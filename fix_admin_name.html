@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>修复数据库字符集</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #409EFF; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #66b1ff; }
+        #result { margin-top: 20px; padding: 15px; background: #f5f7fa; border-radius: 4px; white-space: pre-wrap; }
+        .success { color: #67c23a; }
+        .error { color: #f56c6c; }
+    </style>
+</head>
+<body>
+    <h1>🔧 修复数据库字符集</h1>
+    <p>点击按钮执行 SQL 脚本，修复中文乱码问题。</p>
+    <button onclick="executeSQL()">执行修复</button>
+    <pre id="result"></pre>
+    
+    <script>
+        async function executeSQL() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '正在执行...';
+            
+            try {
+                // 更新 admin 用户姓名
+                const response = await fetch('http://localhost:8080/asset/user/update-name?userId=1&realName=系统管理员', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    resultEl.innerHTML = '<span class="success">✅ 更新成功！</span>\n\n' + JSON.stringify(data, null, 2);
+                    resultEl.innerHTML += '\n\n请刷新浏览器页面，右上角应显示"系统管理员"。';
+                } else {
+                    resultEl.innerHTML = '<span class="error">❌ 更新失败：</span>' + data.msg;
+                }
+            } catch (error) {
+                resultEl.innerHTML = '<span class="error">❌ 错误：</span>' + error.message;
+            }
+        }
+        
+        // 自动执行
+        executeSQL();
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+sequenceDiagram
+    actor Client as 前端 (Vue3)
+    participant LoginCtrl as LoginController
+    participant UserSvc as SysUserServiceImpl
+    participant SecUtil as SecurityUtil
+    participant JwtUtil as JwtUtil
+    participant DB as MySQL
+
+    %% ═══════════════════════════════════════
+    %% 1. 登录认证（含 BCrypt + MD5 兼容迁移）
+    %% ═══════════════════════════════════════
+    rect rgb(230, 245, 255)
+        Note over Client,DB: 场景1：用户登录（BCrypt验证 + MD5兼容迁移）
+
+        Client->>LoginCtrl: POST /login {username:"admin", password:"123456"}
+        LoginCtrl->>LoginCtrl: 校验 username/password 非空
+        LoginCtrl->>UserSvc: login("admin", "123456")
+
+        UserSvc->>DB: SELECT * FROM sys_user WHERE username='admin'
+        DB-->>UserSvc: SysUser{userId:1, password:"$2a$10$...", role:2, status:1}
+
+        Note over UserSvc: 尝试 BCrypt 匹配
+        UserSvc->>SecUtil: matches("123456", "$2a$10$...")
+        SecUtil-->>UserSvc: true ✅
+
+        alt BCrypt 匹配失败 → MD5 兼容
+            UserSvc->>SecUtil: isMd5Hash(user.password)
+            SecUtil-->>UserSvc: true (旧 MD5 密码)
+            UserSvc->>SecUtil: md5("123456")
+            SecUtil-->>UserSvc: "e10adc3949ba59abbe56e057f20f883e"
+            Note over UserSvc: MD5 匹配成功 → 自动升级
+            UserSvc->>SecUtil: encode("123456")
+            SecUtil-->>UserSvc: "$2a$10$new_hash..."
+            UserSvc->>DB: UPDATE sys_user SET password='$2a$10$new_hash...' WHERE user_id=1
+        end
+
+        UserSvc-->>LoginCtrl: SysUser (认证成功)
+
+        LoginCtrl->>JwtUtil: generateToken(1, "admin", 2)
+        JwtUtil->>JwtUtil: 构建 Claims {sub:1, username:"admin", role:2, iat, exp}
+        JwtUtil->>JwtUtil: HMAC-SHA256 签名
+        JwtUtil-->>LoginCtrl: "eyJhbGciOiJIUzI1NiJ9.eyJzdWI..."
+
+        LoginCtrl-->>Client: {code:200, data:{token:"eyJ...", username:"admin", role:2, userId:1}}
+    end
+
+    %% ═══════════════════════════════════════
+    %% 2. 认证拦截器
+    %% ═══════════════════════════════════════
+    rect rgb(255, 245, 230)
+        Note over Client,DB: 场景2：请求拦截验证（AuthInterceptor）
+
+        Client->>Client: 从 localStorage 读取 token
+        Note over Client: request.js 拦截器自动附加 header['token']
+
+        Client->>Client: GET /user/list?current=1&size=10
+        Note over Client: Header: token=eyJhbGciOiJIUzI1NiJ9...
+
+        Note over Client: ═══ AuthInterceptor.preHandle() ═══
+
+        Note over Client: 1. 检查是否为排除路径？(/login, /error, OPTIONS) → No
+
+        Note over Client: 2. 从 request.getHeader("token") 提取 JWT
+
+        Note over Client: 3. JwtUtil.validateToken(token)
+        Note over Client:    → 解析 Claims → 验证签名 → 检查 exp
+
+        alt Token 无效或过期
+            Note over Client: 返回 HTTP 401 + {code:401, msg:"Token 已过期"}
+        else Token 有效
+            Note over Client: 4. 设置 request 属性
+            Note over Client:    request.setAttribute("userId", 1)
+            Note over Client:    request.setAttribute("username", "admin")
+            Note over Client:    request.setAttribute("role", 2)
+            Note over Client: 5. return true → 放行到 Controller
+        end
+    end
+
+    %% ═══════════════════════════════════════
+    %% 3. Department CRUD
+    %% ═══════════════════════════════════════
+    rect rgb(230, 255, 230)
+        Note over Client,DB: 场景3：Department CRUD（新增/修改）
+
+        Client->>Client: POST /department/save
+        Note over Client: AuthInterceptor 已验证通过
+
+        participant DeptCtrl as DepartmentController
+        participant DeptSvc as SysDepartmentServiceImpl
+
+        Client->>DeptCtrl: POST /department/save {deptName:"技术部", deptCode:"TECH", sortOrder:1}
+        DeptCtrl->>DeptSvc: saveDept(department)
+        DeptSvc->>DB: SELECT COUNT(*) FROM sys_department WHERE dept_code='TECH'
+        DB-->>DeptSvc: 0 (编码未重复)
+        DeptSvc->>DB: INSERT INTO sys_department (dept_name, dept_code, ...) VALUES (...)
+        DB-->>DeptSvc: 1 row inserted
+        DeptSvc-->>DeptCtrl: true
+        DeptCtrl-->>Client: {code:200, msg:"操作成功"}
+
+        Client->>DeptCtrl: GET /department/1
+        DeptCtrl->>DeptSvc: getDetail(1L)
+        DeptSvc->>DB: SELECT * FROM sys_department WHERE dept_id=1
+        DB-->>DeptSvc: SysDepartment{deptId:1, deptName:"技术部", ...}
+        DeptSvc-->>DeptCtrl: SysDepartment
+        DeptCtrl-->>Client: {code:200, data:{deptId:1, deptName:"技术部", ...}}
+    end
+
+    %% ═══════════════════════════════════════
+    %% 4. RBAC 角色分配
+    %% ═══════════════════════════════════════
+    rect rgb(245, 230, 255)
+        Note over Client,DB: 场景4：RBAC 权限分配
+
+        participant RoleCtrl as RoleController
+        participant PermCtrl as PermissionController
+        participant RoleSvc as SysRoleServiceImpl
+        participant PermSvc as SysPermissionServiceImpl
+
+        Note over Client: 管理员为角色分配权限
+
+        Client->>PermCtrl: GET /permission/list
+        PermCtrl->>PermSvc: listTree()
+        PermSvc->>DB: SELECT * FROM sys_permission ORDER BY sort_order
+        DB-->>PermSvc: List~SysPermission~ (14条)
+        Note over PermSvc: 组装树形结构 (parentId 嵌套)
+        PermSvc-->>PermCtrl: 树形权限列表
+        PermCtrl-->>Client: {code:200, data:[{permissionId:1,...children:[...]}]}
+
+        Client->>PermCtrl: POST /permission/assign {roleId:2, permissionIds:[1,2,3,5,6,...]}
+        PermCtrl->>PermSvc: assignPermissions(2L, [1,2,3,5,6,...])
+        PermSvc->>DB: DELETE FROM sys_role_permission WHERE role_id=2
+        PermSvc->>DB: INSERT INTO sys_role_permission (role_id, permission_id) VALUES (2,1),(2,2),...
+        DB-->>PermSvc: batch insert OK
+        PermSvc-->>PermCtrl: true
+        PermCtrl-->>Client: {code:200, msg:"权限分配成功"}
+    end
+
+    %% ═══════════════════════════════════════
+    %% 5. 前端角色控制
+    %% ═══════════════════════════════════════
+    rect rgb(255, 255, 230)
+        Note over Client,DB: 场景5：前端按钮角色控制
+
+        Note over Client: AssetScrap.vue 渲染时
+        Note over Client: const userRole = parseInt(localStorage.getItem('role'))
+        Note over Client: → userRole = 2 (管理员)
+
+        Note over Client: &lt;template v-if="userRole === 2"&gt;
+        Note over Client:   通过按钮 / 拒绝按钮 → 可见 ✅
+        Note over Client: &lt;/template&gt;
+
+        Note over Client: AssetInventory.vue 渲染时（普通用户）
+        Note over Client: → userRole = 1
+
+        Note over Client: &lt;template v-if="userRole === 2"&gt;
+        Note over Client:   新建盘点 / 开始盘点 / 完成盘点 → 隐藏 ❌
+        Note over Client: &lt;/template&gt;
+    end

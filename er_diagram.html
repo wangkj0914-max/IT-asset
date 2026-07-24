@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ER 图 - 实体关系图</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
+        h1 { text-align: center; color: #303133; margin-bottom: 40px; }
+        .er-container { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
+        .table { border: 2px solid #303133; border-radius: 4px; overflow: hidden; width: 280px; }
+        .table-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; font-weight: bold; text-align: center; }
+        .table-body { background: white; }
+        .field { padding: 8px 12px; border-bottom: 1px solid #e4e7ed; font-size: 13px; font-family: 'Consolas', monospace; }
+        .field:last-child { border-bottom: none; }
+        .field-key { color: #F56C6C; font-weight: bold; }
+        .relation { position: absolute; background: #909399; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>图 3-1 系统 ER 图（实体关系图）</h1>
+        
+        <div class="er-container">
+            <!-- sys_user -->
+            <div class="table">
+                <div class="table-header">sys_user 用户表</div>
+                <div class="table-body">
+                    <div class="field"><span class="field-key">PK</span> user_id: BIGINT</div>
+                    <div class="field">username: VARCHAR</div>
+                    <div class="field">password: VARCHAR</div>
+                    <div class="field">real_name: VARCHAR</div>
+                    <div class="field">dept_id: BIGINT (FK)</div>
+                    <div class="field">role: TINYINT</div>
+                    <div class="field">status: TINYINT</div>
+                </div>
+            </div>
+
+            <!-- sys_department -->
+            <div class="table">
+                <div class="table-header">sys_department 部门表</div>
+                <div class="table-body">
+                    <div class="field"><span class="field-key">PK</span> dept_id: BIGINT</div>
+                    <div class="field">dept_name: VARCHAR</div>
+                    <div class="field">dept_code: VARCHAR</div>
+                    <div class="field">manager: VARCHAR</div>
+                    <div class="field">phone: VARCHAR</div>
+                    <div class="field">status: TINYINT</div>
+                </div>
+            </div>
+
+            <!-- asset_category -->
+            <div class="table">
+                <div class="table-header">asset_category 资产分类表</div>
+                <div class="table-body">
+                    <div class="field"><span class="field-key">PK</span> category_id: BIGINT</div>
+                    <div class="field">category_name: VARCHAR</div>
+                    <div class="field">parent_id: BIGINT</div>
+                    <div class="field">sort_order: INT</div>
+                </div>
+            </div>
+
+            <!-- asset_info -->
+            <div class="table">
+                <div class="table-header">asset_info 资产信息表</div>
+                <div class="table-body">
+                    <div class="field"><span class="field-key">PK</span> asset_id: BIGINT</div>
+                    <div class="field">asset_code: VARCHAR</div>
+                    <div class="field">asset_name: VARCHAR</div>
+                    <div class="field">category_id: BIGINT (FK)</div>
+                    <div class="field">brand: VARCHAR</div>
+                    <div class="field">model: VARCHAR</div>
+                    <div class="field">purchase_price: DECIMAL</div>
+                    <div class="field">status: TINYINT</div>
+                </div>
+            </div>
+
+            <!-- asset_use_record -->
+            <div class="table">
+                <div class="table-header">asset_use_record 领用记录表</div>
+                <div class="table-body">
+                    <div class="field"><span class="field-key">PK</span> record_id: BIGINT</div>
+                    <div class="field">asset_id: BIGINT (FK)</div>
+                    <div class="field">user_id: BIGINT (FK)</div>
+                    <div class="field">department: VARCHAR</div>
+                    <div class="field">contact_person: VARCHAR</div>
+                    <div class="field">approve_status: TINYINT</div>
+                </div>
+            </div>
+
+            <!-- asset_repair_record -->
+            <div class="table">
+                <div class="table-header">asset_repair_record 维修记录表</div>
+                <div class="table-body">
+                    <div class="field"><span class="field-key">PK</span> repair_id: BIGINT</div>
+                    <div class="field">asset_id: BIGINT (FK)</div>
+                    <div class="field">repair_reason: VARCHAR</div>
+                    <div class="field">repair_status: TINYINT</div>
+                    <div class="field">apply_user: VARCHAR</div>
+                </div>
+            </div>
+
+            <!-- asset_scrap_record -->
+            <div class="table">
+                <div class="table-header">asset_scrap_record 报废记录表</div>
+                <div class="table-body">
+                    <div class="field"><span class="field-key">PK</span> scrap_id: BIGINT</div>
+                    <div class="field">asset_id: BIGINT (FK)</div>
+                    <div class="field">scrap_reason: VARCHAR</div>
+                    <div class="field">scrap_type: TINYINT</div>
+                    <div class="field">approve_status: TINYINT</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #ecf5ff; border-left: 4px solid #409EFF; border-radius: 4px;">
+            <h3 style="margin-top: 0;">关系说明：</h3>
+            <ul style="line-height: 2;">
+                <li><strong>sys_department → sys_user</strong>：1:N 关系，一个部门有多个用户</li>
+                <li><strong>asset_category → asset_info</strong>：1:N 关系，一个分类包含多个资产</li>
+                <li><strong>asset_info → asset_use_record</strong>：1:N 关系，一个资产有多条领用记录</li>
+                <li><strong>asset_info → asset_repair_record</strong>：1:N 关系，一个资产有多条维修记录</li>
+                <li><strong>asset_info → asset_scrap_record</strong>：1:N 关系，一个资产有一条报废记录</li>
+                <li><strong>sys_user → asset_use_record</strong>：1:N 关系，一个用户有多条领用申请</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            console.log('提示：按 Win+Shift+S 或使用截图工具截取整个 ER 图，保存为图片后插入到 Word 文档。');
+        });
+    </script>
+</body>
+</html>

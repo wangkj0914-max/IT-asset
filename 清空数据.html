@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>清空领用记录</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f7fa; }
+        .container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        h1 { color: #667eea; margin-bottom: 20px; }
+        button { padding: 12px 24px; font-size: 14px; cursor: pointer; background: #f56c6c; color: white; border: none; border-radius: 4px; margin: 5px; }
+        button:hover { background: #f78989; }
+        button.safe { background: #409EFF; }
+        button.safe:hover { background: #66b1ff; }
+        #result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; white-space: pre-wrap; }
+        .success { color: #67c23a; font-weight: bold; }
+        .warning { color: #e6a23c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗑️ 清空数据</h1>
+        <p>请选择要清空的数据：</p>
+        <button onclick="clearUseRecords()">清空领用记录</button>
+        <button onclick="clearInboundRecords()">清空入库记录</button>
+        <button class="safe" onclick="checkData()">检查数据</button>
+        <pre id="result"></pre>
+    </div>
+    
+    <script>
+        async function clearUseRecords() {
+            if (!confirm('确认要清空所有领用记录吗？此操作不可恢复！')) return;
+            
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '正在清空...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/asset/system/clear-use-records', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    resultEl.innerHTML = '<span class="success">✅ ' + data.data + '</span>';
+                } else {
+                    resultEl.textContent = '❌ 失败：' + data.msg;
+                }
+            } catch (error) {
+                resultEl.textContent = '❌ 错误：' + error.message;
+            }
+        }
+        
+        async function clearInboundRecords() {
+            if (!confirm('确认要清空所有入库记录吗？此操作不可恢复！')) return;
+            
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '正在清空...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/asset/system/clear-inbound-records', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    resultEl.innerHTML = '<span class="success">✅ ' + data.data + '</span>';
+                } else {
+                    resultEl.textContent = '❌ 失败：' + data.msg;
+                }
+            } catch (error) {
+                resultEl.textContent = '❌ 错误：' + error.message;
+            }
+        }
+        
+        async function checkData() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '正在检查...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/asset/use/list-all?current=1&size=1');
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    const count = data.data.total || 0;
+                    resultEl.innerHTML = '<span class="success">✅ 当前领用记录数：' + count + ' 条</span>';
+                } else {
+                    resultEl.textContent = '❌ 检查失败：' + data.msg;
+                }
+            } catch (error) {
+                resultEl.textContent = '❌ 错误：' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

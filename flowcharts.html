@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>业务流程图集合</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; }
+        h1 { text-align: center; color: #303133; margin-bottom: 30px; }
+        h2 { color: #409EFF; border-left: 4px solid #409EFF; padding-left: 15px; }
+        
+        .flow-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; padding: 20px; }
+        .node { padding: 15px 25px; border-radius: 8px; text-align: center; min-width: 120px; border: 2px solid #303133; font-weight: bold; }
+        .node-start { background: lightyellow; }
+        .node-process { background: lightgreen; }
+        .node-decision { background: lightblue; shape: diamond; }
+        .node-end { background: lightgray; border-radius: 50%; }
+        .arrow { color: #409EFF; font-size: 24px; font-weight: bold; }
+        .label { font-size: 12px; color: #606266; font-weight: normal; display: block; margin-top: 5px; }
+        
+        .vertical-flow { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .vertical-arrow { color: #409EFF; font-size: 24px; transform: rotate(90deg); }
+    </style>
+</head>
+<body>
+
+<!-- 资产领用流程图 -->
+<div class="container">
+    <h1>图 3-2 资产领用业务流程图</h1>
+    
+    <div class="flow-container">
+        <div class="node node-start">员工<br><span class="label">提交领用申请</span></div>
+        <span class="arrow">→</span>
+        <div class="node node-process">系统<br><span class="label">验证资产状态</span></div>
+        <span class="arrow">→</span>
+        <div class="node node-decision">管理员<br><span class="label">审批申请</span></div>
+        <span class="arrow">→</span>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="node node-process" style="background: lightgreen;">审批通过<br><span class="label">更新状态为已领用</span></div>
+            <div class="node node-process" style="background: lightcoral;">审批拒绝<br><span class="label">返回申请人</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="node node-start">员工<br><span class="label">领用资产</span></div>
+        <span class="arrow">→</span>
+        <div class="node node-end">结束</div>
+    </div>
+</div>
+
+<!-- 资产维修流程图 -->
+<div class="container">
+    <h1>图 3-3 资产维修业务流程图</h1>
+    
+    <div class="flow-container">
+        <div class="node node-start">使用人<br><span class="label">提交报修申请</span></div>
+        <span class="arrow">→</span>
+        <div class="node node-process">系统<br><span class="label">更新状态为维修中</span></div>
+        <span class="arrow">→</span>
+        <div class="node node-decision">维修人员<br><span class="label">进行维修</span></div>
+        <span class="arrow">→</span>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="node node-process" style="background: lightgreen;">维修完成<br><span class="label">记录维修费用</span></div>
+            <div class="node node-process" style="background: lightcoral;">无法修复<br><span class="label">申请报废</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="node node-end">结束</div>
+    </div>
+</div>
+
+<!-- 资产报废流程图 -->
+<div class="container">
+    <h1>图 3-4 资产报废业务流程图</h1>
+    
+    <div class="flow-container">
+        <div class="node node-start">申请人<br><span class="label">提交报废申请</span></div>
+        <span class="arrow">→</span>
+        <div class="node node-process">选择类型<br><span class="label">填写原值/残值</span></div>
+        <span class="arrow">→</span>
+        <div class="node node-decision">管理员<br><span class="label">审批申请</span></div>
+        <span class="arrow">→</span>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="node node-process" style="background: lightgreen;">审批通过<br><span class="label">更新为已报废</span></div>
+            <div class="node node-process" style="background: lightcoral;">审批拒绝<br><span class="label">返回申请人</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="node node-process">资产归档</div>
+        <span class="arrow">→</span>
+        <div class="node node-end">结束</div>
+    </div>
+</div>
+
+<!-- 数据流图 DFD -->
+<div class="container">
+    <h1>图 3-5 顶层数据流图（Context Diagram）</h1>
+    
+    <div style="text-align: center; padding: 40px;">
+        <div style="display: inline-block; position: relative; width: 800px; height: 400px;">
+            <!-- 外部实体 -->
+            <div class="node node-process" style="position: absolute; left: 50px; top: 50px;">员工</div>
+            <div class="node node-process" style="position: absolute; left: 50px; top: 250px;">管理员</div>
+            
+            <!-- 核心系统 -->
+            <div class="node node-decision" style="position: absolute; left: 300px; top: 150px; width: 200px; height: 200px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">IT 固定资产<br>管理系统</div>
+            
+            <!-- 数据库 -->
+            <div class="node node-end" style="position: absolute; right: 50px; top: 150px; width: 150px; height: 200px; border-radius: 10px;">MySQL<br>数据库</div>
+            
+            <!-- 箭头 -->
+            <span style="position: absolute; left: 200px; top: 80px; color: #409EFF; font-size: 24px;">→</span>
+            <span style="position: absolute; left: 200px; top: 280px; color: #409EFF; font-size: 24px;">→</span>
+            <span style="position: absolute; left: 520px; top: 240px; color: #409EFF; font-size: 24px;">→</span>
+            <span style="position: absolute; left: 520px; top: 160px; color: #409EFF; font-size: 24px;">←</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    console.log('提示：分别截取每个流程图，保存为图片后插入到 Word 文档对应位置。');
+</script>
+
+</body>
+</html>

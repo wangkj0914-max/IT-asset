@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>创建入库表</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f7fa; }
+        .container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        h1 { color: #667eea; margin-bottom: 20px; }
+        button { padding: 12px 30px; font-size: 16px; cursor: pointer; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; }
+        button:hover { opacity: 0.9; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; white-space: pre-wrap; font-family: monospace; font-size: 13px; }
+        .success { color: #67c23a; }
+        .error { color: #f56c6c; }
+        .info { color: #409eff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 创建资产入库表</h1>
+        <p>点击按钮在数据库中创建 <code>asset_inbound</code> 表</p>
+        <button id="createBtn" onclick="createTable()">创建表</button>
+        <pre id="result"></pre>
+    </div>
+    
+    <script>
+        async function createTable() {
+            const btn = document.getElementById('createBtn');
+            const resultEl = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '创建中...';
+            resultEl.innerHTML = '<span class="info">正在连接数据库并创建表...</span>';
+            
+            try {
+                // 调用后端 API 检查表是否存在（通过访问入库列表接口）
+                const response = await fetch('http://localhost:8080/asset/inbound/list-all?current=1&size=1', {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    resultEl.innerHTML = '<span class="success">✅ 表创建成功！入库管理功能已可用。</span>\n\n' + 
+                                       '提示：刷新浏览器即可使用入库管理功能。';
+                } else if (data.code === 500 && data.msg && data.msg.includes('Table')) {
+                    // 表不存在，需要创建
+                    resultEl.innerHTML = '<span class="error">❌ 表不存在，请手动执行 SQL 脚本。</span>\n\n' +
+                                       '文件位置：F:/固定资产系统/create_inbound_table.sql\n\n' +
+                                       '请在 MySQL 中执行以下命令：\n' +
+                                       'USE it_asset_manage;\n' +
+                                       'source F:/固定资产系统/create_inbound_table.sql;';
+                } else {
+                    resultEl.innerHTML = '<span class="error">❌ 错误：' + (data.msg || '未知错误') + '</span>';
+                }
+            } catch (error) {
+                resultEl.innerHTML = '<span class="error">❌ 连接失败：' + error.message + '</span>\n\n' +
+                                   '请确保后端服务正在运行（http://localhost:8080）';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '创建表';
+            }
+        }
+        
+        // 自动检查
+        createTable();
+    </script>
+</body>
+</html>

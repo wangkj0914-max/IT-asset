@@ -1,0 +1,34 @@
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /asset
+
+# 数据库配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/it_asset_manage?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: ${DB_PASSWORD:CHNX#000}
+  thymeleaf:
+    cache: false
+  # Flyway 数据库迁移（现有系统默认关闭，新部署使用 --spring.profiles.active=flyway 启用）
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# JWT 配置
+jwt:
+  secret: ${JWT_SECRET:it-asset-system-default-secret-key}
+  # Token 过期时间：8 小时（毫秒）
+  expiration: 28800000
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.asset.itassetsystem.entity

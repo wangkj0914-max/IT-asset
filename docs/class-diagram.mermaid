@@ -1,0 +1,311 @@
+classDiagram
+    direction TB
+
+    %% ── Security & Auth ──
+    class JwtConfig {
+        -String secret
+        -Long expiration
+        +getSecret() String
+        +getExpiration() Long
+        +setSecret(String) void
+        +setExpiration(Long) void
+    }
+
+    class JwtUtil {
+        -JwtConfig jwtConfig
+        -SecretKey getSigningKey()
+        +generateToken(Long userId, String username, Integer role) String
+        +validateToken(String token) boolean
+        +parseClaims(String token) Claims
+        +getUserIdFromToken(String token) Long
+        +getRoleFromToken(String token) Integer
+    }
+
+    class SecurityUtil {
+        -BCryptPasswordEncoder encoder
+        +encode(String rawPassword) String
+        +matches(String rawPassword, String encodedPassword) boolean
+        +isMd5Hash(String hash) boolean
+        +md5(String str) String
+    }
+
+    class AuthInterceptor {
+        -JwtUtil jwtUtil
+        +preHandle(HttpServletRequest, HttpServletResponse, Object) boolean
+        -extractToken(HttpServletRequest) String
+        -sendUnauthorized(HttpServletResponse) void
+    }
+
+    class WebMvcConfig {
+        -AuthInterceptor authInterceptor
+        +addInterceptors(InterceptorRegistry) void
+    }
+
+    %% ── RBAC Entities ──
+    class SysRole {
+        +Long roleId
+        +String roleName
+        +String roleCode
+        +String description
+        +Integer status
+        +LocalDateTime createTime
+        +LocalDateTime updateTime
+    }
+
+    class SysPermission {
+        +Long permissionId
+        +String permissionName
+        +String permissionCode
+        +Integer permissionType
+        +Long parentId
+        +String path
+        +String icon
+        +Integer sortOrder
+        +Integer status
+        +LocalDateTime createTime
+    }
+
+    class SysUserRole {
+        +Long id
+        +Long userId
+        +Long roleId
+        +LocalDateTime createTime
+    }
+
+    class SysRolePermission {
+        +Long id
+        +Long roleId
+        +Long permissionId
+        +LocalDateTime createTime
+    }
+
+    class SysUser {
+        +Long userId
+        +String username
+        +String password
+        +String realName
+        +String email
+        +String phone
+        +String department
+        +Integer role
+        +Integer status
+        +LocalDateTime createTime
+        +LocalDateTime updateTime
+    }
+
+    class SysDepartment {
+        +Long deptId
+        +String deptName
+        +Long parentId
+        +String deptCode
+        +String manager
+        +String phone
+        +Integer sortOrder
+        +Integer status
+        +LocalDateTime createTime
+    }
+
+    %% ── Mappers ──
+    class SysUserMapper {
+        +selectByUsername(String username) SysUser
+    }
+
+    class SysRoleMapper {
+    }
+
+    class SysPermissionMapper {
+        +selectByRoleId(Long roleId) List~SysPermission~
+    }
+
+    class SysUserRoleMapper {
+    }
+
+    class SysRolePermissionMapper {
+    }
+
+    class SysDepartmentMapper {
+        +selectAll() List~SysDepartment~
+    }
+
+    %% ── Services ──
+    class SysUserService {
+        +login(String username, String password) SysUser
+        +getByUsername(String username) SysUser
+        +pageUsers(Long current, Long size, String keyword) IPage
+        +updateRole(Long userId, Integer role) boolean
+        +deleteUser(Long userId) boolean
+        +createUser(SysUser user) boolean
+    }
+
+    class SysUserServiceImpl {
+        -SecurityUtil securityUtil
+        +login(String username, String password) SysUser
+        +createUser(SysUser user) boolean
+        -autoUpgradePassword(SysUser user, String rawPassword) void
+    }
+
+    class SysRoleService {
+        +listAll() List~SysRole~
+        +getById(Long roleId) SysRole
+        +save(SysRole role) boolean
+        +updateById(SysRole role) boolean
+        +deleteById(Long roleId) boolean
+    }
+
+    class SysRoleServiceImpl {
+        -SysRoleMapper roleMapper
+        -SysUserRoleMapper userRoleMapper
+    }
+
+    class SysPermissionService {
+        +listTree() List~SysPermission~
+        +getByRoleId(Long roleId) List~SysPermission~
+        +assignPermissions(Long roleId, List~Long~ permissionIds) boolean
+    }
+
+    class SysPermissionServiceImpl {
+        -SysPermissionMapper permissionMapper
+        -SysRolePermissionMapper rolePermissionMapper
+    }
+
+    class SysDepartmentService {
+        +listAll() List~SysDepartment~
+        +getDetail(Long deptId) SysDepartment
+        +saveDept(SysDepartment dept) boolean
+        +updateDept(SysDepartment dept) boolean
+        +deleteDept(Long deptId) boolean
+    }
+
+    class SysDepartmentServiceImpl {
+    }
+
+    %% ── Controllers ──
+    class LoginController {
+        -SysUserService sysUserService
+        -JwtUtil jwtUtil
+        +login(LoginDTO) Result~Map~
+        +getUserInfo(String token) Result~Map~
+    }
+
+    class UserController {
+        -SysUserService sysUserService
+        -SecurityUtil securityUtil
+        +list() Result
+        +create(SysUser) Result
+        +updateRole(Long, Integer) Result
+        +resetPassword(Long) Result
+    }
+
+    class DepartmentController {
+        -SysDepartmentService sysDepartmentService
+        +list() Result~List~
+        +detail(Long) Result~SysDepartment~
+        +save(SysDepartment) Result~String~
+        +update(SysDepartment) Result~String~
+        +delete(Long) Result~String~
+    }
+
+    class RoleController {
+        -SysRoleService sysRoleService
+        +list() Result~List~
+        +detail(Long) Result~SysRole~
+        +save(SysRole) Result~String~
+        +update(SysRole) Result~String~
+        +delete(Long) Result~String~
+    }
+
+    class PermissionController {
+        -SysPermissionService sysPermissionService
+        +listTree() Result~List~
+        +rolePermissions(Long) Result~List~
+        +assign(Long, List~Long~) Result~String~
+    }
+
+    class SystemInitController {
+        -JdbcTemplate jdbcTemplate
+        +createInboundTable() Result
+        +checkInboundTable() Result
+        +fixInboundTable() Result
+    }
+
+    class SystemDataController {
+        -DataSource dataSource
+        -AssetUseService assetUseService
+        +clearUseRecords() Result
+        +clearInboundRecords() Result
+        +clearAll() Result
+    }
+
+    %% ── Common ──
+    class Result~T~ {
+        +Integer code
+        +String msg
+        +T data
+        +success(T data)$ Result~T~
+        +error(String msg)$ Result~T~
+        +error(Integer code, String msg)$ Result~T~
+    }
+
+    class CommonUtil {
+        +buildPageResult(IPage) Map
+        +getCurrentUserId() Long$
+    }
+
+    class LoginDTO {
+        +String username
+        +String password
+    }
+
+    %% ── Relationships ──
+
+    %% Interceptor dependencies
+    WebMvcConfig --> AuthInterceptor : registers
+    AuthInterceptor --> JwtUtil : uses
+    JwtUtil --> JwtConfig : reads config from
+
+    %% Security chain
+    JwtUtil ..> SecurityUtil : independent utility
+    SecurityUtil --> SysUserServiceImpl : injected into
+
+    %% Service layer
+    SysUserService <|.. SysUserServiceImpl : implements
+    SysUserServiceImpl --> SysUserMapper : extends BaseMapper
+    SysUserServiceImpl --> SecurityUtil : uses
+
+    SysRoleService <|.. SysRoleServiceImpl : implements
+    SysRoleServiceImpl --> SysRoleMapper : extends BaseMapper
+    SysRoleServiceImpl --> SysUserRoleMapper : uses
+
+    SysPermissionService <|.. SysPermissionServiceImpl : implements
+    SysPermissionServiceImpl --> SysPermissionMapper : extends BaseMapper
+    SysPermissionServiceImpl --> SysRolePermissionMapper : uses
+
+    SysDepartmentService <|.. SysDepartmentServiceImpl : implements
+    SysDepartmentServiceImpl --> SysDepartmentMapper : extends BaseMapper
+
+    %% Controller layer
+    LoginController --> SysUserService : uses
+    LoginController --> JwtUtil : uses
+    UserController --> SysUserService : uses
+    UserController --> SecurityUtil : uses
+    DepartmentController --> SysDepartmentService : uses
+    RoleController --> SysRoleService : uses
+    PermissionController --> SysPermissionService : uses
+
+    %% Entity relationships
+    SysUserRole --> SysUser : userId FK
+    SysUserRole --> SysRole : roleId FK
+    SysRolePermission --> SysRole : roleId FK
+    SysRolePermission --> SysPermission : permissionId FK
+    SysPermission --> SysPermission : parentId self-ref
+
+    %% Mapper inheritance
+    SysUserMapper --|> BaseMapper
+    SysRoleMapper --|> BaseMapper
+    SysPermissionMapper --|> BaseMapper
+    SysUserRoleMapper --|> BaseMapper
+    SysRolePermissionMapper --|> BaseMapper
+    SysDepartmentMapper --|> BaseMapper
+
+    %% DTO
+    LoginController ..> LoginDTO : request body

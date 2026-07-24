@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>检查资产状态</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f7fa; }
+        .container { max-width: 800px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        h1 { color: #667eea; margin-bottom: 20px; }
+        button { padding: 10px 20px; font-size: 14px; cursor: pointer; background: #409EFF; color: white; border: none; border-radius: 4px; margin-right: 10px; }
+        button:hover { background: #66b1ff; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .status-0 { color: #909399; }
+        .status-1 { color: #67c23a; font-weight: bold; }
+        .status-2 { color: #e6a23c; }
+        .status-3 { color: #f56c6c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 检查资产状态</h1>
+        <p>检查所有资产的状态，确认是否有资产处于"已领用"状态（status=1）</p>
+        <button onclick="checkAssets()">检查资产状态</button>
+        <button onclick="fixAssetStatus()" style="background: #67c23a;">修复资产状态</button>
+        <pre id="result"></pre>
+    </div>
+    
+    <script>
+        async function checkAssets() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '正在加载...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/asset/assetInfo/list');
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    const assets = result.data || [];
+                    let html = `共 ${assets.length} 个资产\n\n`;
+                    html += 'ID\t编号\t名称\t状态\n';
+                    html += '='.repeat(60) + '\n';
+                    
+                    const statusMap = {
+                        0: '<span class="status-0">未领用</span>',
+                        1: '<span class="status-1">已领用</span>',
+                        2: '<span class="status-2">维修中</span>',
+                        3: '<span class="status-3">已报废</span>'
+                    };
+                    
+                    assets.forEach(a => {
+                        html += `${a.assetId}\t${a.assetCode || '-'}\t${a.assetName}\t${statusMap[a.status] || '未知'}\n`;
+                    });
+                    
+                    const usedCount = assets.filter(a => a.status === 1).length;
+                    html += '\n' + '='.repeat(60) + '\n';
+                    html += `统计：已领用 ${usedCount} 个，未领用 ${assets.length - usedCount} 个\n`;
+                    
+                    if (usedCount === 0) {
+                        html += '\n⚠️ 没有已领用的资产，无法测试归还功能！\n';
+                        html += '提示：先申请领用一个资产并审批通过。';
+                    } else {
+                        html += '\n✅ 有已领用的资产，可以测试归还功能。';
+                    }
+                    
+                    resultEl.innerHTML = html;
+                } else {
+                    resultEl.textContent = '加载失败：' + result.msg;
+                }
+            } catch (error) {
+                resultEl.textContent = '错误：' + error.message;
+            }
+        }
+        
+        async function fixAssetStatus() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '正在修复...';
+            
+            try {
+                // 这里可以调用后端 API 修复资产状态
+                resultEl.textContent = '修复功能开发中...';
+            } catch (error) {
+                resultEl.textContent = '错误：' + error.message;
+            }
+        }
+        
+        // 自动检查
+        checkAssets();
+    </script>
+</body>
+</html>

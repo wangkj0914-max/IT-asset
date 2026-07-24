@@ -1,0 +1,26 @@
+# Logs
+*.log
+backend.log
+frontend.log
+
+# Build artifacts
+it-asset-frontend/node_modules/
+it-asset-frontend/dist/
+it-asset-system/target/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Temp files
+*.tmp
+*.bak
