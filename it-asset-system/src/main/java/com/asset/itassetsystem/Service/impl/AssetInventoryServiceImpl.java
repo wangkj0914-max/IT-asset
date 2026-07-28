@@ -1,6 +1,7 @@
 package com.asset.itassetsystem.service.impl;
 
 import com.asset.itassetsystem.dto.InventoryCreateDTO;
+import com.asset.itassetsystem.dto.InventoryReportDTO;
 import com.asset.itassetsystem.entity.AssetInfo;
 import com.asset.itassetsystem.entity.AssetInventory;
 import com.asset.itassetsystem.entity.AssetInventoryDetail;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -44,6 +46,9 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
     
     @Autowired
     private SysUserService sysUserService;
+
+    @Autowired
+    private HttpServletRequest request;
     
     /**
      * 盘点范围类型常量
@@ -129,20 +134,65 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
     
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void checkInventory(Long detailId, Integer status, String remark) {
+    public void checkInventory(Long detailId, Integer status, String remark, String actualLocation, String differenceType) {
         AssetInventoryDetail detail = detailMapper.selectById(detailId);
         if (detail == null) {
             throw new RuntimeException("盘点明细不存在");
         }
-        
+
+        // 从请求上下文获取当前用户名
+        String checker = (String) request.getAttribute("username");
+        if (checker == null || checker.isEmpty()) {
+            checker = request.getHeader("X-Username");
+        }
+        if (checker == null || checker.isEmpty()) {
+            checker = "系统"; // 兜底
+        }
+
         // 更新盘点状态和结果
         detail.setStatus(status); // 1-正常 2-盘盈 3-盘亏
         detail.setResultRemark(remark);
         detail.setCheckTime(LocalDateTime.now());
-        detail.setCheckerName("盘点员");
-        
+        detail.setCheckerName(checker);
+        detail.setScannedAt(LocalDateTime.now());
+        detail.setActualLocation(actualLocation);
+        detail.setVerifiedBy(checker);
+
+        // 判断差异类型：如果前端传了则使用前端值，否则根据资产原始值判断
+        if (differenceType != null && !differenceType.isEmpty()) {
+            detail.setDifferenceType(differenceType);
+        } else if (detail.getAssetId() != null) {
+            // 根据资产原始数据自动判断
+            AssetInfo asset = assetInfoService.getById(detail.getAssetId());
+            if (asset != null) {
+                if (status == 3) {
+                    detail.setDifferenceType("MISSING");
+                } else if (status == 2) {
+                    detail.setDifferenceType("EXTRA");
+                } else {
+                    // 正常状态，检查位置和资产状态是否匹配
+                    boolean locationDiffer = actualLocation != null && !actualLocation.isEmpty()
+                            && !actualLocation.equals(asset.getStorageLocation());
+                    // 资产系统状态异常（如已报废）但盘点正常 → 状态不符
+                    boolean statusDiffer = asset.getStatus() != null && asset.getStatus() == 3;
+                    if (locationDiffer) {
+                        detail.setDifferenceType("LOCATION");
+                    } else if (statusDiffer) {
+                        detail.setDifferenceType("STATUS");
+                    } else {
+                        detail.setDifferenceType("NONE");
+                    }
+                }
+            } else {
+                detail.setDifferenceType("NONE");
+            }
+        } else {
+            detail.setDifferenceType("NONE");
+        }
+
         detailMapper.updateById(detail);
-        log.info("盘点明细更新成功，detailId: {}, status: {}", detailId, status);
+        log.info("盘点明细更新成功，detailId: {}, status: {}, checker: {}, differenceType: {}",
+                detailId, status, checker, detail.getDifferenceType());
     }
     
     @Override
@@ -180,6 +230,63 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
         inventoryMapper.updateById(inventory);
         log.info("盘点任务完成，总数：{}, 正常：{}, 盘盈：{}, 盘亏：{}", 
                 details.size(), normalCount, surplusCount, lossCount);
+    }
+
+    @Override
+    public InventoryReportDTO generateReport(Long inventoryId) {
+        InventoryReportDTO report = new InventoryReportDTO();
+
+        LambdaQueryWrapper<AssetInventoryDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetInventoryDetail::getInventoryId, inventoryId);
+        List<AssetInventoryDetail> allDetails = detailMapper.selectList(wrapper);
+
+        int normalCount = 0, surplusCount = 0, lossCount = 0;
+        int locationDiffCount = 0, statusDiffCount = 0, missingCount = 0, extraCount = 0;
+        List<AssetInventoryDetail> diffDetails = new ArrayList<>();
+
+        for (AssetInventoryDetail detail : allDetails) {
+            if (detail.getStatus() == 1) {
+                normalCount++;
+                // 正常状态也可能有位置差异
+                if ("LOCATION".equals(detail.getDifferenceType())) {
+                    locationDiffCount++;
+                    diffDetails.add(detail);
+                } else if ("STATUS".equals(detail.getDifferenceType())) {
+                    statusDiffCount++;
+                    diffDetails.add(detail);
+                }
+            } else if (detail.getStatus() == 2) {
+                surplusCount++;
+                extraCount++;
+                diffDetails.add(detail);
+            } else if (detail.getStatus() == 3) {
+                lossCount++;
+                missingCount++;
+                diffDetails.add(detail);
+            }
+
+            // 单独统计差异类型
+            if ("LOCATION".equals(detail.getDifferenceType())) {
+                locationDiffCount++;
+            } else if ("STATUS".equals(detail.getDifferenceType())) {
+                statusDiffCount++;
+            }
+        }
+
+        report.setNormalCount(normalCount);
+        report.setSurplusCount(surplusCount);
+        report.setLossCount(lossCount);
+        report.setLocationDiffCount(locationDiffCount);
+        report.setStatusDiffCount(statusDiffCount);
+        report.setMissingCount(missingCount);
+        report.setExtraCount(extraCount);
+        report.setTotalCount(allDetails.size());
+        report.setDetails(diffDetails);
+
+        log.info("生成盘点报告，inventoryId: {}, 正常: {}, 盘盈: {}, 盘亏: {}, 位置不符: {}, 状态不符: {}",
+                inventoryId, normalCount, surplusCount, lossCount, locationDiffCount, statusDiffCount);
+
+        return report;
     }
     
     @Override

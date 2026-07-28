@@ -1,7 +1,9 @@
 <template>
-  <div class="transfer-container">
+  <div class="page-container">
+    <div class="header-title"><span>资产调拨</span></div>
+    
     <!-- 搜索 -->
-    <el-card class="search-card">
+    <div class="search-section">
       <el-form inline>
         <el-form-item label="状态">
           <el-select v-model="searchStatus" placeholder="全部" clearable @change="loadData">
@@ -15,10 +17,10 @@
           <el-button type="success" @click="showApply">新建调拨</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
     <!-- 表格 -->
-    <el-card class="table-card">
+    <div class="table-section">
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="transferNo" label="调拨单号" width="160" />
         <el-table-column prop="assetName" label="资产名称" min-width="140" />
@@ -51,18 +53,19 @@
         </el-table-column>
       </el-table>
       <el-empty v-if="!loading && tableData.length === 0" description="暂无调拨记录" />
-      <el-pagination
-        v-if="total > 0"
-        v-model:current-page="pageNum"
-        v-model:page-size="pageSize"
-        :total="total"
-        :page-sizes="[10, 20, 50]"
-        layout="total, sizes, prev, pager, next"
-        style="margin-top:16px;justify-content:flex-end"
-        @size-change="loadData"
-        @current-change="loadData"
-      />
-    </el-card>
+      <div class="pagination-container">
+        <el-pagination
+          v-if="total > 0"
+          v-model:current-page="pageNum"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next"
+          @size-change="loadData"
+          @current-change="loadData"
+        />
+      </div>
+    </div>
 
     <!-- 新建对话框 -->
     <el-dialog v-model="applyVisible" title="新建资产调拨" width="500px" @closed="resetApplyForm">
@@ -222,7 +225,4 @@ onMounted(() => { loadData(); loadDepts() })
 </script>
 
 <style scoped>
-.transfer-container { padding: 20px; }
-.search-card { margin-bottom: 20px; }
-.table-card { min-height: 400px; }
 </style>

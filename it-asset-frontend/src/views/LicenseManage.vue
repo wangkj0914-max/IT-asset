@@ -11,7 +11,7 @@
     </el-alert>
 
     <div class="table-section">
-      <el-table :data="tableData" v-loading="loading" stripe>
+      <el-table :data="tableData" v-loading="loading" border stripe>
         <el-table-column prop="licenseId" label="ID" width="60" align="center" />
         <el-table-column prop="softwareName" label="软件名称" min-width="160" />
         <el-table-column prop="vendor" label="厂商" width="100" />
@@ -78,7 +78,4 @@ onMounted(()=>{load();loadExpiring()})
 </script>
 
 <style scoped>
-.page-container{width:95%;margin:0 auto;padding:20px}
-.header-title{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:16px 24px;font-size:18px;font-weight:bold;border-radius:8px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(102,126,234,0.3)}
-.table-section{background:white;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 </style>

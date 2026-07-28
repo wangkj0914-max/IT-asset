@@ -39,38 +39,6 @@
             <span>系统首页</span>
           </el-menu-item>
 
-          <!-- 信息管理 -->
-          <el-sub-menu index="info">
-            <template #title>
-              <el-icon><Grid /></el-icon>
-              <span>信息管理</span>
-            </template>
-            <el-menu-item index="/notice" @click="navigateTo('/notice')">
-              <el-icon><Notification /></el-icon>
-              <span>公告信息</span>
-            </el-menu-item>
-            <el-menu-item index="/department-info" @click="navigateTo('/department-info')">
-              <el-icon><View /></el-icon>
-              <span>部门信息</span>
-            </el-menu-item>
-            <el-menu-item index="/storage-location" @click="navigateTo('/storage-location')">
-              <el-icon><Location /></el-icon>
-              <span>存放地点</span>
-            </el-menu-item>
-            <el-menu-item index="/consumable-manage" @click="navigateTo('/consumable-manage')">
-              <el-icon><Box /></el-icon>
-              <span>耗材管理</span>
-            </el-menu-item>
-            <el-menu-item index="/license-manage" @click="navigateTo('/license-manage')">
-              <el-icon><Key /></el-icon>
-              <span>许可证管理</span>
-            </el-menu-item>
-            <el-menu-item index="/user-manage" @click="navigateTo('/user-manage')">
-              <el-icon><User /></el-icon>
-              <span>员工信息</span>
-            </el-menu-item>
-          </el-sub-menu>
-
           <!-- 审批中心 -->
           <el-menu-item index="/approval-center" @click="navigateTo('/approval-center')" v-if="userRole === 2">
             <el-icon><Check /></el-icon>
@@ -84,10 +52,6 @@
               <el-icon><Briefcase /></el-icon>
               <span>资产管理</span>
             </template>
-            <el-menu-item index="/category-manage" @click="navigateTo('/category-manage')">
-              <el-icon><List /></el-icon>
-              <span>资产分类</span>
-            </el-menu-item>
             <el-menu-item index="/asset-manage" @click="navigateTo('/asset-manage')">
               <el-icon><Document /></el-icon>
               <span>固定资产</span>
@@ -122,6 +86,62 @@
             </el-menu-item>
           </el-sub-menu>
 
+          <!-- 基础数据 -->
+          <el-sub-menu index="base-data">
+            <template #title>
+              <el-icon><Grid /></el-icon>
+              <span>基础数据</span>
+            </template>
+            <el-menu-item index="/category-manage" @click="navigateTo('/category-manage')">
+              <el-icon><List /></el-icon>
+              <span>资产分类</span>
+            </el-menu-item>
+            <el-menu-item index="/model-manage" @click="navigateTo('/model-manage')">
+              <el-icon><Box /></el-icon>
+              <span>资产模型</span>
+            </el-menu-item>
+            <el-menu-item index="/status-label-manage" @click="navigateTo('/status-label-manage')">
+              <el-icon><Tag /></el-icon>
+              <span>状态标签</span>
+            </el-menu-item>
+            <el-menu-item index="/department-info" @click="navigateTo('/department-info')">
+              <el-icon><View /></el-icon>
+              <span>部门信息</span>
+            </el-menu-item>
+            <el-menu-item index="/storage-location" @click="navigateTo('/storage-location')">
+              <el-icon><Location /></el-icon>
+              <span>存放地点</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 物资管理 -->
+          <el-sub-menu index="inventory">
+            <template #title>
+              <el-icon><Goods /></el-icon>
+              <span>物资管理</span>
+            </template>
+            <el-menu-item index="/consumable-manage" @click="navigateTo('/consumable-manage')">
+              <el-icon><Box /></el-icon>
+              <span>耗材管理</span>
+            </el-menu-item>
+            <el-menu-item index="/license-manage" @click="navigateTo('/license-manage')">
+              <el-icon><Key /></el-icon>
+              <span>许可证管理</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 综合报表 -->
+          <el-menu-item index="/reports" @click="navigateTo('/reports')">
+            <el-icon><DataLine /></el-icon>
+            <span>综合报表</span>
+          </el-menu-item>
+
+          <!-- 公告信息 -->
+          <el-menu-item index="/notice" @click="navigateTo('/notice')">
+            <el-icon><Notification /></el-icon>
+            <span>公告信息</span>
+          </el-menu-item>
+
           <!-- 系统管理（仅管理员） -->
           <el-sub-menu index="system" v-if="userRole === 2">
             <template #title>
@@ -131,6 +151,10 @@
             <el-menu-item index="/workflow-settings" @click="navigateTo('/workflow-settings')">
               <el-icon><Setting /></el-icon>
               <span>流程设置</span>
+            </el-menu-item>
+            <el-menu-item index="/custom-field-manage" @click="navigateTo('/custom-field-manage')">
+              <el-icon><Setting /></el-icon>
+              <span>自定义字段</span>
             </el-menu-item>
             <el-menu-item index="/integration" @click="navigateTo('/integration')">
               <el-icon><Document /></el-icon>
@@ -143,6 +167,14 @@
             <el-menu-item index="/operation-log" @click="navigateTo('/operation-log')">
               <el-icon><List /></el-icon>
               <span>操作日志</span>
+            </el-menu-item>
+            <el-menu-item index="/group-manage" @click="navigateTo('/group-manage')">
+              <el-icon><UserFilled /></el-icon>
+              <span>用户组管理</span>
+            </el-menu-item>
+            <el-menu-item index="/user-manage" @click="navigateTo('/user-manage')">
+              <el-icon><User /></el-icon>
+              <span>用户管理</span>
             </el-menu-item>
           </el-sub-menu>
         </el-menu>
@@ -198,7 +230,8 @@ import {
   House, User, UserFilled, Document, List, 
   Tools, Setting, MoreFilled, ArrowDown,
   DocumentAdd, Grid, Notification, View, Briefcase,
-  Plus, Search, Switch, Delete, Fold, Expand, Location, Box, Key
+  Plus, Search, Switch, Delete, Fold, Expand, Location, Box, Key, Tag,
+  Headset, Cpu, Check, DataLine, Goods
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -232,6 +265,7 @@ const activeMenu = computed(() => {
     '/asset-repair': '/asset-repair',
     '/asset-inbound': '/asset-inbound',
     '/asset-inventory': '/asset-inventory',
+    '/reports': '/reports',
     '/asset-scrap': '/asset-scrap',
     '/notice': '/notice',
     '/department-info': '/department-info',
@@ -241,9 +275,11 @@ const activeMenu = computed(() => {
     '/change-password': '/change-password',
     '/asset-transfer': '/asset-transfer',
     '/approval-center': '/approval-center',
+    '/custom-field-manage': '/custom-field-manage',
     '/integration': '/integration',
     '/api-manage': '/api-manage',
-    '/operation-log': '/operation-log'
+    '/operation-log': '/operation-log',
+    '/group-manage': '/group-manage'
   }
   return pathMap[route.path] || '/home'
 })
@@ -261,7 +297,7 @@ const updateTitle = (path) => {
   const titleMap = {
     '/home': '系统首页',
     '/profile': '个人资产',
-    '/user-manage': '员工信息',
+    '/user-manage': '用户管理',
     '/category-manage': '资产分类',
     '/asset-manage': '固定资产',
     '/asset-use': '资产领用',
@@ -269,6 +305,7 @@ const updateTitle = (path) => {
     '/asset-repair': '资产维修',
     '/asset-inbound': '资产入库',
     '/asset-inventory': '资产盘点',
+    '/reports': '综合报表',
     '/asset-scrap': '资产报废',
     '/notice': '公告信息',
     '/department-info': '部门信息',
@@ -276,10 +313,12 @@ const updateTitle = (path) => {
     '/consumable-manage': '耗材管理',
     '/license-manage': '许可证管理',
     '/asset-transfer': '资产调拨',
+    '/custom-field-manage': '自定义字段',
     '/approval-center': '审批中心',
     '/integration': '集成配置',
     '/api-manage': '接口管理',
-    '/operation-log': '操作日志'
+    '/operation-log': '操作日志',
+    '/group-manage': '用户组管理'
   }
   currentTitle.value = titleMap[path] || ''
 }

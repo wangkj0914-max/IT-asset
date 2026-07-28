@@ -6,6 +6,7 @@ frontend.log
 # Build artifacts
 it-asset-frontend/node_modules/
 it-asset-frontend/dist/
+it-asset-frontend/dist-v2/
 it-asset-system/target/
 
 # Python

@@ -14,6 +14,7 @@ public class StorageLocation {
     private String site;
     private String locationName;
     private String remark;
+    private Long parentId;
     private Integer sortOrder;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

@@ -1,6 +1,7 @@
 package com.asset.itassetsystem.service;
 
 import com.asset.itassetsystem.dto.InventoryCreateDTO;
+import com.asset.itassetsystem.dto.InventoryReportDTO;
 import com.asset.itassetsystem.entity.AssetInventory;
 import com.asset.itassetsystem.entity.AssetInventoryDetail;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -24,7 +25,12 @@ public interface AssetInventoryService extends IService<AssetInventory> {
     /**
      * 执行盘点（单条明细）
      */
-    void checkInventory(Long detailId, Integer status, String remark);
+    void checkInventory(Long detailId, Integer status, String remark, String actualLocation, String differenceType);
+
+    /**
+     * 生成盘点差异报告
+     */
+    InventoryReportDTO generateReport(Long inventoryId);
     
     /**
      * 完成盘点任务

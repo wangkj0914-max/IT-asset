@@ -1,5 +1,5 @@
 <template>
-  <div class="asset-container">
+  <div class="page-container">
     <!-- 顶部标题栏 -->
     <div class="header-title">IT 固定资产管理</div>
 
@@ -57,6 +57,11 @@
         </el-form-item>
         <el-form-item>
           <el-input v-model="searchForm.responsiblePerson" placeholder="责任人" clearable style="width:160px" />
+        </el-form-item>
+        <el-form-item>
+          <el-select v-model="searchForm.statusLabelId" placeholder="状态标签" clearable style="width:130px">
+            <el-option v-for="s in statusLabelList" :key="s.statusLabelId" :label="s.statusName" :value="s.statusLabelId" />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -166,10 +171,49 @@
           </template>
         </el-table-column>
 
-        <!-- 折旧方法 -->
-        <el-table-column prop="depreciationMethod" label="折旧方法" width="90" align="center">
+        <!-- P0: 当前价值 -->
+        <el-table-column label="当前价值" width="110" align="right" sortable="custom" prop="currentValue">
           <template #default="{ row }">
-            {{ row.depreciationMethod || '-' }}
+            <span v-if="row.currentValue != null" :class="['price-text', { 'text-danger': row.currentValue <= 0 }]">
+              ¥{{ Number(row.currentValue).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+
+        <!-- P0: EOL日期 -->
+        <el-table-column label="EOL日期" width="110" align="center" sortable="custom" prop="eolDate">
+          <template #default="{ row }">
+            <span v-if="row.eolDate" :style="{ color: isEolNear(row.eolDate) ? '#F56C6C' : '' }">
+              {{ row.eolDate }}
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+
+        <!-- 保修到期 -->
+        <el-table-column label="保修到期" width="110" align="center">
+          <template #default="{ row }">
+            <span v-if="row.warrantyExpireDate" :style="{ color: isExpireNear(row.warrantyExpireDate) ? '#F56C6C' : '' }">
+              {{ row.warrantyExpireDate }}
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <!-- 下次维护 -->
+        <el-table-column label="下次维护" width="110" align="center">
+          <template #default="{ row }">
+            <span v-if="row.nextMaintenanceDate" :style="{ color: isExpireNear(row.nextMaintenanceDate) ? '#E6A23C' : '' }">
+              {{ row.nextMaintenanceDate }}
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+
+        <!-- 折旧方法 -->
+        <el-table-column label="折旧方法" width="90" align="center">
+          <template #default="{ row }">
+            {{ getDepText(row.depreciationMethod) }}
           </template>
         </el-table-column>
 
@@ -200,6 +244,16 @@
             <span :class="['status-tag', getStatusClass(row.status)]">
               {{ getStatusText(row.status) }}
             </span>
+          </template>
+        </el-table-column>
+
+        <!-- P0: 状态标签 -->
+        <el-table-column label="状态标签" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag v-if="row.statusLabelId" :type="getStatusLabelColor(row.statusLabelId)" size="small">
+              {{ getStatusLabelName(row.statusLabelId) }}
+            </el-tag>
+            <span v-else>-</span>
           </template>
         </el-table-column>
 
@@ -287,6 +341,25 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
+            <el-form-item label="资产模型">
+              <el-select v-model="assetForm.modelId" placeholder="选择模型(自动继承折旧)" clearable filterable style="width:100%" @change="onModelChange">
+                <el-option v-for="m in modelList" :key="m.modelId" :label="m.modelName" :value="m.modelId" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="状态标签">
+              <el-select v-model="assetForm.statusLabelId" placeholder="选择状态标签" clearable filterable style="width:100%">
+                <el-option v-for="s in statusLabelList" :key="s.statusLabelId" :label="s.statusName" :value="s.statusLabelId">
+                  <el-tag :type="s.color" size="small">{{ s.statusName }}</el-tag>
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
             <el-form-item label="序列号" prop="serialNumber">
               <el-input v-model="assetForm.serialNumber" placeholder="请输入序列号" clearable />
             </el-form-item>
@@ -357,6 +430,78 @@
           </el-col>
         </el-row>
 
+        <!-- 维护信息 -->
+        <el-divider content-position="left">维护信息</el-divider>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="保修到期日">
+              <el-date-picker v-model="assetForm.warrantyExpireDate" type="date" placeholder="保修到期"
+                value-format="YYYY-MM-DD" style="width:100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="维护周期(天)">
+              <el-input-number v-model="assetForm.maintenanceCycleDays" :min="1" :max="3650" style="width:100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="下次维护日期">
+              <el-date-picker v-model="assetForm.nextMaintenanceDate" type="date" placeholder="自动推算或手动设"
+                value-format="YYYY-MM-DD" style="width:100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- P0: 财务与折旧 -->
+        <el-divider content-position="left">财务与折旧</el-divider>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="采购成本">
+              <el-input v-model="assetForm.purchaseCost" placeholder="采购成本" type="number" step="0.01" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="折旧年限">
+              <el-input-number v-model="assetForm.depreciationYears" :min="1" :max="20" style="width:100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="折旧方法">
+              <el-select v-model="assetForm.depreciationMethod" style="width:100%">
+                <el-option label="直线折旧" value="straight_line" />
+                <el-option label="余额递减" value="declining_balance" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="EOL日期">
+              <el-date-picker
+                v-model="assetForm.eolDate"
+                type="date"
+                placeholder="EOL日期"
+                value-format="YYYY-MM-DD"
+                style="width: 100%;"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="当前价值">
+              <span v-if="assetForm.currentValue != null" class="price-text">
+                ¥{{ Number(assetForm.currentValue).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
+              </span>
+              <span v-else style="color:#999">保存后自动计算</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="折旧率">
+              <span v-if="assetForm.depreciationRate != null">{{ Number(assetForm.depreciationRate).toFixed(2) }}% / 年</span>
+              <span v-else style="color:#999">保存后自动计算</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="使用人">
@@ -379,6 +524,34 @@
             </el-form-item>
           </el-col>
         </el-row>
+
+        <!-- 自定义字段 -->
+        <template v-if="customFieldDefs.length > 0">
+          <el-divider content-position="left">自定义字段</el-divider>
+          <el-row :gutter="20">
+            <el-col :span="12" v-for="def in customFieldDefs" :key="def.fieldId">
+              <el-form-item :label="def.fieldName" :required="def.isRequired === 1">
+                <!-- 文本 -->
+                <el-input v-if="def.fieldType === 'text'" v-model="customFieldValues[def.fieldId]"
+                  :placeholder="'请输入' + def.fieldName" clearable />
+                <!-- 数字 -->
+                <el-input-number v-if="def.fieldType === 'number'" v-model="customFieldValues[def.fieldId]"
+                  :precision="2" style="width:100%" />
+                <!-- 日期 -->
+                <el-date-picker v-if="def.fieldType === 'date'" v-model="customFieldValues[def.fieldId]"
+                  type="date" value-format="YYYY-MM-DD" style="width:100%" />
+                <!-- 下拉选择 -->
+                <el-select v-if="def.fieldType === 'select'" v-model="customFieldValues[def.fieldId]"
+                  :placeholder="'请选择' + def.fieldName" clearable style="width:100%">
+                  <el-option v-for="opt in parseOptions(def.fieldOptions)" :key="opt" :label="opt" :value="opt" />
+                </el-select>
+                <!-- 多行文本 -->
+                <el-input v-if="def.fieldType === 'textarea'" v-model="customFieldValues[def.fieldId]"
+                  type="textarea" :rows="2" :placeholder="'请输入' + def.fieldName" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </template>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -553,7 +726,9 @@
               <el-table-column prop="quantity" label="数量" width="60" />
               <el-table-column prop="purchasePrice" label="原始价值" width="90" />
               <el-table-column prop="purchaseDate" label="购置日期" width="100" />
-              <el-table-column prop="depreciationMethod" label="折旧方法" width="80" />
+              <el-table-column label="折旧方法" width="80">
+                <template #default="{ row }">{{ getDepText(row.depreciationMethod) }}</template>
+              </el-table-column>
               <el-table-column prop="department" label="使用部门" width="90" show-overflow-tooltip />
               <el-table-column prop="responsiblePerson" label="责任人" width="80" />
               <el-table-column prop="storageLocation" label="存放地点" width="90" show-overflow-tooltip />
@@ -615,6 +790,12 @@ const assetList = ref([])
 // 分类列表
 const categoryList = ref([])
 
+// 资产模型列表 (P0)
+const modelList = ref([])
+
+// 状态标签列表 (P0)
+const statusLabelList = ref([])
+
 // 用户列表（用于映射使用人）
 const userList = ref([])
 const userMap = ref({})
@@ -636,7 +817,8 @@ const searchForm = reactive({
   status: null,     // 状态
   department: '',   // 使用部门
   storageLocation: '', // 存放地点
-  responsiblePerson: '' // 责任人
+  responsiblePerson: '', // 责任人
+  statusLabelId: null // P0: 状态标签
 })
 
 // 分页信息
@@ -657,21 +839,83 @@ const assetForm = reactive({
   categoryId: null,
   brand: '',
   model: '',
+  modelId: null,
   serialNumber: '',
   purchasePrice: '',
+  purchaseCost: '',
   purchaseDate: '',
   supplier: '',
   storageLocation: '',
   status: 0,
+  statusLabelId: null,
   userId: null,
   department: '',
   warrantyInfo: '',
+  depreciationMethod: 'straight_line',
+  depreciationYears: null,
+  depreciationRate: null,
+  eolDate: '',
+  currentValue: null,
+  warrantyExpireDate: '',
+  maintenanceCycleDays: null,
+  nextMaintenanceDate: '',
   remark: ''
 })
 
 // 领用申请相关
 const applyDialogVisible = ref(false)
 const applyAsset = ref(null)
+
+// 自定义字段
+const customFieldDefs = ref([])
+const customFieldValues = reactive({})
+
+const parseOptions = (options) => {
+  if (!options) return []
+  try { return JSON.parse(options) } catch { return [] }
+}
+
+const loadCustomFieldDefs = async () => {
+  try {
+    const r = await request.get('/custom-field/def-list', { params: { targetEntity: 'asset' } })
+    if (r.code === 200) customFieldDefs.value = r.data || []
+  } catch { customFieldDefs.value = [] }
+}
+
+const loadCustomFieldValues = async (assetId) => {
+  // 重置
+  Object.keys(customFieldValues).forEach(k => delete customFieldValues[k])
+  if (!assetId) return
+  try {
+    const r = await request.get('/custom-field/values', { params: { entityType: 'asset', entityId: assetId } })
+    if (r.code === 200) {
+      const vals = r.data || []
+      vals.forEach(v => {
+        let val = v.fieldValue
+        if (val) {
+          // 找到对应定义，判断类型
+          const def = customFieldDefs.value.find(d => d.fieldId === v.fieldId)
+          if (def && def.fieldType === 'number') val = Number(val)
+        }
+        customFieldValues[v.fieldId] = val
+      })
+    }
+  } catch { /* ignore */ }
+}
+
+const saveCustomFieldValues = async (assetId) => {
+  if (!assetId) return
+  const data = []
+  for (const def of customFieldDefs.value) {
+    const v = customFieldValues[def.fieldId]
+    if (v !== undefined && v !== null && v !== '') {
+      data.push({ entityType: 'asset', entityId: assetId, fieldId: def.fieldId, fieldValue: String(v) })
+    }
+  }
+  if (data.length > 0) {
+    await request.post('/custom-field/save-values', data)
+  }
+}
 const applyFormRef = ref(null)
 const applyForm = reactive({
   assetId: null,
@@ -703,6 +947,8 @@ const formRules = reactive({
 // 页面加载时查询数据
 onMounted(() => {
   getCategoryList()
+  loadModelList()
+  loadStatusLabelList()
   loadUserList()
   loadDepartmentList()
   loadLocationList()
@@ -784,6 +1030,66 @@ const getCategoryList = async () => {
   }
 }
 
+// P0: 加载资产模型列表
+const loadModelList = async () => {
+  try {
+    const res = await request.get('/assetModel/list')
+    modelList.value = res.data || []
+  } catch (error) {
+    modelList.value = []
+  }
+}
+
+// P0: 加载状态标签列表
+const loadStatusLabelList = async () => {
+  try {
+    const res = await request.get('/statusLabel/list')
+    statusLabelList.value = res.data || []
+  } catch (error) {
+    statusLabelList.value = []
+  }
+}
+
+// P0: 选择模型时自动填充折旧参数
+const onModelChange = (modelId) => {
+  if (!modelId) return
+  const m = modelList.value.find(m => m.modelId === modelId)
+  if (!m) return
+  if (m.depreciationYears) assetForm.depreciationYears = m.depreciationYears
+  if (m.depreciationMethod) assetForm.depreciationMethod = m.depreciationMethod
+  if (!assetForm.model) assetForm.model = m.modelName
+}
+
+// P0: 获取状态标签名
+const getStatusLabelName = (id) => {
+  const s = statusLabelList.value.find(s => s.statusLabelId === id)
+  return s ? s.statusName : ''
+}
+
+// P0: 获取状态标签颜色
+const getStatusLabelColor = (id) => {
+  const s = statusLabelList.value.find(s => s.statusLabelId === id)
+  return s ? s.color : 'info'
+}
+
+// P0: EOL临近判断（3个月内）
+const isEolNear = (eolDate) => {
+  if (!eolDate) return false
+  const d = new Date(eolDate)
+  const now = new Date()
+  const diff = (d - now) / (1000 * 60 * 60 * 24)
+  return diff >= 0 && diff <= 90
+}
+
+// 维护日期临近判断（30天内）
+const isExpireNear = (date) => {
+  if (!date) return false
+  const d = new Date(date)
+  const now = new Date()
+  const diff = (d - now) / (1000 * 60 * 60 * 24)
+  return diff >= 0 && diff <= 30
+}
+
 // 查询资产列表（分页）
 const getAssetList = async () => {
   try {
@@ -799,6 +1105,7 @@ const getAssetList = async () => {
         department: searchForm.department || undefined,
         storageLocation: searchForm.storageLocation || undefined,
         responsiblePerson: searchForm.responsiblePerson || undefined,
+        statusLabelId: searchForm.statusLabelId || undefined,
         sortColumn: sortColumn.value || undefined,
         sortOrder: sortOrder.value || undefined
       }
@@ -827,6 +1134,7 @@ const resetSearch = () => {
   searchForm.tagNo = ''
   searchForm.storageLocation = ''
   searchForm.responsiblePerson = ''
+  searchForm.statusLabelId = null
   pagination.current = 1
   getAssetList()
 }
@@ -836,22 +1144,38 @@ const showAddDialog = async () => {
   await loadDepartmentList()
   await loadLocationList()
   await loadUserList()
+  await loadModelList()
+  await loadStatusLabelList()
+  await loadCustomFieldDefs()
   isEditMode.value = false
+  // 重置自定义字段值
+  Object.keys(customFieldValues).forEach(k => delete customFieldValues[k])
   Object.assign(assetForm, {
     assetId: null,
     assetName: '',
     categoryId: null,
     brand: '',
     model: '',
+    modelId: null,
     serialNumber: '',
     purchasePrice: '',
+    purchaseCost: '',
     purchaseDate: '',
     supplier: '',
     storageLocation: '',
     status: 0,
+    statusLabelId: null,
     userId: null,
     department: '',
     warrantyInfo: '',
+    depreciationMethod: 'straight_line',
+    depreciationYears: null,
+    depreciationRate: null,
+    eolDate: '',
+    currentValue: null,
+    warrantyExpireDate: '',
+    maintenanceCycleDays: null,
+    nextMaintenanceDate: '',
     remark: ''
   })
   dialogVisible.value = true
@@ -863,21 +1187,36 @@ const showEditDialog = async (row) => {
   await loadDepartmentList(row.department)
   await loadLocationList()
   await loadUserList()
+  await loadModelList()
+  await loadStatusLabelList()
+  await loadCustomFieldDefs()
+  await loadCustomFieldValues(row.assetId)
   Object.assign(assetForm, {
     assetId: row.assetId,
     assetName: row.assetName,
     categoryId: row.categoryId,
     brand: row.brand || '',
     model: row.model || '',
+    modelId: row.modelId || null,
     serialNumber: row.serialNumber || '',
     purchasePrice: row.purchasePrice || '',
+    purchaseCost: row.purchaseCost || '',
     purchaseDate: row.purchaseDate || '',
     supplier: row.supplier || '',
     storageLocation: row.storageLocation || '',
     status: row.status,
+    statusLabelId: row.statusLabelId || null,
     userId: row.userId || null,
     department: parseDepartment(row.remark) !== '-' ? parseDepartment(row.remark) : '',
     warrantyInfo: row.warrantyInfo || '',
+    depreciationMethod: row.depreciationMethod || 'straight_line',
+    depreciationYears: row.depreciationYears || null,
+    depreciationRate: row.depreciationRate || null,
+    eolDate: row.eolDate || '',
+    currentValue: row.currentValue || null,
+    warrantyExpireDate: row.warrantyExpireDate || '',
+    maintenanceCycleDays: row.maintenanceCycleDays || null,
+    nextMaintenanceDate: row.nextMaintenanceDate || '',
     remark: (() => {
       let r = row.remark || ''
       return r.replace(/部门[:：][^,，\s]*[，,]?\s*/g, '').trim()
@@ -894,7 +1233,8 @@ const handleSubmit = async () => {
 
     const submitData = {
       ...assetForm,
-      purchasePrice: assetForm.purchasePrice ? Number(assetForm.purchasePrice) : null
+      purchasePrice: assetForm.purchasePrice ? Number(assetForm.purchasePrice) : null,
+      purchaseCost: assetForm.purchaseCost ? Number(assetForm.purchaseCost) : null
     }
 
     // 将部门信息写入remark
@@ -910,9 +1250,16 @@ const handleSubmit = async () => {
     if (isEditMode.value) {
       await request.post('/assetInfo/update', submitData)
       ElMessage.success('更新成功')
+      // 保存自定义字段值（编辑时assetId已知）
+      await saveCustomFieldValues(assetForm.assetId)
     } else {
-      await request.post('/assetInfo/save', submitData)
+      const r = await request.post('/assetInfo/save', submitData)
       ElMessage.success('资产入库成功')
+      // 保存自定义字段值（新增时从返回值获取assetId）
+      const assetId = r.data?.assetId
+      if (assetId) {
+        await saveCustomFieldValues(assetId)
+      }
     }
 
     dialogVisible.value = false
@@ -1033,7 +1380,6 @@ const exportLabels = async () => {
     const qr = await buildQr(`${code}|${a.assetName}`)
     return `
       <div class="label">
-        <div class="header"><img src="./nai-logo.png" alt="NAI" class="logo-img" /><span>NAI Property</span></div>
         <div class="qr"><img src="${qr}" alt="QR" /></div>
         <div class="row"><span class="lbl">FA Code:</span><span class="val">${code}</span></div>
         <div class="row"><span class="lbl">ME Code:</span><span class="val">${meCode}</span></div>
@@ -1061,15 +1407,6 @@ const exportLabels = async () => {
     position: relative;
     overflow: hidden;
     background: #fff;
-  }
-  .label .header {
-    font-size: 8pt; font-weight: bold; color: #1a8a3a;
-    text-align: left; margin-bottom: 0.6mm;
-    line-height: 1.1;
-    display: flex; align-items: center; gap: 1mm;
-  }
-  .label .header .logo-img {
-    height: 5.5mm; width: auto; display: block;
   }
   .label .qr {
     position: absolute; top: 1.2mm; right: 1.2mm;
@@ -1117,8 +1454,6 @@ const printSingleLabel = async (row) => {
   body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
   .container { max-width: 440px; margin: 0 auto; }
   .preview { background: #fff; width: 170px; height: 135px; border: 2px solid #000; padding: 8px 10px; position: relative; margin: 0 auto 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  .preview .title { font-size: 10pt; font-weight: bold; color: #1a8a3a; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
-  .preview .title .logo { height: 22px; width: auto; }
   .preview .row { font-size: 8pt; line-height: 1.4; }
   .preview .qr { position: absolute; top: 6px; right: 6px; width: 50px; height: 50px; }
   .preview .qr img { width: 100%; height: 100%; display: block; }
@@ -1132,7 +1467,6 @@ const printSingleLabel = async (row) => {
 </style></head><body>
 <div class="container">
   <div class="preview">
-    <div class="title"><img src="./nai-logo.png" alt="NAI" class="logo" /><span>NAI Property</span></div>
     <div class="qr"><img src="${qrDataUrl}" alt="QR" /></div>
     <div class="row"><b>FA:</b> ${code}</div>
     <div class="row"><b>ME:</b> ${meCode}</div>
@@ -1422,6 +1756,12 @@ const getStatusClass = (status) => {
   return map[status] || 'status-unused'
 }
 
+const getDepText = (m) => {
+  if (m === 'straight_line') return '直线折旧'
+  if (m === 'declining_balance') return '余额递减'
+  return m || '-'
+}
+
 // ========== 领用申请相关 ==========
 
 // 从资产列表直接申请领用
@@ -1530,123 +1870,6 @@ const formatDateTime = (dateStr) => {
 </script>
 
 <style scoped>
-.asset-container {
-  width: 95%;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
-}
-
-/* 顶部标题栏 */
-.header-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 18px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-/* 搜索区域 */
-.search-section {
-  background: white;
-  padding: 20px 20px 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.search-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.search-form .el-form-item {
-  margin-bottom: 15px;
-}
-
-/* 操作按钮区域 */
-.operation-section {
-  margin-bottom: 15px;
-}
-
-.btn-add {
-  margin-right: 10px;
-}
-
-.btn-export {
-  background-color: #67c23a;
-  border-color: #67c23a;
-}
-
-/* 表格区域 */
-.table-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* 资产编号样式 */
-.asset-code {
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 12px;
-  color: #409eff;
-}
-
-/* 价格样式 */
-.price-text {
-  color: #f56c6c;
-  font-weight: 500;
-}
-
-/* 状态标签样式 */
-.status-tag {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.status-unused {
-  background-color: #f4f4f5;
-  color: #909399;
-}
-
-.status-used {
-  background-color: #f0f9eb;
-  color: #67c23a;
-}
-
-.status-repair {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-.status-scrapped {
-  background-color: #fef0f0;
-  color: #f56c6c;
-}
-
-.status-pending {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-.status-approved {
-  background-color: #f0f9eb;
-  color: #67c23a;
-}
-
-.status-rejected {
-  background-color: #fef0f0;
-  color: #f56c6c;
-}
-
 /* 领用申请资产信息 */
 .apply-asset-info {
   background: #ecf5ff;
@@ -1682,33 +1905,6 @@ const formatDateTime = (dateStr) => {
 
 .use-record-code {
   color: #909399;
-  font-size: 13px;
-}
-
-/* 分页 */
-.pagination-container {
-  margin-top: 20px;
-  text-align: right;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* 表格样式调整 */
-:deep(.el-table) {
-  font-size: 13px;
-}
-
-:deep(.el-table th) {
-  background-color: #fafafa;
-  color: #303133;
-  font-weight: 600;
-}
-
-:deep(.el-table td) {
-  padding: 8px 0;
-}
-
-:deep(.el-table .cell) {
   font-size: 13px;
 }
 

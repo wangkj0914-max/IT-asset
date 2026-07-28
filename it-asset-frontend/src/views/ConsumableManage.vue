@@ -12,13 +12,13 @@
     <el-alert v-if="lowStockList.length > 0" type="warning" :closable="false" style="margin-bottom:16px">
       <b>低库存预警：</b>
       <span v-for="(c,i) in lowStockList" :key="i">
-        {{ c.consumableName }}({{ c.currentStock }}{{ c.unit }})
+        {{ c.consumableName }}({{ c.currentStock }}/{{ c.minStock }}{{ c.unit }}，建议补充 {{ c.suggestedReplenishment || (c.minStock - c.currentStock) }}{{ c.unit }})
         <template v-if="i < lowStockList.length - 1">，</template>
       </span>
     </el-alert>
 
     <div class="table-section">
-      <el-table :data="tableData" v-loading="loading" stripe>
+      <el-table :data="tableData" v-loading="loading" border stripe>
         <el-table-column prop="consumableId" label="ID" width="70" align="center" />
         <el-table-column prop="consumableName" label="耗材名称" min-width="160" />
         <el-table-column prop="category" label="分类" width="80">
@@ -111,7 +111,7 @@ const loadData=async()=>{
   catch{ElMessage.error('加载失败')}finally{loading.value=false}
 }
 const loadLowStock=async()=>{
-  try{const r=await request.get('/consumable/low-stock');if(r.code===200)lowStockList.value=r.data||[]}catch(e){/* ignore */}
+  try{const r=await request.get('/consumable/alerts');if(r.code===200)lowStockList.value=r.data||[]}catch(e){/* ignore */}
 }
 const showAdd=()=>{isEdit.value=false;Object.assign(form,{consumableId:null,consumableName:'',category:'',unit:'个',currentStock:0,minStock:5,price:null,supplier:''});formRef.value?.clearValidate();dialogVisible.value=true}
 const showEdit=(row)=>{isEdit.value=true;Object.assign(form,{consumableId:row.consumableId,consumableName:row.consumableName,category:row.category,unit:row.unit,currentStock:row.currentStock,minStock:row.minStock,price:row.price,supplier:row.supplier});formRef.value?.clearValidate();dialogVisible.value=true}
@@ -157,7 +157,4 @@ onMounted(()=>{loadData();loadLowStock()})
 </script>
 
 <style scoped>
-.page-container{width:95%;margin:0 auto;padding:20px}
-.header-title{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:16px 24px;font-size:18px;font-weight:bold;border-radius:8px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(102,126,234,0.3)}
-.table-section{background:white;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 </style>

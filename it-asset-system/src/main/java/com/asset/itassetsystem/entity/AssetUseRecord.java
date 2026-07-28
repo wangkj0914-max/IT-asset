@@ -22,6 +22,9 @@ public class AssetUseRecord {
     private String contactPhone;
     private Integer useType; // 1-领用 2-归还 3-调拨
     private LocalDateTime useDate;
+    private LocalDateTime expectedReturnDate;
+    private LocalDateTime actualReturnDate;
+    private Integer overdueStatus; // 0-正常 1-已逾期 2-已关闭
     private LocalDateTime returnDate;
     private String approveUser;
     private Integer approveStatus; // 0-待审批 1-已通过 2-已拒绝

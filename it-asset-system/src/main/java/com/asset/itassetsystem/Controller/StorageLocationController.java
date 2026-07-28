@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/storage-location")
@@ -25,6 +26,38 @@ public class StorageLocationController {
         if (site != null && !site.isEmpty()) w.eq(StorageLocation::getSite, site);
         w.orderByAsc(StorageLocation::getSortOrder);
         return Result.success(locationService.list(w));
+    }
+
+    @GetMapping("/tree")
+    public Result<List<Map<String, Object>>> tree(@RequestParam(required = false) String site) {
+        var w = new LambdaQueryWrapper<StorageLocation>();
+        if (site != null && !site.isEmpty()) w.eq(StorageLocation::getSite, site);
+        w.orderByAsc(StorageLocation::getSortOrder);
+        List<StorageLocation> all = locationService.list(w);
+
+        Map<Long, List<StorageLocation>> parentMap = all.stream()
+            .collect(Collectors.groupingBy(l -> l.getParentId() == null ? 0L : l.getParentId()));
+
+        List<Map<String, Object>> result = buildTree(parentMap, 0L);
+        return Result.success(result);
+    }
+
+    private List<Map<String, Object>> buildTree(Map<Long, List<StorageLocation>> parentMap, Long parentId) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        List<StorageLocation> children = parentMap.getOrDefault(parentId, Collections.emptyList());
+        for (StorageLocation loc : children) {
+            Map<String, Object> node = new LinkedHashMap<>();
+            node.put("locationId", loc.getLocationId());
+            node.put("locationName", loc.getLocationName());
+            node.put("parentId", loc.getParentId());
+            node.put("sortOrder", loc.getSortOrder());
+            node.put("remark", loc.getRemark());
+            node.put("site", loc.getSite());
+            List<Map<String, Object>> sub = buildTree(parentMap, loc.getLocationId());
+            if (!sub.isEmpty()) node.put("children", sub);
+            list.add(node);
+        }
+        return list;
     }
 
     @PostMapping("/save")
@@ -53,6 +86,12 @@ public class StorageLocationController {
 
     @PostMapping("/delete")
     public Result<String> delete(@RequestParam Long locationId) {
+        // 检查是否有子地点
+        var childW = new LambdaQueryWrapper<StorageLocation>();
+        childW.eq(StorageLocation::getParentId, locationId);
+        if (locationService.count(childW) > 0) {
+            return Result.error("该地点下存在子地点，请先删除子地点");
+        }
         locationService.removeById(locationId);
         return Result.success("删除成功");
     }

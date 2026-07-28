@@ -103,11 +103,12 @@ public class AssetUseController {
             @RequestParam(required = false) String assetName,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) String site,
+            @RequestParam(required = false) Integer overdue,
             @RequestParam(defaultValue = "1") Long current,
             @RequestParam(defaultValue = "10") Long size) {
         
         com.baomidou.mybatisplus.core.metadata.IPage<com.asset.itassetsystem.vo.UseRecordVO> result = 
-            assetUseService.listAllWithAssetInfo(current, size, assetName, status);
+            assetUseService.listAllWithAssetInfo(current, size, assetName, status, overdue);
         if (site != null && !site.isEmpty() && result.getRecords() != null) {
             var filtered = result.getRecords().stream()
                 .filter(r -> site.equals(r.getSite()))

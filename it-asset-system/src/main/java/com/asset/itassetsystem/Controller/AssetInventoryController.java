@@ -2,12 +2,14 @@ package com.asset.itassetsystem.controller;
 
 import com.asset.itassetsystem.common.Result;
 import com.asset.itassetsystem.dto.InventoryCreateDTO;
+import com.asset.itassetsystem.dto.InventoryReportDTO;
 import com.asset.itassetsystem.entity.AssetInventory;
 import com.asset.itassetsystem.entity.AssetInventoryDetail;
 import com.asset.itassetsystem.service.AssetInventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -21,6 +23,9 @@ public class AssetInventoryController {
     
     @Autowired
     private AssetInventoryService assetInventoryService;
+
+    @Autowired
+    private HttpServletRequest request;
     
     /**
      * 创建盘点任务
@@ -55,9 +60,11 @@ public class AssetInventoryController {
     @PostMapping("/check")
     public Result<String> check(@RequestParam Long detailId,
                                 @RequestParam Integer status,
-                                @RequestParam(required = false) String remark) {
+                                @RequestParam(required = false) String remark,
+                                @RequestParam(required = false) String actualLocation,
+                                @RequestParam(required = false) String differenceType) {
         try {
-            assetInventoryService.checkInventory(detailId, status, remark);
+            assetInventoryService.checkInventory(detailId, status, remark, actualLocation, differenceType);
             return Result.success("盘点完成");
         } catch (Exception e) {
             return Result.error(e.getMessage());
@@ -77,6 +84,19 @@ public class AssetInventoryController {
         }
     }
     
+    /**
+     * 生成盘点差异报告
+     */
+    @GetMapping("/report")
+    public Result<InventoryReportDTO> report(@RequestParam Long inventoryId) {
+        try {
+            InventoryReportDTO report = assetInventoryService.generateReport(inventoryId);
+            return Result.success(report);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
     /**
      * 获取盘点任务详情
      */

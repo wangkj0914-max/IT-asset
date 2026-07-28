@@ -20,7 +20,7 @@
     </div>
 
     <div class="table-section">
-      <el-table :data="userList" v-loading="loading" stripe>
+      <el-table :data="userList" v-loading="loading" border stripe>
         <el-table-column prop="userId" label="ID" width="70" align="center" />
         <el-table-column prop="username" label="用户名" width="130" align="center" />
         <el-table-column prop="realName" label="姓名" width="120" align="center" />
@@ -311,37 +311,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  width: 95%;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.header-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 16px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.3);
-}
-
-.table-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.pagination-section {
-  margin-top: 15px;
-  display: flex;
-  justify-content: flex-end;
-}
 </style>

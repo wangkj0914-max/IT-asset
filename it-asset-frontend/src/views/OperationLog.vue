@@ -29,6 +29,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="loadData">查询</el-button>
+          <el-button type="success" @click="exportLog" :loading="exporting">导出CSV</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -78,9 +79,11 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
+import axios from 'axios'
 
 const loading = ref(false), tableData = ref([]), pageNum = ref(1), pageSize = ref(20), total = ref(0)
 const searchModule = ref(null), searchUser = ref(''), searchStatus = ref(null)
+const exporting = ref(false)
 
 const opColor = (o) => ({ ADD: 'success', UPDATE: 'primary', DELETE: 'danger', APPROVE: 'warning', COMPLETE: 'success', RESET: 'info' }[o] || 'info')
 
@@ -92,6 +95,27 @@ const loadData = async () => {
     })
     if (res.code === 200) { tableData.value = res.data.records || []; total.value = res.data.total || 0 }
   } catch { ElMessage.error('加载失败') } finally { loading.value = false }
+}
+
+const exportLog = async () => {
+  exporting.value = true
+  try {
+    const response = await axios.get('/asset/log/export', {
+      params: { module: searchModule.value, userName: searchUser.value, status: searchStatus.value },
+      responseType: 'blob',
+      headers: { token: localStorage.getItem('token') }
+    })
+    const blob = new Blob([response.data], { type: 'text/csv;charset=UTF-8' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = '操作日志_' + new Date().toISOString().slice(0, 10) + '.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch { ElMessage.error('导出失败') } finally { exporting.value = false }
 }
 
 onMounted(loadData)

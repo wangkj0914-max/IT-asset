@@ -4,8 +4,10 @@ import com.asset.itassetsystem.common.Result;
 import com.asset.itassetsystem.dto.BatchUpdateDTO;
 import com.asset.itassetsystem.entity.AssetChangeLog;
 import com.asset.itassetsystem.entity.AssetInfo;
+import com.asset.itassetsystem.entity.AssetModel;
 import com.asset.itassetsystem.mapper.AssetChangeLogMapper;
 import com.asset.itassetsystem.service.AssetInfoService;
+import com.asset.itassetsystem.service.AssetModelService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,8 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 资产信息控制器
@@ -30,13 +38,16 @@ public class AssetInfoController {
     private AssetChangeLogMapper changeLogMapper;
 
     @Autowired
+    private AssetModelService assetModelService;
+
+    @Autowired
     private javax.servlet.http.HttpServletRequest httpRequest;
 
     /**
      * 资产入库（新增资产）
      */
     @PostMapping("/save")
-    public Result<String> saveAsset(@RequestBody AssetInfo assetInfo) {
+    public Result<Map<String, Object>> saveAsset(@RequestBody AssetInfo assetInfo) {
         if (assetInfo.getAssetName() == null || assetInfo.getAssetName().trim().isEmpty()) {
             return Result.error("资产名称不能为空");
         }
@@ -55,9 +66,20 @@ public class AssetInfoController {
             assetInfo.setSite(site != null && !site.isEmpty() ? site : "苏州");
         }
         
+        // 如果选择了资产模型，从模型继承折旧参数
+        applyModelDefaults(assetInfo);
+        // 自动计算折旧和当前价值
+        calculateDepreciation(assetInfo);
+        // 自动推算下次维护日期
+        calculateMaintenance(null, assetInfo);
+        
         boolean save = assetInfoService.save(assetInfo);
         if (save) {
-            return Result.success("资产入库成功，资产编号：" + assetInfo.getAssetCode());
+            // 返回资产ID供自定义字段关联
+            Map<String, Object> data = new HashMap<>();
+            data.put("assetId", assetInfo.getAssetId());
+            data.put("assetCode", assetInfo.getAssetCode());
+            return Result.success(data);
         } else {
             return Result.error("资产入库失败");
         }
@@ -94,6 +116,8 @@ public class AssetInfoController {
             @RequestParam(required = false) String site,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String tagNo,
+            @RequestParam(required = false) Long modelId,
+            @RequestParam(required = false) Long statusLabelId,
             @RequestParam(required = false) String sortColumn,
             @RequestParam(required = false) String sortOrder) {
 
@@ -154,6 +178,16 @@ public class AssetInfoController {
         if (StringUtils.hasText(site)) {
             wrapper.eq(AssetInfo::getSite, site);
         }
+
+        // 按资产模型筛选
+        if (modelId != null) {
+            wrapper.eq(AssetInfo::getModelId, modelId);
+        }
+
+        // 按状态标签筛选
+        if (statusLabelId != null) {
+            wrapper.eq(AssetInfo::getStatusLabelId, statusLabelId);
+        }
         
         // 动态排序，默认按创建时间倒序
         if (StringUtils.hasText(sortColumn)) {
@@ -162,6 +196,9 @@ public class AssetInfoController {
                 case "assetName" -> "asset_name";
                 case "assetCode" -> "asset_code";
                 case "purchasePrice" -> "purchase_price";
+                case "purchaseCost" -> "purchase_cost";
+                case "currentValue" -> "current_value";
+                case "eolDate" -> "eol_date";
                 case "createTime" -> "create_time";
                 case "status" -> "status";
                 case "department" -> "department";
@@ -227,6 +264,11 @@ public class AssetInfoController {
             auditChange(old, assetInfo);
         }
         assetInfo.setUpdateTime(LocalDateTime.now());
+        // 自动计算折旧和当前价值
+        applyModelDefaults(assetInfo);
+        calculateDepreciation(assetInfo);
+        // 自动推算下次维护日期（对比旧值，判断是否需要重新推算）
+        calculateMaintenance(old, assetInfo);
         boolean update = assetInfoService.updateById(assetInfo);
         if (update) {
             return Result.success("更新成功");
@@ -335,5 +377,106 @@ public class AssetInfoController {
             count++;
         }
         return Result.success("批量更新成功，共 " + count + " 条");
+    }
+
+    // ==================== P0: 折旧/模型 辅助方法 ====================
+
+    /**
+     * 如果选择了资产模型，从模型继承折旧参数
+     */
+    private void applyModelDefaults(AssetInfo asset) {
+        if (asset.getModelId() == null) return;
+        AssetModel model = assetModelService.getById(asset.getModelId());
+        if (model == null) return;
+        // 继承模型默认值（仅当资产自身未设置时）
+        if (asset.getDepreciationYears() == null && model.getDepreciationYears() != null) {
+            asset.setDepreciationYears(model.getDepreciationYears());
+        }
+        if (asset.getDepreciationMethod() == null && model.getDepreciationMethod() != null) {
+            asset.setDepreciationMethod(model.getDepreciationMethod());
+        }
+        if (asset.getEolDate() == null && asset.getPurchaseDate() != null && model.getEolMonths() != null) {
+            asset.setEolDate(asset.getPurchaseDate().plusMonths(model.getEolMonths()));
+        }
+        // 同步模型字段到资产的model文本
+        if (asset.getModel() == null || asset.getModel().isEmpty()) {
+            asset.setModel(model.getModelName());
+        }
+    }
+
+    /**
+     * 自动计算EOL日期、折旧率和当前价值
+     * 直线折旧法：每月折旧 = 采购成本 / (折旧年限 * 12)
+     */
+    private void calculateDepreciation(AssetInfo asset) {
+        // 采购成本默认取purchasePrice
+        BigDecimal cost = asset.getPurchaseCost();
+        if (cost == null && asset.getPurchasePrice() != null) {
+            cost = asset.getPurchasePrice();
+            asset.setPurchaseCost(cost);
+        }
+        if (cost == null) return;
+
+        LocalDate purchaseDate = asset.getPurchaseDate();
+        if (purchaseDate == null) return;
+
+        // 折旧年限默认3年
+        Integer depYears = asset.getDepreciationYears();
+        if (depYears == null || depYears <= 0) {
+            depYears = 3;
+            asset.setDepreciationYears(depYears);
+        }
+
+        // 年折旧率
+        if (asset.getDepreciationRate() == null) {
+            BigDecimal rate = BigDecimal.valueOf(100.0).divide(BigDecimal.valueOf(depYears), 2, RoundingMode.HALF_UP);
+            asset.setDepreciationRate(rate);
+        }
+
+        // EOL日期
+        if (asset.getEolDate() == null) {
+            asset.setEolDate(purchaseDate.plusMonths(depYears * 12L));
+        }
+
+        // 当前价值 = max(0, cost - cost * 已使用月数 / (depYears * 12))
+        long monthsUsed = ChronoUnit.MONTHS.between(purchaseDate, LocalDate.now());
+        if (monthsUsed < 0) monthsUsed = 0;
+        long totalMonths = depYears * 12L;
+        BigDecimal depreciationAmount = cost.multiply(BigDecimal.valueOf(monthsUsed))
+                .divide(BigDecimal.valueOf(totalMonths), 2, RoundingMode.HALF_UP);
+        BigDecimal currentValue = cost.subtract(depreciationAmount);
+        if (currentValue.compareTo(BigDecimal.ZERO) < 0) {
+            currentValue = BigDecimal.ZERO;
+        }
+        asset.setCurrentValue(currentValue);
+    }
+
+    /**
+     * 自动推算下次维护日期
+     * - 新增时：若 purchase_date 有值、next_maintenance_date 为空、maintenance_cycle_days 有值，则自动推算
+     * - 更新时：若 maintenance_cycle_days 变了但 next_maintenance_date 未手动修改，则重新推算
+     */
+    private void calculateMaintenance(AssetInfo old, AssetInfo asset) {
+        if (asset.getPurchaseDate() == null) {
+            // purchase_date 为空时，保留手动设置的 next_maintenance_date（不覆盖）
+            return;
+        }
+        if (old == null) {
+            // 新增：首次自动推算
+            if (asset.getNextMaintenanceDate() == null && asset.getMaintenanceCycleDays() != null) {
+                asset.setNextMaintenanceDate(asset.getPurchaseDate().plusDays(asset.getMaintenanceCycleDays()));
+            }
+        } else {
+            // 更新：判断 maintenance_cycle_days 是否改变
+            boolean cycleChanged = !java.util.Objects.equals(old.getMaintenanceCycleDays(), asset.getMaintenanceCycleDays());
+            boolean nextDateChanged = !java.util.Objects.equals(old.getNextMaintenanceDate(), asset.getNextMaintenanceDate());
+            if (cycleChanged && !nextDateChanged && asset.getMaintenanceCycleDays() != null) {
+                // 维护周期变了但下次维护日期未手动修改 → 重新推算
+                asset.setNextMaintenanceDate(asset.getPurchaseDate().plusDays(asset.getMaintenanceCycleDays()));
+            } else if (asset.getNextMaintenanceDate() == null && asset.getMaintenanceCycleDays() != null) {
+                // 下次维护日期本身为空（之前也可能为空）→ 自动推算
+                asset.setNextMaintenanceDate(asset.getPurchaseDate().plusDays(asset.getMaintenanceCycleDays()));
+            }
+        }
     }
 }

@@ -32,7 +32,7 @@
     
     <!-- 入库记录列表 -->
     <div class="table-section">
-      <el-table :data="inboundList" v-loading="loading" stripe>
+      <el-table :data="inboundList" v-loading="loading" border stripe>
         <el-table-column prop="inboundNo" label="入库单号" width="150" align="center" />
         <el-table-column prop="assetName" label="资产名称" min-width="180" show-overflow-tooltip />
         <el-table-column prop="categoryName" label="分类" width="100" align="center" />
@@ -134,7 +134,9 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="存放位置" prop="storageLocation">
-              <el-input v-model="inboundForm.storageLocation" placeholder="请输入存放位置" clearable />
+              <el-select v-model="inboundForm.storageLocation" placeholder="选择存放位置" filterable clearable style="width:100%">
+                <el-option v-for="s in storageLocationList" :key="s.locationId" :label="s.locationName" :value="s.locationName" />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -189,6 +191,7 @@ import request from '@/utils/request'
 const loading = ref(false)
 const inboundList = ref([])
 const categoryList = ref([])
+const storageLocationList = ref([])
 const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 
 const searchForm = reactive({
@@ -225,13 +228,21 @@ const inboundRules = reactive({
   categoryId: [{ required: true, message: '请选择资产分类', trigger: 'change' }],
   brand: [{ required: true, message: '请输入品牌', trigger: 'blur' }],
   serialNumber: [{ required: true, message: '请输入序列号', trigger: 'blur' }],
-  storageLocation: [{ required: true, message: '请输入存放位置', trigger: 'blur' }]
+  storageLocation: [{ required: true, message: '请选择存放位置', trigger: 'change' }]
 })
 
 onMounted(() => {
   loadCategories()
+  loadLocationList()
   loadInboundList()
 })
+
+const loadLocationList = async () => {
+  try {
+    const res = await request.get('/storage-location/list')
+    storageLocationList.value = (res.data || []).map(s => ({ locationId: s.locationId, locationName: s.locationName }))
+  } catch { /* silent */ }
+}
 
 const loadCategories = async () => {
   try {
@@ -351,81 +362,4 @@ const handleCurrentChange = () => loadInboundList()
 </script>
 
 <style scoped>
-.page-container {
-  width: 95%;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.header-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 16px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.search-section {
-  background: white;
-  padding: 20px 20px 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.table-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.status-tag {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.status-pending {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-.status-completed {
-  background-color: #f0f9eb;
-  color: #67c23a;
-}
-
-.status-rejected {
-  background-color: #fef0f0;
-  color: #f56c6c;
-}
-
-.pagination-container {
-  margin-top: 20px;
-  text-align: right;
-  display: flex;
-  justify-content: flex-end;
-}
-
-:deep(.el-table) {
-  font-size: 14px;
-}
-
-:deep(.el-table th) {
-  background-color: #fafafa;
-  color: #606266;
-  font-weight: 600;
-}
-
-:deep(.el-table td) {
-  padding: 12px 0;
-}
 </style>

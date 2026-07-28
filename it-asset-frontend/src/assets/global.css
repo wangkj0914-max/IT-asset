@@ -1,0 +1,139 @@
+/* ========== 全局统一样式规范 ========== */
+
+/* 页面容器 */
+.page-container {
+  width: 100%;
+  padding: 0;
+  min-height: 100%;
+}
+
+/* 标题统一样式 */
+.header-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 搜索区域卡片 */
+.search-section, .search-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.search-section .el-form-item, .search-card .el-form-item {
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+/* 搜索栏（inline 搜索） */
+.search-bar {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 操作按钮区域 */
+.operation-section {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 表格区域卡片 */
+.table-section, .table-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* 分页容器 - 右对齐 */
+.pagination-container, .pagination-wrap, .pagination-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+/* 对话框统一样式 */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 状态标签 */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.status-unused { background-color: #f4f4f5; color: #909399; }
+.status-used { background-color: #f0f9eb; color: #67c23a; }
+.status-repair { background-color: #fdf6ec; color: #e6a23c; }
+.status-scrapped { background-color: #fef0f0; color: #f56c6c; }
+.status-pending { background-color: #fdf6ec; color: #e6a23c; }
+.status-approved { background-color: #f0f9eb; color: #67c23a; }
+.status-rejected { background-color: #fef0f0; color: #f56c6c; }
+
+/* 空状态样式 */
+.el-empty {
+  padding: 40px 0;
+}
+
+/* v-loading 统一 */
+.el-loading-mask {
+  border-radius: 8px;
+}
+
+/* 资产编号样式 */
+.asset-code {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  color: #409eff;
+}
+
+/* 价格样式 */
+.price-text {
+  color: #f56c6c;
+  font-weight: 500;
+}
+.text-danger {
+  color: #F56C6C !important;
+  font-weight: bold;
+}
+
+/* 通用卡片 */
+.header-card {
+  margin-bottom: 20px;
+}
+
+/* 表格统一优化 */
+:deep(.el-table th) {
+  background-color: #fafafa;
+  color: #303133;
+  font-weight: 600;
+}
+
+:deep(.el-table td) {
+  padding: 8px 0;
+}

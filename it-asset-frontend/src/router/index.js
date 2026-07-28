@@ -43,6 +43,18 @@ const routes = [
     meta: { title: '分类管理', requireAuth: true }
   },
   {
+    path: '/model-manage',
+    name: 'ModelManage',
+    component: () => import('@/views/ModelManage.vue'),
+    meta: { title: '资产模型', requireAuth: true }
+  },
+  {
+    path: '/status-label-manage',
+    name: 'StatusLabelManage',
+    component: () => import('@/views/StatusLabelManage.vue'),
+    meta: { title: '状态标签', requireAuth: true }
+  },
+  {
     path: '/asset-manage',
     name: 'AssetManage',
     component: AssetManage,
@@ -109,6 +121,12 @@ const routes = [
     meta: { title: '存放地点', requireAuth: true }
   },
   {
+    path: '/custom-field-manage',
+    name: 'CustomFieldManage',
+    component: () => import('@/views/CustomFieldManage.vue'),
+    meta: { title: '自定义字段', requireAuth: true, requireAdmin: true }
+  },
+  {
     path: '/consumable-manage',
     name: 'ConsumableManage',
     component: () => import('@/views/ConsumableManage.vue'),
@@ -141,7 +159,7 @@ const routes = [
   {
     path: '/api-manage',
     name: 'ApiManage',
-    component: () => import('@/views/Placeholder.vue'),
+    component: () => import('@/views/ApiManage.vue'),
     meta: { title: '接口管理', requireAuth: true, requireAdmin: true }
   },
   {
@@ -149,6 +167,18 @@ const routes = [
     name: 'OperationLog',
     component: () => import('@/views/OperationLog.vue'),
     meta: { title: '操作日志', requireAuth: true, requireAdmin: true }
+  },
+  {
+    path: '/reports',
+    name: 'Reports',
+    component: () => import('@/views/Reports.vue'),
+    meta: { title: '综合报表', requireAuth: true }
+  },
+  {
+    path: '/group-manage',
+    name: 'GroupManage',
+    component: () => import('@/views/GroupManage.vue'),
+    meta: { title: '用户组管理', requireAuth: true, requireAdmin: true }
   },
   {
     path: '/:pathMatch(.*)*',

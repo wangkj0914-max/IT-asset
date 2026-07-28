@@ -8,7 +8,7 @@
     </div>
 
     <div class="table-section">
-      <el-table :data="treeData" v-loading="loading" stripe row-key="categoryId"
+      <el-table :data="treeData" v-loading="loading" border stripe row-key="categoryId"
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
         <el-table-column prop="categoryName" label="分类名称" min-width="220">
           <template #default="{ row }">
@@ -165,12 +165,4 @@ onMounted(loadCategories)
 </script>
 
 <style scoped>
-.page-container { width: 95%; margin: 0 auto; padding: 20px; }
-.header-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white; padding: 16px 24px; font-size: 18px; font-weight: bold;
-  border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center;
-  justify-content: space-between; box-shadow: 0 2px 12px rgba(102,126,234,0.3);
-}
-.table-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 </style>

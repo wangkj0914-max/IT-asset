@@ -1,5 +1,5 @@
 <template>
-  <div class="asset-use-container">
+  <div class="page-container">
     <!-- 顶部标题栏 -->
     <div class="header-title">资产领用管理</div>
 
@@ -24,6 +24,18 @@
             <el-option label="待审批" :value="0" />
             <el-option label="已通过" :value="1" />
             <el-option label="已拒绝" :value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="逾期状态">
+          <el-select
+            v-model="searchForm.overdue"
+            placeholder="全部"
+            clearable
+            style="width: 120px;"
+          >
+            <el-option label="正常" :value="0" />
+            <el-option label="已逾期" :value="1" />
+            <el-option label="已关闭" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -82,6 +94,19 @@
         </el-table-column>
         <el-table-column label="领用时间" width="110" align="center">
           <template #default="{ row }">{{ row.useDate ? formatDate(row.useDate) : '-' }}</template>
+        </el-table-column>
+        <el-table-column label="预期归还" width="110" align="center">
+          <template #default="{ row }">{{ row.expectedReturnDate ? formatDate(row.expectedReturnDate) : '-' }}</template>
+        </el-table-column>
+        <el-table-column label="实际归还" width="110" align="center">
+          <template #default="{ row }">{{ row.actualReturnDate ? formatDate(row.actualReturnDate) : '-' }}</template>
+        </el-table-column>
+        <el-table-column label="逾期状态" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag v-if="row.overdueStatus === 1" type="danger" size="small">已逾期</el-tag>
+            <el-tag v-else-if="row.overdueStatus === 2" type="success" size="small">已关闭</el-tag>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column label="审批状态" width="90" align="center">
           <template #default="{ row }">
@@ -172,6 +197,15 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-form-item label="预期归还日期">
+          <el-date-picker
+            v-model="applyForm.expectedReturnDate"
+            type="datetime"
+            placeholder="请选择预期归还日期"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%;"
+          />
+        </el-form-item>
         <!-- 选中资产后显示资产信息 -->
         <el-form-item v-if="selectedAsset" label="资产信息">
           <div class="asset-info-card">
@@ -201,7 +235,14 @@
         <el-descriptions-item label="联系人">{{ currentRecord.contactPerson || '-' }}</el-descriptions-item>
         <el-descriptions-item label="联系电话">{{ currentRecord.contactPhone || '-' }}</el-descriptions-item>
         <el-descriptions-item label="领用时间">{{ currentRecord.useDate ? formatDate(currentRecord.useDate) : '-' }}</el-descriptions-item>
+        <el-descriptions-item label="预期归还">{{ currentRecord.expectedReturnDate ? formatDate(currentRecord.expectedReturnDate) : '-' }}</el-descriptions-item>
+        <el-descriptions-item label="实际归还">{{ currentRecord.actualReturnDate ? formatDate(currentRecord.actualReturnDate) : '-' }}</el-descriptions-item>
         <el-descriptions-item label="归还时间">{{ currentRecord.returnDate ? formatDate(currentRecord.returnDate) : '-' }}</el-descriptions-item>
+        <el-descriptions-item label="逾期状态">
+          <el-tag v-if="currentRecord.overdueStatus === 1" type="danger" size="small">已逾期</el-tag>
+          <el-tag v-else-if="currentRecord.overdueStatus === 2" type="success" size="small">已关闭</el-tag>
+          <span v-else>-</span>
+        </el-descriptions-item>
         <el-descriptions-item label="审批状态">
           <span :class="['status-tag', getStatusClass(currentRecord.approveStatus)]">
             {{ getStatusText(currentRecord.approveStatus) }}
@@ -234,7 +275,8 @@ const userRole = ref(1) // 1-普通用户 2-管理员
 
 const searchForm = reactive({
   assetName: '',
-  status: null
+  status: null,
+  overdue: null
 })
 
 const pagination = reactive({
@@ -252,6 +294,7 @@ const applyForm = reactive({
   department: '',
   contactPerson: '',
   contactPhone: '',
+  expectedReturnDate: '',
   remark: ''
 })
 
@@ -294,6 +337,7 @@ const loadList = async () => {
       params: {
         assetName: searchForm.assetName || undefined,
         status: searchForm.status !== null ? searchForm.status : undefined,
+        overdue: searchForm.overdue !== null ? searchForm.overdue : undefined,
         current: pagination.current,
         size: pagination.size
       }
@@ -352,6 +396,7 @@ const handleSearch = () => {
 const resetSearch = () => {
   searchForm.assetName = ''
   searchForm.status = null
+  searchForm.overdue = null
   pagination.current = 1
   loadList()
 }
@@ -376,6 +421,7 @@ const resetApplyForm = () => {
   applyForm.department = ''
   applyForm.contactPerson = ''
   applyForm.contactPhone = ''
+  applyForm.expectedReturnDate = ''
   applyForm.remark = ''
 }
 
@@ -506,73 +552,6 @@ const formatDateTime = (dateStr) => {
 </script>
 
 <style scoped>
-.asset-use-container {
-  width: 95%;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
-}
-
-/* 顶部标题栏 */
-.header-title {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 18px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-/* 搜索区域 */
-.search-section {
-  background: white;
-  padding: 20px 20px 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.search-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.search-form .el-form-item {
-  margin-bottom: 15px;
-}
-
-/* 操作按钮区域 */
-.operation-section {
-  margin-bottom: 15px;
-}
-
-.btn-apply {
-  margin-right: 10px;
-}
-
-.btn-pending {
-  background-color: #f59e42;
-  border-color: #f59e42;
-}
-
-/* 表格区域 */
-.table-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* 资产编号样式 */
-.asset-code {
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 12px;
-  color: #409eff;
-}
-
 .clickable {
   color: #409eff;
   cursor: pointer;
@@ -580,30 +559,6 @@ const formatDateTime = (dateStr) => {
 
 .clickable:hover {
   text-decoration: underline;
-}
-
-/* 状态标签 */
-.status-tag {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.status-pending {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-.status-approved {
-  background-color: #f0f9eb;
-  color: #67c23a;
-}
-
-.status-rejected {
-  background-color: #fef0f0;
-  color: #f56c6c;
 }
 
 /* 资产信息卡片 */
@@ -624,28 +579,5 @@ const formatDateTime = (dateStr) => {
   color: #909399;
   display: inline-block;
   width: 70px;
-}
-
-/* 分页 */
-.pagination-container {
-  margin-top: 20px;
-  text-align: right;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* 表格样式 */
-:deep(.el-table) {
-  font-size: 13px;
-}
-
-:deep(.el-table th) {
-  background-color: #fafafa;
-  color: #303133;
-  font-weight: 600;
-}
-
-:deep(.el-table td) {
-  padding: 8px 0;
 }
 </style>

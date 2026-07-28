@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <el-card class="login-card" shadow="hover">
+    <el-card class="login-card">
       <div class="login-title">IT 固定资产管理系统</div>
       <div class="login-subtitle">欢迎登录，请输入您的账号信息</div>
 
@@ -160,7 +160,12 @@ const handleLogin = async () => {
   width: 450px;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s;
+}
+
+.login-card:hover {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16), 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .login-title {

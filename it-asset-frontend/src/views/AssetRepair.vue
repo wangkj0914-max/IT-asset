@@ -1,7 +1,10 @@
 <template>
-  <div class="asset-repair-container">
+  <div class="page-container">
+    <!-- 标题 -->
+    <div class="header-title"><span>资产维修</span></div>
+    
     <!-- 搜索栏 -->
-    <el-card class="search-card">
+    <div class="search-section">
       <el-form :model="searchForm" inline>
         <el-form-item label="资产名称">
           <el-input v-model="searchForm.assetName" placeholder="请输入资产名称" clearable />
@@ -18,17 +21,17 @@
           <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
     <!-- 操作按钮 -->
-    <div style="margin-bottom: 15px;">
+    <div class="operation-section">
       <el-button type="primary" @click="showApplyDialog">
         <el-icon><Plus /></el-icon> 报修申请
       </el-button>
     </div>
 
     <!-- 数据表格 -->
-    <el-card class="table-card">
+    <div class="table-section">
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="repairId" label="维修 ID" width="80" />
         <el-table-column prop="assetName" label="资产名称" />
@@ -74,17 +77,18 @@
       <el-empty v-if="!loading && tableData.length === 0" description="暂无数据" />
 
       <!-- 分页 -->
-      <el-pagination
-        v-model:current-page="pagination.pageNum"
-        v-model:page-size="pagination.pageSize"
-        :total="pagination.total"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handlePageChange"
-        style="margin-top: 20px; justify-content: flex-end"
-      />
-    </el-card>
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="pagination.pageNum"
+          v-model:page-size="pagination.pageSize"
+          :total="pagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
+      </div>
+    </div>
 
     <!-- 报修申请对话框 -->
     <el-dialog v-model="applyDialogVisible" title="报修申请" width="500px">
@@ -385,13 +389,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.asset-repair-container {
-  padding: 20px;
-}
-.search-card {
-  margin-bottom: 20px;
-}
-.table-card {
-  min-height: 500px;
-}
 </style>

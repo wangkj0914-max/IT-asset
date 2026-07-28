@@ -1,13 +1,11 @@
 <template>
-  <div class="dept-container">
-    <el-card class="header-card">
-      <el-row justify="space-between" align="middle">
-        <span style="font-size:16px;font-weight:bold">部门列表</span>
-        <el-button type="primary" @click="showAdd" v-if="userRole === 2">新增部门</el-button>
-      </el-row>
-    </el-card>
+  <div class="page-container">
+    <div class="header-title">
+      <span>部门列表</span>
+      <el-button type="primary" size="small" @click="showAdd" v-if="userRole === 2">新增部门</el-button>
+    </div>
 
-    <el-card class="table-card">
+    <div class="table-section">
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="deptId" label="ID" width="80" />
         <el-table-column prop="deptName" label="部门名称" min-width="150" />
@@ -32,7 +30,7 @@
         </el-table-column>
       </el-table>
       <el-empty v-if="!loading && tableData.length === 0" description="暂无部门数据" />
-    </el-card>
+    </div>
 
     <!-- 新增/编辑对话框 -->
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑部门' : '新增部门'" width="500px">
@@ -151,7 +149,4 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.dept-container { padding: 20px; }
-.header-card { margin-bottom: 20px; }
-.table-card { min-height: 400px; }
 </style>

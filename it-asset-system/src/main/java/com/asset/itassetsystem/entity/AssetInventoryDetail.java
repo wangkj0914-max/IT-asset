@@ -73,6 +73,26 @@ public class AssetInventoryDetail {
     private LocalDateTime checkTime;
     
     /**
+     * 扫描时间
+     */
+    private LocalDateTime scannedAt;
+    
+    /**
+     * 实际位置
+     */
+    private String actualLocation;
+    
+    /**
+     * 差异类型: LOCATION/STATUS/MISSING/EXTRA
+     */
+    private String differenceType;
+    
+    /**
+     * 验证人
+     */
+    private String verifiedBy;
+    
+    /**
      * 盘点人
      */
     private String checkerName;

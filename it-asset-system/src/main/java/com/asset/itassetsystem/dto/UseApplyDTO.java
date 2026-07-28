@@ -1,6 +1,7 @@
 package com.asset.itassetsystem.dto;
 
 import lombok.Data;
+import java.time.LocalDateTime;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -20,6 +21,8 @@ public class UseApplyDTO {
     
     @NotBlank(message = "联系电话不能为空")
     private String contactPhone;
+    
+    private LocalDateTime expectedReturnDate;
     
     private String remark;
 }

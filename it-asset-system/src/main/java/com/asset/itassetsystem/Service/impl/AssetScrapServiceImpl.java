@@ -26,6 +26,9 @@ public class AssetScrapServiceImpl extends ServiceImpl<AssetScrapRecordMapper, A
     @Autowired
     private AssetInfoService assetInfoService;
 
+    @Autowired
+    private com.asset.itassetsystem.mapper.SysUserMapper sysUserMapper;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean apply(ScrapApplyDTO dto, String operator) {
@@ -42,8 +45,8 @@ public class AssetScrapServiceImpl extends ServiceImpl<AssetScrapRecordMapper, A
         record.setScrapType(dto.getScrapType());
         record.setOriginalPrice(dto.getOriginalPrice());
         record.setResidualValue(dto.getResidualValue());
-        record.setApplyUserName(operator);  // 申请人
-        record.setApplyDepartment("使用部门");  // TODO: 从用户表获取
+        record.setApplyUserName(operator);  // ��请人
+        record.setApplyDepartment(getUserDepartment(operator));
         record.setApproveStatus(0); // 待审批
         record.setRemark(dto.getRemark());
         
@@ -129,12 +132,24 @@ public class AssetScrapServiceImpl extends ServiceImpl<AssetScrapRecordMapper, A
         private Long total;
         private Long current;
         private Long size;
-        
+
         public PageResult(List<T> records, Long total, Long current, Long size) {
             this.records = records;
             this.total = total;
             this.current = current;
             this.size = size;
         }
+    }
+
+    /**
+     * 从用户表获取用户的部门
+     */
+    private String getUserDepartment(String username) {
+        if (username == null || username.isEmpty()) return "";
+        com.asset.itassetsystem.entity.SysUser user = sysUserMapper.selectOne(
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.asset.itassetsystem.entity.SysUser>()
+                .eq(com.asset.itassetsystem.entity.SysUser::getUsername, username)
+        );
+        return user != null && user.getDepartment() != null ? user.getDepartment() : "";
     }
 }

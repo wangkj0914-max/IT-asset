@@ -1,6 +1,8 @@
 <template>
-  <div class="asset-return-container">
-    <el-card class="search-card">
+  <div class="page-container">
+    <div class="header-title"><span>归还记录</span></div>
+    
+    <div class="search-section">
       <el-form :model="searchForm" inline>
         <el-form-item label="状态">
           <el-select v-model="searchForm.approveStatus" placeholder="全部" clearable>
@@ -16,9 +18,9 @@
           <el-button type="success" @click="showSubmit">提交归还申请</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
-    <el-card class="table-card">
+    <div class="table-section">
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="assetCode" label="资产编号" width="120" />
         <el-table-column prop="assetName" label="资产名称" min-width="150" />
@@ -44,16 +46,17 @@
       </el-table>
 
       <el-empty v-if="!loading && tableData.length === 0" description="暂无归还记录" />
-      <el-pagination
-        v-model:current-page="pagination.current"
-        v-model:page-size="pagination.size"
-        :total="pagination.total"
-        :page-sizes="[10, 20, 50]"
-        layout="total, sizes, prev, pager, next"
-        @size-change="loadData" @current-change="loadData"
-        style="margin-top: 20px; justify-content: flex-end"
-      />
-    </el-card>
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="pagination.current"
+          v-model:page-size="pagination.size"
+          :total="pagination.total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next"
+          @size-change="loadData" @current-change="loadData"
+        />
+      </div>
+    </div>
 
     <!-- 提交归还申请 -->
     <el-dialog v-model="submitVisible" title="提交归还申请" width="520px">
@@ -201,7 +204,4 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.asset-return-container { padding: 20px; }
-.search-card, .table-card { margin-bottom: 20px; }
-.table-card { min-height: 500px; }
 </style>

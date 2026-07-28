@@ -57,6 +57,7 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
         record.setContactPhone(dto.getContactPhone());
         record.setUseType(1); // 领用
         record.setUseDate(LocalDateTime.now());
+        record.setExpectedReturnDate(dto.getExpectedReturnDate());
         record.setApproveStatus(0); // 待审批
         record.setRemark(dto.getRemark());
         
@@ -107,14 +108,28 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
             throw new RuntimeException("资产未领用，无法归还");
         }
 
-        // 创建归还记录
-        AssetUseRecord record = new AssetUseRecord();
-        record.setAssetId(assetId);
-        record.setUserId(1L); // 默认用户 ID
-        record.setUseType(2); // 归还
-        record.setReturnDate(LocalDateTime.now());
-        record.setApproveStatus(1); // 归还不需要审批
-        save(record);
+        // 查找该资产最近一条已通过的领用记录
+        LambdaQueryWrapper<AssetUseRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(AssetUseRecord::getAssetId, assetId)
+                    .eq(AssetUseRecord::getUseType, 1)
+                    .eq(AssetUseRecord::getApproveStatus, 1)
+                    .orderByDesc(AssetUseRecord::getRecordId)
+                    .last("LIMIT 1");
+        AssetUseRecord borrowRecord = getOne(queryWrapper);
+        if (borrowRecord == null) {
+            throw new RuntimeException("未找到该资产的领用记录");
+        }
+
+        // 更新领用记录的归还信息
+        LocalDateTime now = LocalDateTime.now();
+        borrowRecord.setActualReturnDate(now);
+        // 判断是否逾期
+        if (borrowRecord.getExpectedReturnDate() != null && now.isAfter(borrowRecord.getExpectedReturnDate())) {
+            borrowRecord.setOverdueStatus(1); // 已逾期
+        } else {
+            borrowRecord.setOverdueStatus(2); // 已关闭
+        }
+        updateById(borrowRecord);
 
         // 更新资产状态为未领用
         asset.setStatus(0);
@@ -138,13 +153,16 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
     }
     
     @Override
-    public IPage<UseRecordVO> listAllWithAssetInfo(Long current, Long size, String assetName, Integer status) {
+    public IPage<UseRecordVO> listAllWithAssetInfo(Long current, Long size, String assetName, Integer status, Integer overdue) {
         // 分页查询领用记录
         IPage<AssetUseRecord> recordPage = new Page<>(current, size);
         LambdaQueryWrapper<AssetUseRecord> wrapper = new LambdaQueryWrapper<>();
         
         if (status != null) {
             wrapper.eq(AssetUseRecord::getApproveStatus, status);
+        }
+        if (overdue != null) {
+            wrapper.eq(AssetUseRecord::getOverdueStatus, overdue);
         }
         wrapper.orderByDesc(AssetUseRecord::getUseDate);
         
@@ -174,6 +192,9 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
             vo.setContactPhone(record.getContactPhone());
             vo.setUseType(record.getUseType());
             vo.setUseDate(record.getUseDate());
+            vo.setExpectedReturnDate(record.getExpectedReturnDate());
+            vo.setActualReturnDate(record.getActualReturnDate());
+            vo.setOverdueStatus(record.getOverdueStatus());
             vo.setReturnDate(record.getReturnDate());
             vo.setApproveUser(record.getApproveUser());
             vo.setApproveStatus(record.getApproveStatus());

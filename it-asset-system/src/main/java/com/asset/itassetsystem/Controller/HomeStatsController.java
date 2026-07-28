@@ -1,6 +1,7 @@
 package com.asset.itassetsystem.controller;
 
 import com.asset.itassetsystem.common.Result;
+import com.asset.itassetsystem.mapper.ConsumableRecordMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.asset.itassetsystem.entity.*;
 import com.asset.itassetsystem.service.*;
@@ -12,7 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +35,7 @@ public class HomeStatsController {
     @Autowired private SysDepartmentService deptService;
     @Autowired private ConsumableService consumableService;
     @Autowired private LicenseService licenseService;
+    @Autowired private ConsumableRecordMapper consumableRecordMapper;
 
     @GetMapping("/stats")
     public Result<Map<String, Long>> stats() {
@@ -116,6 +121,34 @@ public class HomeStatsController {
         data.put("licenseExpiringCount", (long) expiringLicenses.size());
         data.put("licenseExpiringItems", expiringLicenses);
 
+        // 逾期资产统计
+        long overdueAssetCount = assetUseService.count(
+            new LambdaQueryWrapper<AssetUseRecord>()
+                .eq(AssetUseRecord::getOverdueStatus, 1)
+                .eq(AssetUseRecord::getUseType, 1));
+        data.put("overdueAssetCount", overdueAssetCount);
+
+        // 折旧汇总
+        BigDecimal depTotalOrig = BigDecimal.ZERO;
+        BigDecimal depTotalCurr = BigDecimal.ZERO;
+        for (AssetInfo a : assetInfoService.list(wrapper(site))) {
+            BigDecimal orig = a.getPurchasePrice() != null ? a.getPurchasePrice() : BigDecimal.ZERO;
+            BigDecimal curr = a.getCurrentValue() != null ? a.getCurrentValue() : orig;
+            depTotalOrig = depTotalOrig.add(orig);
+            depTotalCurr = depTotalCurr.add(curr);
+        }
+        BigDecimal depRate = depTotalOrig.compareTo(BigDecimal.ZERO) > 0
+            ? depTotalOrig.subtract(depTotalCurr).divide(depTotalOrig, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_UP)
+            : BigDecimal.ZERO;
+        Map<String, Object> depSummary = new HashMap<>();
+        depSummary.put("totalOriginalValue", depTotalOrig);
+        depSummary.put("totalCurrentValue", depTotalCurr);
+        depSummary.put("depreciationRate", depRate);
+        data.put("depreciationSummary", depSummary);
+
+        // 近6个月耗材消耗趋势
+        data.put("monthlyConsumption", getMonthlyConsumption(6));
+
         return Result.success(data);
     }
 
@@ -132,5 +165,31 @@ public class HomeStatsController {
     private long countBySiteAndStatus(String site, Integer status) {
         var w = wrapper(site); w.eq(AssetInfo::getStatus, status);
         return assetInfoService.count(w);
+    }
+
+    private List<Map<String, Object>> getMonthlyConsumption(int months) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        if (months <= 0) months = 6;
+
+        LocalDateTime since = LocalDateTime.now().minusMonths(months).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        DateTimeFormatter monthFmt = DateTimeFormatter.ofPattern("yyyy-MM");
+
+        List<ConsumableRecord> records = consumableRecordMapper.selectList(
+            new LambdaQueryWrapper<ConsumableRecord>()
+                .eq(ConsumableRecord::getType, 2)
+                .ge(ConsumableRecord::getCreateTime, since));
+
+        for (int i = months - 1; i >= 0; i--) {
+            String month = LocalDate.now().minusMonths(i).format(monthFmt);
+            int qty = records.stream()
+                .filter(r -> r.getCreateTime() != null && r.getCreateTime().format(monthFmt).equals(month))
+                .mapToInt(r -> r.getQuantity() != null ? r.getQuantity() : 0)
+                .sum();
+            Map<String, Object> m = new HashMap<>();
+            m.put("month", month);
+            m.put("totalQuantity", qty);
+            result.add(m);
+        }
+        return result;
     }
 }

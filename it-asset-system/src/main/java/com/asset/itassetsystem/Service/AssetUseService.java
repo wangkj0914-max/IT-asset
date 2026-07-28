@@ -40,5 +40,5 @@ public interface AssetUseService extends IService<AssetUseRecord> {
     /**
      * 分页查询领用记录（包含资产名称）
      */
-    IPage<UseRecordVO> listAllWithAssetInfo(Long current, Long size, String assetName, Integer status);
+    IPage<UseRecordVO> listAllWithAssetInfo(Long current, Long size, String assetName, Integer status, Integer overdue);
 }

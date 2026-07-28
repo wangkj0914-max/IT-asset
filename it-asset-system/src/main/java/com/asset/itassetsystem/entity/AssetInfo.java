@@ -32,8 +32,10 @@ public class AssetInfo {
 
     private String brand;
     private String model;
+    private Long modelId; // 资产模型ID (P0新增)
     private String serialNumber;
     private BigDecimal purchasePrice;
+    private BigDecimal purchaseCost; // 采购成本 (P0新增)
     @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
     private LocalDate purchaseDate;
     private String supplier;
@@ -41,6 +43,8 @@ public class AssetInfo {
 
     @NotNull(message = "资产状态不能为空")
     private Integer status; // 0-未领用 1-已领用 2-维修中 3-已报废
+
+    private Long statusLabelId; // 状态标签ID (P0新增)
 
     private Long userId; // 当前使用人 ID
     private String userName; // 使用人姓名
@@ -52,6 +56,11 @@ public class AssetInfo {
     private String assetImage; // 资产图片URL
     private Integer quantity; // 资产数量
     private String depreciationMethod; // 折旧方法
+    private Integer depreciationYears; // 折旧年限 (P0新增)
+    private BigDecimal depreciationRate; // 年折旧率(%) (P0新增)
+    @JsonDeserialize(using = FlexibleLocalDateDeserializer.class)
+    private LocalDate eolDate; // EOL日期 (P0新增)
+    private BigDecimal currentValue; // 当前价值(自动计算) (P0新增)
     private String responsiblePerson; // 责任人
     private LocalDate nextMaintenanceDate;
     private Integer maintenanceCycleDays;
