@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <!-- 登录页不显示布局 -->
-    <template v-if="isLoginPage">
+    <template v-if="isFullscreenPage">
       <router-view />
     </template>
     
@@ -80,6 +80,10 @@
               <el-icon><Search /></el-icon>
               <span>资产盘点</span>
             </el-menu-item>
+            <el-menu-item index="/mobile" @click="navigateTo('/mobile')">
+              <el-icon><PhoneFilled /></el-icon>
+              <span>移动端</span>
+            </el-menu-item>
             <el-menu-item index="/asset-transfer" @click="navigateTo('/asset-transfer')">
               <el-icon><Switch /></el-icon>
               <span>资产调拨</span>
@@ -127,6 +131,10 @@
             <el-menu-item index="/license-manage" @click="navigateTo('/license-manage')">
               <el-icon><Key /></el-icon>
               <span>许可证管理</span>
+            </el-menu-item>
+            <el-menu-item index="/contract-manage" @click="navigateTo('/contract-manage')">
+              <el-icon><Document /></el-icon>
+              <span>合同管理</span>
             </el-menu-item>
           </el-sub-menu>
 
@@ -191,10 +199,11 @@
             </el-breadcrumb>
           </div>
           <div class="header-right">
-            <el-select v-model="currentSite" @change="switchSite" style="width:120px;margin-right:16px">
+            <el-select v-if="userRole === 2" v-model="currentSite" @change="switchSite" style="width:120px;margin-right:16px">
               <el-option label="苏州" value="苏州" />
               <el-option label="Penang" value="Penang" />
             </el-select>
+            <el-tag v-else style="margin-right:16px" type="info" effect="plain">站点: {{ currentSite }}</el-tag>
             <el-dropdown @command="handleCommand">
               <span class="user-dropdown">
                 <el-avatar :size="32" :icon="UserFilled" style="margin-right: 8px;" />
@@ -231,7 +240,7 @@ import {
   Tools, Setting, MoreFilled, ArrowDown,
   DocumentAdd, Grid, Notification, View, Briefcase,
   Plus, Search, Switch, Delete, Fold, Expand, Location, Box, Key, Tag,
-  Headset, Cpu, Check, DataLine, Goods
+  Headset, Cpu, Check, DataLine, Goods, PhoneFilled
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -251,7 +260,7 @@ const switchSite = (val) => {
   window.location.reload()
 }
 
-const isLoginPage = computed(() => route.path === '/')
+const isFullscreenPage = computed(() => route.path === '/' || route.path.startsWith('/mobile'))
 
 const activeMenu = computed(() => {
   const pathMap = {
@@ -272,6 +281,7 @@ const activeMenu = computed(() => {
     '/storage-location': '/storage-location',
     '/consumable-manage': '/consumable-manage',
     '/license-manage': '/license-manage',
+    '/contract-manage': '/contract-manage',
     '/change-password': '/change-password',
     '/asset-transfer': '/asset-transfer',
     '/approval-center': '/approval-center',
@@ -279,7 +289,10 @@ const activeMenu = computed(() => {
     '/integration': '/integration',
     '/api-manage': '/api-manage',
     '/operation-log': '/operation-log',
-    '/group-manage': '/group-manage'
+    '/group-manage': '/group-manage',
+    '/mobile': '/mobile',
+    '/mobile-scan': '/mobile',
+    '/mobile-query': '/mobile'
   }
   return pathMap[route.path] || '/home'
 })
@@ -312,13 +325,17 @@ const updateTitle = (path) => {
     '/storage-location': '存放地点',
     '/consumable-manage': '耗材管理',
     '/license-manage': '许可证管理',
+    '/contract-manage': '合同管理',
     '/asset-transfer': '资产调拨',
     '/custom-field-manage': '自定义字段',
     '/approval-center': '审批中心',
     '/integration': '集成配置',
     '/api-manage': '接口管理',
     '/operation-log': '操作日志',
-    '/group-manage': '用户组管理'
+    '/group-manage': '用户组管理',
+    '/mobile': '移动端',
+    '/mobile-scan': '扫码盘点',
+    '/mobile-query': '资产查询'
   }
   currentTitle.value = titleMap[path] || ''
 }
@@ -355,7 +372,7 @@ onMounted(() => {
   updateTitle(route.path)
   
   // 检查登录状态
-  if (!isLoginPage.value && !localStorage.getItem('token')) {
+  if (!isFullscreenPage.value && !localStorage.getItem('token')) {
     router.push('/')
   }
 

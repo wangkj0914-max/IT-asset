@@ -59,7 +59,7 @@ public class AssetScrapController {
     public Result<AssetScrapRecord> detail(@RequestParam Long scrapId) {
         AssetScrapRecord record = assetScrapService.getById(scrapId);
         if (record == null) {
-            return Result.error("报废记录不存在");
+            return Result.fail("报废记录不存在");
         }
         return Result.success(record);
     }
@@ -75,7 +75,7 @@ public class AssetScrapController {
             assetScrapService.apply(dto, operator);
             return Result.success("报废申请提交成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class AssetScrapController {
             assetScrapService.approve(scrapId, approved, approver);
             return Result.success(approved ? "审批通过" : "已拒绝");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 

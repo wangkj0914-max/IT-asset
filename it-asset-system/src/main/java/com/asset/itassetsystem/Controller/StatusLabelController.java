@@ -48,7 +48,7 @@ public class StatusLabelController {
     @PostMapping("/save")
     public Result<String> save(@RequestBody StatusLabel label) {
         if (label.getStatusName() == null || label.getStatusName().trim().isEmpty()) {
-            return Result.error("状态名称不能为空");
+            return Result.fail("状态名称不能为空");
         }
         if (label.getSite() == null || label.getSite().isEmpty()) {
             label.setSite(getSite());
@@ -66,7 +66,7 @@ public class StatusLabelController {
      */
     @PostMapping("/update")
     public Result<String> update(@RequestBody StatusLabel label) {
-        if (label.getStatusLabelId() == null) return Result.error("状态标签ID不能为空");
+        if (label.getStatusLabelId() == null) return Result.fail("状态标签ID不能为空");
         label.setUpdateTime(LocalDateTime.now());
         boolean ok = statusLabelService.updateById(label);
         return ok ? Result.success("更新成功") : Result.error("更新失败");

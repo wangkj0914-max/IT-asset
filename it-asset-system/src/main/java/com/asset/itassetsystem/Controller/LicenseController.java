@@ -34,7 +34,7 @@ public class LicenseController {
 
     @PostMapping("/save")
     public Result<String> save(@RequestBody License l) {
-        if (l.getSoftwareName() == null || l.getSoftwareName().isEmpty()) return Result.error("名称不能为空");
+        if (l.getSoftwareName() == null || l.getSoftwareName().isEmpty()) return Result.fail("名称不能为空");
         // 自动补全站点
         if (l.getSite() == null || l.getSite().isEmpty()) {
             String site = request.getParameter("site");
@@ -50,7 +50,7 @@ public class LicenseController {
 
     @PostMapping("/update")
     public Result<String> update(@RequestBody License l) {
-        if (l.getLicenseId() == null) return Result.error("缺少ID");
+        if (l.getLicenseId() == null) return Result.fail("缺少ID");
         licenseService.updateById(l);
         return Result.success("更新成功");
     }

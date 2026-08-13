@@ -3,7 +3,7 @@
     <div class="header-title">状态标签管理</div>
 
     <div class="operation-section">
-      <el-button type="primary" @click="showAddDialog">
+      <el-button v-if="userRole === 2" type="primary" @click="showAddDialog">
         <el-icon><Plus /></el-icon> 新增状态
       </el-button>
     </div>
@@ -35,8 +35,8 @@
         <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
         <el-table-column label="操作" width="150" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="showEditDialog(row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)" :disabled="row.isDefault === 1">删除</el-button>
+            <el-button v-if="userRole === 2" type="primary" size="small" @click="showEditDialog(row)">编辑</el-button>
+            <el-button v-if="userRole === 2" type="danger" size="small" @click="handleDelete(row)" :disabled="row.isDefault === 1">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -77,11 +77,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 
+const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 const loading = ref(false)
 const statusList = ref([])
 const dialogVisible = ref(false)

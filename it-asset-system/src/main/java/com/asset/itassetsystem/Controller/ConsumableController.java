@@ -41,7 +41,7 @@ public class ConsumableController {
 
     @PostMapping("/save")
     public Result<String> save(@RequestBody Consumable c) {
-        if (c.getConsumableName() == null || c.getConsumableName().isEmpty()) return Result.error("名称不能为空");
+        if (c.getConsumableName() == null || c.getConsumableName().isEmpty()) return Result.fail("名称不能为空");
         // 自动补全站点（优先 body，其次 param，再 header）
         if (c.getSite() == null || c.getSite().isEmpty()) {
             String site = request.getParameter("site");
@@ -57,7 +57,7 @@ public class ConsumableController {
 
     @PostMapping("/update")
     public Result<String> update(@RequestBody Consumable c) {
-        if (c.getConsumableId() == null) return Result.error("缺少ID");
+        if (c.getConsumableId() == null) return Result.fail("缺少ID");
         consumableService.updateById(c);
         return Result.success("更新成功");
     }
@@ -83,7 +83,7 @@ public class ConsumableController {
         int qty = Integer.parseInt(body.get("quantity").toString());
         String op = (String) body.getOrDefault("operator", "admin");
         try { consumableService.stockOut(id, qty, op); return Result.success("出库成功"); }
-        catch (RuntimeException e) { return Result.error(e.getMessage()); }
+        catch (RuntimeException e) { return Result.fail(e.getMessage()); }
     }
 
     @GetMapping("/records")

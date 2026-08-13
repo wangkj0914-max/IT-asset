@@ -45,7 +45,7 @@ public class AssetRepairController {
             assetRepairService.apply(dto);
             return Result.success("报修申请提交成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -60,7 +60,7 @@ public class AssetRepairController {
             assetRepairService.updateStatus(repairId, status, repairMan);
             return Result.success("状态更新成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -75,7 +75,7 @@ public class AssetRepairController {
             assetRepairService.complete(repairId, cost, remark);
             return Result.success("维修已完成");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 

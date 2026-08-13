@@ -109,6 +109,24 @@ const routes = [
     meta: { title: '资产盘点管理', requireAuth: true }
   },
   {
+    path: '/mobile-scan',
+    name: 'MobileScan',
+    component: () => import('@/views/MobileScan.vue'),
+    meta: { title: '扫码盘点', requireAuth: true, layout: 'blank' }
+  },
+  {
+    path: '/mobile-query',
+    name: 'MobileQuery',
+    component: () => import('@/views/MobileQuery.vue'),
+    meta: { title: '资产查询', requireAuth: true, layout: 'blank' }
+  },
+  {
+    path: '/mobile',
+    name: 'MobileHome',
+    component: () => import('@/views/MobileHome.vue'),
+    meta: { title: '移动端', requireAuth: true, layout: 'blank' }
+  },
+  {
     path: '/notice',
     name: 'Notice',
     component: () => import('@/views/Notice.vue'),
@@ -137,6 +155,12 @@ const routes = [
     name: 'LicenseManage',
     component: () => import('@/views/LicenseManage.vue'),
     meta: { title: '许可证管理', requireAuth: true }
+  },
+  {
+    path: '/contract-manage',
+    name: 'ContractManage',
+    component: () => import('@/views/ContractManage.vue'),
+    meta: { title: '合同管理', requireAuth: true }
   },
   {
     path: '/department-info',

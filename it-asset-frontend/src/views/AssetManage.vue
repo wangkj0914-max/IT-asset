@@ -268,8 +268,8 @@
         <el-table-column label="操作" width="210" align="center" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="printSingleLabel(row)" style="color:#67C23A;border-color:#67C23A">标签</el-button>
-            <el-button type="primary" size="small" @click="showEditDialog(row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" size="small" @click="showEditDialog(row)" v-if="userRole === 2">编辑</el-button>
+            <el-button type="danger" size="small" @click="handleDelete(row)" v-if="userRole === 2">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -759,7 +759,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Download, RefreshRight, Printer, Upload, Edit } from '@element-plus/icons-vue'
@@ -773,6 +773,7 @@ const route = useRoute()
 const assetFormRef = ref(null)
 
 // 加载状态
+const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 const loading = ref(false)
 const sortColumn = ref('')
 const sortOrder = ref('')

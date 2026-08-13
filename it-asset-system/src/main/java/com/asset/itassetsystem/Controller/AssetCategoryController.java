@@ -52,7 +52,7 @@ public class AssetCategoryController {
     @PostMapping("/save")
     public Result<String> save(@RequestBody AssetCategory category) {
         if (category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()) {
-            return Result.error("分类名称不能为空");
+            return Result.fail("分类名称不能为空");
         }
         // 自动补全站点
         if (category.getSite() == null || category.getSite().isEmpty()) {
@@ -73,7 +73,7 @@ public class AssetCategoryController {
     @PostMapping("/update")
     public Result<String> update(@RequestBody AssetCategory category) {
         if (category.getCategoryId() == null) {
-            return Result.error("分类 ID 不能为空");
+            return Result.fail("分类 ID 不能为空");
         }
         assetCategoryService.updateById(category);
         return Result.success("更新成功");
@@ -88,7 +88,7 @@ public class AssetCategoryController {
         long assetCount = assetInfoService.count(new LambdaQueryWrapper<com.asset.itassetsystem.entity.AssetInfo>()
             .eq(com.asset.itassetsystem.entity.AssetInfo::getCategoryId, categoryId));
         if (assetCount > 0) {
-            return Result.error("该分类下有 " + assetCount + " 条资产，无法删除");
+            return Result.fail("该分类下有 " + assetCount + " 条资产，无法删除");
         }
 
         // 子分类自动提升为顶级

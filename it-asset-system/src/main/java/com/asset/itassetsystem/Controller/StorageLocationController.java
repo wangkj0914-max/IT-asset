@@ -63,7 +63,7 @@ public class StorageLocationController {
     @PostMapping("/save")
     public Result<String> save(@RequestBody StorageLocation location) {
         if (location.getLocationName() == null || location.getLocationName().trim().isEmpty())
-            return Result.error("名称不能为空");
+            return Result.fail("名称不能为空");
         // 自动补全站点
         if (location.getSite() == null || location.getSite().isEmpty()) {
             String site = request.getParameter("site");
@@ -79,7 +79,7 @@ public class StorageLocationController {
 
     @PostMapping("/update")
     public Result<String> update(@RequestBody StorageLocation location) {
-        if (location.getLocationId() == null) return Result.error("缺少ID");
+        if (location.getLocationId() == null) return Result.fail("缺少ID");
         locationService.updateById(location);
         return Result.success("更新成功");
     }
@@ -90,7 +90,7 @@ public class StorageLocationController {
         var childW = new LambdaQueryWrapper<StorageLocation>();
         childW.eq(StorageLocation::getParentId, locationId);
         if (locationService.count(childW) > 0) {
-            return Result.error("该地点下存在子地点，请先删除子地点");
+            return Result.fail("该地点下存在子地点，请先删除子地点");
         }
         locationService.removeById(locationId);
         return Result.success("删除成功");

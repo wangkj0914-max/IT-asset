@@ -42,9 +42,10 @@
             <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
-        <el-table-column label="领用" width="80" align="center">
+        <el-table-column label="领用" width="140" align="center">
           <template #default="{ row }">
             <el-button size="small" @click="showUse(row)">申请</el-button>
+            <el-button size="small" type="info" @click="showRecords(row)">记录</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -87,6 +88,21 @@
       </el-form>
       <template #footer><el-button @click="stockVisible=false">取消</el-button><el-button type="primary" @click="submitStock">确定</el-button></template>
     </el-dialog>
+
+    <!-- 领用记录 -->
+    <el-dialog v-model="recordVisible" :title="'操作记录 - ' + recordTarget?.consumableName" width="580px">
+      <el-table :data="recordList" v-loading="recordLoading" border max-height="350" size="small">
+        <el-table-column type="index" label="#" width="50" />
+        <el-table-column prop="operatorName" label="操作人" width="100" />
+        <el-table-column prop="quantity" label="数量" width="70" align="center" />
+        <el-table-column label="类型" width="80" align="center">
+          <template #default="{row}"><el-tag :type="row.type===1?'success':row.type===2?'warning':'info'" size="small">{{ typeText(row.type) }}</el-tag></template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="时间" width="160" />
+      </el-table>
+      <el-empty v-if="!recordLoading && recordList.length===0" description="暂无操作记录" />
+    </el-dialog>
   </div>
 </template>
 
@@ -101,6 +117,7 @@ const userRole = computed(() => parseInt(localStorage.getItem('role')||'1'))
 const loading=ref(false),tableData=ref([]),lowStockList=ref([]),dialogVisible=ref(false),isEdit=ref(false),formRef=ref(null)
 const stockVisible=ref(false),stockInMode=ref(true),stockTarget=ref(null)
 const useVisible=ref(false),useTarget=ref(null),useForm=reactive({quantity:1,applicant:localStorage.getItem('username')||'',department:'',usePurpose:''})
+const recordVisible=ref(false),recordTarget=ref(null),recordLoading=ref(false),recordList=ref([])
 const form=reactive({consumableId:null,consumableName:'',category:'',unit:'个',currentStock:0,minStock:5,price:null,supplier:''})
 const rules=reactive({consumableName:[{required:true,message:'请输入名称',trigger:'blur'}]})
 const stockForm=reactive({quantity:1,remark:''})
@@ -134,6 +151,19 @@ const submitUse=async()=>{
     const r=await request.post('/consumable-use/apply',{consumableId:useTarget.value.consumableId,quantity:useForm.quantity,applicant:useForm.applicant,department:useForm.department,usePurpose:useForm.usePurpose})
     if(r.code===200){ElMessage.success('提交成功');useVisible.value=false;loadData()}else ElMessage.error(r.msg)
   } catch(e) { ElMessage.error('提交失败') }
+}
+
+const typeText = (t) => ({ 1: '入库', 2: '出库' }[t] || '其他')
+
+const showRecords = async (row) => {
+  recordTarget.value = row
+  recordVisible.value = true
+  recordLoading.value = true
+  try {
+    const r = await request.get('/consumable/records', { params: { consumableId: row.consumableId } })
+    recordList.value = r.data || []
+  } catch { recordList.value = [] }
+  recordLoading.value = false
 }
 
 const exportConsumable = async () => {

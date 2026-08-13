@@ -59,7 +59,7 @@ public class AssetInboundController {
             assetInboundService.apply(inbound, getCurrentUser());
             return Result.success("入库申请提交成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -74,7 +74,7 @@ public class AssetInboundController {
             assetInboundService.audit(inboundId, approved, getCurrentUser());
             return Result.success(approved ? "审核通过，资产已入库" : "已拒绝");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 }

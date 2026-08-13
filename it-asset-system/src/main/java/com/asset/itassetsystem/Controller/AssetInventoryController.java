@@ -5,13 +5,17 @@ import com.asset.itassetsystem.dto.InventoryCreateDTO;
 import com.asset.itassetsystem.dto.InventoryReportDTO;
 import com.asset.itassetsystem.entity.AssetInventory;
 import com.asset.itassetsystem.entity.AssetInventoryDetail;
+import com.asset.itassetsystem.entity.AssetInfo;
+import com.asset.itassetsystem.service.AssetInfoService;
 import com.asset.itassetsystem.service.AssetInventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 资产盘点控制器
@@ -25,7 +29,34 @@ public class AssetInventoryController {
     private AssetInventoryService assetInventoryService;
 
     @Autowired
+    private AssetInfoService assetInfoService;
+
+    @Autowired
     private HttpServletRequest request;
+
+    /**
+     * 扫码快速查找资产（用于移动盘点）
+     */
+    @GetMapping("/scan")
+    public Result<Map<String, Object>> scanAsset(@RequestParam String code) {
+        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<AssetInfo>()
+            .eq(AssetInfo::getAssetCode, code);
+        AssetInfo asset = assetInfoService.getOne(wrapper);
+        if (asset == null) {
+            return Result.fail("未找到资产: " + code);
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("assetId", asset.getAssetId());
+        data.put("assetCode", asset.getAssetCode());
+        data.put("assetName", asset.getAssetName());
+        data.put("brand", asset.getBrand());
+        data.put("model", asset.getModel());
+        data.put("status", asset.getStatus());
+        data.put("location", asset.getStorageLocation());
+        data.put("currentUser", asset.getUserName());
+        data.put("department", asset.getDepartment());
+        return Result.success(data);
+    }
     
     /**
      * 创建盘点任务
@@ -36,7 +67,7 @@ public class AssetInventoryController {
             assetInventoryService.createInventory(dto);
             return Result.success("盘点任务创建成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
     
@@ -50,7 +81,7 @@ public class AssetInventoryController {
             assetInventoryService.updateInventoryStatus(inventoryId, status);
             return Result.success("盘点任务状态已更新");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
     
@@ -67,7 +98,7 @@ public class AssetInventoryController {
             assetInventoryService.checkInventory(detailId, status, remark, actualLocation, differenceType);
             return Result.success("盘点完成");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
     
@@ -80,7 +111,7 @@ public class AssetInventoryController {
             assetInventoryService.finishInventory(inventoryId);
             return Result.success("盘点任务已完成");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
     
@@ -93,7 +124,7 @@ public class AssetInventoryController {
             InventoryReportDTO report = assetInventoryService.generateReport(inventoryId);
             return Result.success(report);
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -104,7 +135,7 @@ public class AssetInventoryController {
     public Result<AssetInventory> detail(@RequestParam Long inventoryId) {
         AssetInventory inventory = assetInventoryService.getDetail(inventoryId);
         if (inventory == null) {
-            return Result.error("盘点任务不存在");
+            return Result.fail("盘点任务不存在");
         }
         return Result.success(inventory);
     }

@@ -74,7 +74,7 @@ public class AssetModelController {
     @PostMapping("/save")
     public Result<String> save(@RequestBody AssetModel model) {
         if (model.getModelName() == null || model.getModelName().trim().isEmpty()) {
-            return Result.error("模型名称不能为空");
+            return Result.fail("模型名称不能为空");
         }
         if (model.getSite() == null || model.getSite().isEmpty()) {
             model.setSite(getSite());
@@ -92,7 +92,7 @@ public class AssetModelController {
      */
     @PostMapping("/update")
     public Result<String> update(@RequestBody AssetModel model) {
-        if (model.getModelId() == null) return Result.error("模型ID不能为空");
+        if (model.getModelId() == null) return Result.fail("模型ID不能为空");
         model.setUpdateTime(LocalDateTime.now());
         boolean ok = assetModelService.updateById(model);
         return ok ? Result.success("更新成功") : Result.error("更新失败");

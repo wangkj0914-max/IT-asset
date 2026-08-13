@@ -113,6 +113,7 @@ const handleLogin = async () => {
     localStorage.setItem('realName', res.data.realName || res.data.username)
     localStorage.setItem('userId', res.data.userId)
     localStorage.setItem('role', res.data.role)
+    if (res.data.site) localStorage.setItem('site', res.data.site)
 
     ElMessage.success('登录成功！')
 
@@ -120,18 +121,16 @@ const handleLogin = async () => {
     if (res.data.isDefaultPassword) {
       setTimeout(() => {
         ElMessageBox.confirm('您的密码仍为系统默认密码，存在安全风险。\n\n建议立即修改密码，是否前往修改？', '安全提醒', {
-          confirmButtonText: '去修改', cancelButtonText: '稍后再说', type: 'warning'
+          confirmButtonText: '去修改', cancelButtonText: '暂不修改', type: 'warning'
         }).then(() => {
           router.push('/change-password')
-        }).catch(() => {})
-      }, 1000)
+        }).catch(() => {
+          router.push('/home')
+        })
+      }, 800)
+    } else {
+      setTimeout(() => router.push('/home'), 500)
     }
-
-    // 跳转到首页
-    setTimeout(() => {
-      if (res.data.isDefaultPassword) return // 已弹窗不跳转
-      router.push('/home')
-    }, 500)
 
   } catch (error) {
     // 表单验证失败时，Element Plus 会自动显示错误信息，不需要额外弹窗

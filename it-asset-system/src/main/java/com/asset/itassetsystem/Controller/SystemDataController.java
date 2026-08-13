@@ -34,7 +34,7 @@ public class SystemDataController {
     @PostMapping("/clear-use-records")
     public Result<String> clearUseRecords(@RequestHeader("token") String token) {
         if (!checkAdminPermission(token)) {
-            return Result.error("无权限：仅管理员可执行此操作");
+            return Result.fail("无权限：仅管理员可执行此操作");
         }
         try {
             Connection conn = dataSource.getConnection();
@@ -55,7 +55,7 @@ public class SystemDataController {
     @PostMapping("/clear-inbound-records")
     public Result<String> clearInboundRecords(@RequestHeader("token") String token) {
         if (!checkAdminPermission(token)) {
-            return Result.error("无权限：仅管理员可执行此操作");
+            return Result.fail("无权限：仅管理员可执行此操作");
         }
         try {
             Connection conn = dataSource.getConnection();
@@ -75,7 +75,7 @@ public class SystemDataController {
     @PostMapping("/clear-all")
     public Result<String> clearAll(@RequestHeader("token") String token) {
         if (!checkAdminPermission(token)) {
-            return Result.error("无权限：仅管理员可执行此操作");
+            return Result.fail("无权限：仅管理员可执行此操作");
         }
         try {
             Connection conn = dataSource.getConnection();

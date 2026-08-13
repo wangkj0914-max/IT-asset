@@ -25,3 +25,6 @@ Thumbs.db
 # Temp files
 *.tmp
 *.bak
+
+# HTTPS 本地自签证书（含私钥，不提交）
+it-asset-frontend/cert/

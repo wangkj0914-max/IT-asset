@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="header-title">
       <span>资产分类管理</span>
-      <el-button type="primary" size="small" @click="showAddDialog(null)">
+      <el-button v-if="userRole === 2" type="primary" size="small" @click="showAddDialog(null)">
         <el-icon><Plus /></el-icon> 新增父级分类
       </el-button>
     </div>
@@ -28,11 +28,11 @@
         <el-table-column prop="sortOrder" label="排序" width="80" align="center" />
         <el-table-column label="操作" width="240" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="row.parentId === 0" type="success" size="small" @click="showAddDialog(row)">
+            <el-button v-if="row.parentId === 0 && userRole === 2" type="success" size="small" @click="showAddDialog(row)">
               <el-icon><Plus /></el-icon> 子分类
             </el-button>
-            <el-button type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="userRole === 2" type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button v-if="userRole === 2" type="danger" size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -80,6 +80,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, FolderOpened } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 
+const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 const loading = ref(false), dialogVisible = ref(false), isEditMode = ref(false)
 const categoryList = ref([]), categoryFormRef = ref(null)
 

@@ -27,15 +27,15 @@ public class AssetTransferController {
     public Result<String> apply(@RequestBody TransferApplyDTO dto) {
         try {
             if (dto.getAssetId() == null) {
-                return Result.error("请选择要调拨的资产");
+                return Result.fail("请选择要调拨的资产");
             }
             if (dto.getToDepartment() == null || dto.getToDepartment().isEmpty()) {
-                return Result.error("请填写调入部门");
+                return Result.fail("请填写调入部门");
             }
             assetTransferService.apply(dto);
             return Result.success("调拨申请已提交");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -49,12 +49,12 @@ public class AssetTransferController {
             @RequestParam(required = false) String remark) {
         try {
             if (status != 1 && status != 2) {
-                return Result.error("审批状态错误");
+                return Result.fail("审批状态错误");
             }
             assetTransferService.approve(transferId, status, remark);
             return Result.success(status == 1 ? "已通过" : "已拒绝");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -67,7 +67,7 @@ public class AssetTransferController {
             assetTransferService.delete(transferId);
             return Result.success("删除成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 

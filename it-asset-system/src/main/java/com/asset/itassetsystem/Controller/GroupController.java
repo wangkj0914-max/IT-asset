@@ -94,7 +94,7 @@ public class GroupController {
             sysGroupService.saveGroup(group);
             return Result.success("创建成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -107,7 +107,7 @@ public class GroupController {
             sysGroupService.updateGroup(group);
             return Result.success("更新成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -119,12 +119,12 @@ public class GroupController {
         try {
             Long groupId = params.get("groupId");
             if (groupId == null) {
-                return Result.error("组ID不能为空");
+                return Result.fail("组ID不能为空");
             }
             sysGroupService.deleteGroup(groupId);
             return Result.success("删除成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -137,12 +137,12 @@ public class GroupController {
             Long groupId = params.get("groupId");
             Long userId = params.get("userId");
             if (groupId == null || userId == null) {
-                return Result.error("组ID和用户ID不能为空");
+                return Result.fail("组ID和用户ID不能为空");
             }
             sysGroupService.addUserToGroup(groupId, userId);
             return Result.success("添加成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -155,12 +155,12 @@ public class GroupController {
             Long groupId = params.get("groupId");
             Long userId = params.get("userId");
             if (groupId == null || userId == null) {
-                return Result.error("组ID和用户ID不能为空");
+                return Result.fail("组ID和用户ID不能为空");
             }
             sysGroupService.removeUserFromGroup(groupId, userId);
             return Result.success("移除成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -181,7 +181,7 @@ public class GroupController {
             }).collect(Collectors.toList());
             return Result.success(result);
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -194,7 +194,7 @@ public class GroupController {
             Set<String> perms = sysGroupService.getGroupPermissions(groupId);
             return Result.success(perms);
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -210,7 +210,7 @@ public class GroupController {
             sysGroupService.setGroupPermissions(groupId, permissions);
             return Result.success("权限设置成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 }

@@ -49,7 +49,7 @@ public class NoticeController {
 
     @PostMapping("/save")
     public Result<String> save(@RequestBody SysNotice notice) {
-        if (notice.getTitle() == null || notice.getTitle().isEmpty()) return Result.error("标题不能为空");
+        if (notice.getTitle() == null || notice.getTitle().isEmpty()) return Result.fail("标题不能为空");
         notice.setCreateTime(LocalDateTime.now());
         noticeService.save(notice);
         return Result.success("公告创建成功");
@@ -57,7 +57,7 @@ public class NoticeController {
 
     @PostMapping("/update")
     public Result<String> update(@RequestBody SysNotice notice) {
-        if (notice.getNoticeId() == null) return Result.error("缺少ID");
+        if (notice.getNoticeId() == null) return Result.fail("缺少ID");
         notice.setUpdateTime(LocalDateTime.now());
         noticeService.updateById(notice);
         return Result.success("公告更新成功");

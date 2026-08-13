@@ -32,3 +32,22 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.asset.itassetsystem.entity
+
+# 邮件配置（按需修改 SMTP 参数）
+# spring:
+#   mail:
+#     host: smtp.example.com
+#     port: 587
+#     username: your-email@example.com
+#     password: your-password
+#     properties:
+#       mail.smtp.auth: true
+#       mail.smtp.starttls.enable: true
+
+# 合同到期提醒配置
+contract:
+  remind:
+    cron: "0 0 9 * * ?"       # 每天上午9点检查
+    days: "30,15,7"             # 到期前30/15/7天提醒
+    email: ""                   # 提醒邮件接收人，多个用逗号分隔（为空则不发送）
+

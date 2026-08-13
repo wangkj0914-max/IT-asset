@@ -39,7 +39,7 @@ public class AssetUseController {
             assetUseService.apply(dto, operator);
             return Result.success("领用申请提交成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -55,7 +55,7 @@ public class AssetUseController {
             assetUseService.approve(recordId, approved, approver);
             return Result.success(approved ? "审批通过" : "已拒绝");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -82,7 +82,7 @@ public class AssetUseController {
             assetUseService.returnAsset(assetId, operator);
             return Result.success("归还成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 

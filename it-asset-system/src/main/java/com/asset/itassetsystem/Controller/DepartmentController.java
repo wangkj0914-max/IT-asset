@@ -42,7 +42,7 @@ public class DepartmentController {
     public Result<String> save(@RequestBody SysDepartment department) {
         try {
             if (department.getDeptName() == null || department.getDeptName().trim().isEmpty()) {
-                return Result.error("部门名称不能为空");
+                return Result.fail("部门名称不能为空");
             }
             // 自动补全站点
             if (department.getSite() == null || department.getSite().isEmpty()) {
@@ -56,7 +56,7 @@ public class DepartmentController {
             sysDepartmentService.saveDepartment(department);
             return Result.success("部门创建成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -67,12 +67,12 @@ public class DepartmentController {
     public Result<String> update(@RequestBody SysDepartment department) {
         try {
             if (department.getDeptId() == null) {
-                return Result.error("部门 ID 不能为空");
+                return Result.fail("部门 ID 不能为空");
             }
             sysDepartmentService.updateDepartment(department);
             return Result.success("部门更新成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -85,7 +85,7 @@ public class DepartmentController {
             sysDepartmentService.deleteDepartment(deptId);
             return Result.success("部门删除成功");
         } catch (Exception e) {
-            return Result.error(e.getMessage());
+            return Result.fail(e.getMessage());
         }
     }
 
@@ -96,7 +96,7 @@ public class DepartmentController {
     public Result<SysDepartment> detail(@RequestParam Long deptId) {
         SysDepartment department = sysDepartmentService.getDepartmentDetail(deptId);
         if (department == null) {
-            return Result.error("部门不存在");
+            return Result.fail("部门不存在");
         }
         return Result.success(department);
     }

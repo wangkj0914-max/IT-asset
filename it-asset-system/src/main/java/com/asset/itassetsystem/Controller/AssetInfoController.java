@@ -49,10 +49,10 @@ public class AssetInfoController {
     @PostMapping("/save")
     public Result<Map<String, Object>> saveAsset(@RequestBody AssetInfo assetInfo) {
         if (assetInfo.getAssetName() == null || assetInfo.getAssetName().trim().isEmpty()) {
-            return Result.error("资产名称不能为空");
+            return Result.fail("资产名称不能为空");
         }
         if (assetInfo.getCategoryId() == null) {
-            return Result.error("资产分类不能为空");
+            return Result.fail("资产分类不能为空");
         }
         
         // 资产编号：前端传入则使用，否则自动生成
@@ -219,7 +219,7 @@ public class AssetInfoController {
     @PostMapping("/batchSave")
     public Result<String> batchSaveAsset(@RequestBody List<AssetInfo> assetList) {
         if (assetList == null || assetList.isEmpty()) {
-            return Result.error("导入数据不能为空");
+            return Result.fail("导入数据不能为空");
         }
         int success = 0;
         for (AssetInfo asset : assetList) {
@@ -256,7 +256,7 @@ public class AssetInfoController {
     @PostMapping("/update")
     public Result<String> updateAsset(@RequestBody AssetInfo assetInfo) {
         if (assetInfo.getAssetId() == null) {
-            return Result.error("资产 ID 不能为空");
+            return Result.fail("资产 ID 不能为空");
         }
         // 记录变更历史
         AssetInfo old = assetInfoService.getById(assetInfo.getAssetId());
@@ -358,8 +358,8 @@ public class AssetInfoController {
      */
     @PostMapping("/batchUpdate")
     public Result<String> batchUpdate(@RequestBody BatchUpdateDTO dto) {
-        if (dto.getAssetIds() == null || dto.getAssetIds().isEmpty()) return Result.error("请选择至少一条资产");
-        if (dto.getFields() == null || dto.getFields().isEmpty()) return Result.error("请设置要修改的字段");
+        if (dto.getAssetIds() == null || dto.getAssetIds().isEmpty()) return Result.fail("请选择至少一条资产");
+        if (dto.getFields() == null || dto.getFields().isEmpty()) return Result.fail("请设置要修改的字段");
 
         int count = 0;
         for (Long id : dto.getAssetIds()) {

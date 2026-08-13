@@ -107,7 +107,7 @@
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="盘点详情" width="800px">
+    <el-dialog v-model="detailDialogVisible" title="盘点详情" width="900px">
       <el-descriptions :column="2" border>
         <el-descriptions-item label="盘点单号">{{ currentRow.inventoryNo }}</el-descriptions-item>
         <el-descriptions-item label="盘点名称">{{ currentRow.inventoryName }}</el-descriptions-item>
@@ -123,13 +123,24 @@
         <el-descriptions-item label="备注">{{ currentRow.remark }}</el-descriptions-item>
       </el-descriptions>
 
-      <el-divider>盘点明细</el-divider>
+      <div class="detail-toolbar">
+        <span class="detail-title">盘点明细</span>
+        <div class="toolbar-actions" v-if="currentRow.status !== 2">
+          <el-button type="success" size="small" @click="quickScanOpen = true">
+            <el-icon><Camera /></el-icon> 扫码盘点
+          </el-button>
+          <el-button size="small" @click="scanAllPending">
+            <el-icon><Position /></el-icon> 一键全盘
+          </el-button>
+        </div>
+      </div>
       <el-table :data="detailList" border>
-        <el-table-column prop="assetCode" label="资产编号" width="120" />
-        <el-table-column prop="assetName" label="资产名称" />
-        <el-table-column prop="department" label="使用部门" width="100" />
+        <el-table-column type="index" label="#" width="50" />
+        <el-table-column prop="assetCode" label="资产编号" width="130" fixed="left" />
+        <el-table-column prop="assetName" label="资产名称" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="department" label="使用部门" width="100" show-overflow-tooltip />
         <el-table-column prop="userName" label="使用人" width="80" />
-        <el-table-column prop="actualLocation" label="实际位置" width="120" />
+        <el-table-column prop="actualLocation" label="实际位置" width="120" show-overflow-tooltip />
         <el-table-column prop="differenceType" label="差异类型" width="100">
           <template #default="{ row }">
             <el-tag v-if="row.differenceType" :type="getDiffTypeTag(row.differenceType)" size="small">
@@ -138,14 +149,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="scannedAt" label="扫描时间" width="160" />
-        <el-table-column prop="status" label="盘点结果" width="100">
+        <el-table-column prop="status" label="盘点结果" width="100" fixed="right">
           <template #default="{ row }">
             <el-tag :type="getResultTag(row.status)">
               {{ getResultText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" width="90" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="currentRow.status !== 2"
@@ -198,6 +209,35 @@
       <template #footer>
         <el-button @click="checkDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="submitCheck">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 快速扫码盘点 -->
+    <el-dialog v-model="quickScanOpen" title="扫码盘点" width="480px" @closed="onQuickScanClose">
+      <p class="scan-tip">扫描或输入资产编号，自动定位并标记为正常</p>
+      <input ref="quickScanFile" type="file" accept="image/*" capture="environment" style="display:none" @change="handleQuickScanFile" />
+      <div class="quick-scan-actions">
+        <el-button type="primary" @click="$refs.quickScanFile.click()" :loading="scanLoading">
+          <el-icon><Camera /></el-icon> 拍照扫码
+        </el-button>
+        <span class="divider">或</span>
+        <el-input v-model="quickScanCode" placeholder="输入资产编号" @keyup.enter="doQuickScan" clearable style="flex:1">
+          <template #append>
+            <el-button @click="doQuickScan">确认</el-button>
+          </template>
+        </el-input>
+      </div>
+      <div v-if="quickScanLog.length > 0" class="scan-log">
+        <el-divider>本次已盘点 ({{ quickScanLog.length }})</el-divider>
+        <div v-for="item in quickScanLog" :key="item.assetCode" class="log-item">
+          <el-tag size="small" :type="item.success ? 'success' : 'danger'">{{ item.success ? '✓' : '✗' }}</el-tag>
+          <span style="margin-left:8px">{{ item.assetCode }} {{ item.assetName }}</span>
+          <span style="margin-left:auto;color:#94A3B8;font-size:12px">{{ item.msg }}</span>
+        </div>
+        <el-button size="small" type="text" @click="quickScanLog = []">清空记录</el-button>
+      </div>
+      <template #footer>
+        <el-button @click="quickScanOpen = false">关闭</el-button>
       </template>
     </el-dialog>
 
@@ -281,6 +321,8 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Camera, Position } from '@element-plus/icons-vue'
+import { Html5Qrcode } from 'html5-qrcode'
 import request from '@/utils/request'
 
 const loading = ref(false)
@@ -288,6 +330,11 @@ const tableData = ref([])
 const detailList = ref([])
 const createDialogVisible = ref(false)
 const detailDialogVisible = ref(false)
+const quickScanOpen = ref(false)
+const quickScanCode = ref('')
+const quickScanFile = ref(null)
+const scanLoading = ref(false)
+const quickScanLog = ref([])
 const checkDialogVisible = ref(false)
 const reportDialogVisible = ref(false)
 const createFormRef = ref(null)
@@ -518,12 +565,127 @@ const handleReport = async (row) => {
 const handleSizeChange = () => loadData()
 const handlePageChange = () => loadData()
 
+// 处理拍照扫码图片
+const handleQuickScanFile = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  scanLoading.value = true
+  try {
+    const scanner = new Html5Qrcode('quick-scan-temp')
+    const result = await scanner.scanFile(file, false)
+    scanner.clear()
+    quickScanCode.value = result
+    await doQuickScan()
+  } catch {
+    ElMessage.error('未能识别二维码，请重试或手动输入')
+  }
+  scanLoading.value = false
+  if (quickScanFile.value) quickScanFile.value.value = ''
+}
+
+// 扫码盘点：定位并标记为正常
+const doQuickScan = async () => {
+  const code = quickScanCode.value.trim()
+  if (!code) { ElMessage.warning('请输入资产编号'); return }
+  const detail = detailList.value.find(d => d.assetCode === code)
+  if (!detail) {
+    quickScanLog.value.unshift({ assetCode: code, assetName: '?', success: false, msg: '不在本盘点单中' })
+    ElMessage.error(`资产 ${code} 不在本次盘点明细中`)
+    quickScanCode.value = ''
+    return
+  }
+  if (detail.status === 1) {
+    quickScanLog.value.unshift({ assetCode: code, assetName: detail.assetName, success: false, msg: '已盘点' })
+    ElMessage.warning(`资产 ${code} 已盘点，请勿重复`)
+    quickScanCode.value = ''
+    return
+  }
+  try {
+    await request.post('/inventory/check', null, {
+      params: { detailId: detail.detailId, status: 1, remark: '扫码盘点' }
+    })
+    detail.status = 1
+    detail.scannedAt = new Date().toISOString().replace('T', ' ').slice(0, 19)
+    quickScanLog.value.unshift({ assetCode: code, assetName: detail.assetName, success: true, msg: '已标记正常' })
+    ElMessage.success(`${code} 盘点成功`)
+    quickScanCode.value = ''
+  } catch (e) {
+    quickScanLog.value.unshift({ assetCode: code, assetName: detail.assetName, success: false, msg: '提交失败' })
+    ElMessage.error('盘点提交失败')
+  }
+}
+
+const onQuickScanClose = () => {
+  quickScanLog.value = []
+  quickScanCode.value = ''
+}
+
+// 一键全部标记为正常
+const scanAllPending = async () => {
+  const pending = detailList.value.filter(d => d.status !== 1)
+  if (pending.length === 0) { ElMessage.info('没有待盘点的资产'); return }
+  try {
+    await ElMessage.confirm(`确认将 ${pending.length} 项未盘点资产全部标记为正常？`, '提示', { type: 'warning' })
+  } catch { return }
+  let count = 0
+  for (const d of pending) {
+    try {
+      await request.post('/inventory/check', null, {
+        params: { detailId: d.detailId, status: 1, remark: '一键全盘' }
+      })
+      d.status = 1
+      d.scannedAt = new Date().toISOString().replace('T', ' ').slice(0, 19)
+      count++
+    } catch { /* 单条失败继续下一条 */ }
+  }
+  ElMessage.success(`已完成 ${count} 项盘点`)
+}
+
 onMounted(() => {
   loadData()
 })
 </script>
 
 <style scoped>
+.detail-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E2E8F0;
+}
+.detail-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #1A1A2E;
+}
+.toolbar-actions { display: flex; gap: 8px; }
+.quick-scan-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+.divider { color: #94A3B8; font-size: 13px; }
+.scan-tip {
+  color: #64748B;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+.scan-log {
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 16px;
+}
+.log-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed #F1F5F9;
+  font-size: 13px;
+}
 .report-summary {
   margin-bottom: 10px;
 }
