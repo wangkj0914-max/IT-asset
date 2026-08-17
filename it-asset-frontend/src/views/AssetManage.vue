@@ -59,11 +59,6 @@
           <el-input v-model="searchForm.responsiblePerson" placeholder="责任人" clearable style="width:160px" />
         </el-form-item>
         <el-form-item>
-          <el-select v-model="searchForm.statusLabelId" placeholder="状态标签" clearable style="width:130px">
-            <el-option v-for="s in statusLabelList" :key="s.statusLabelId" :label="s.statusName" :value="s.statusLabelId" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
           <el-button type="primary" @click="handleSearch">查询</el-button>
           <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
@@ -123,20 +118,6 @@
         <el-table-column prop="assetCode" label="资产编号" width="130" align="center" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="asset-code">{{ row.assetCode || '-' }}</span>
-          </template>
-        </el-table-column>
-
-        <!-- 资产图片 -->
-        <el-table-column label="资产图片" width="90" align="center">
-          <template #default="{ row }">
-            <el-image
-              v-if="row.assetImage"
-              :src="row.assetImage"
-              :preview-src-list="[row.assetImage]"
-              style="width: 50px; height: 50px; border-radius: 4px;"
-              fit="cover"
-            />
-            <span v-else>-</span>
           </template>
         </el-table-column>
 
@@ -247,16 +228,6 @@
           </template>
         </el-table-column>
 
-        <!-- P0: 状态标签 -->
-        <el-table-column label="状态标签" width="90" align="center">
-          <template #default="{ row }">
-            <el-tag v-if="row.statusLabelId" :type="getStatusLabelColor(row.statusLabelId)" size="small">
-              {{ getStatusLabelName(row.statusLabelId) }}
-            </el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-
         <!-- 备注 -->
         <el-table-column prop="remark" label="备注" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">
@@ -344,15 +315,6 @@
             <el-form-item label="资产模型">
               <el-select v-model="assetForm.modelId" placeholder="选择模型(自动继承折旧)" clearable filterable style="width:100%" @change="onModelChange">
                 <el-option v-for="m in modelList" :key="m.modelId" :label="m.modelName" :value="m.modelId" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="状态标签">
-              <el-select v-model="assetForm.statusLabelId" placeholder="选择状态标签" clearable filterable style="width:100%">
-                <el-option v-for="s in statusLabelList" :key="s.statusLabelId" :label="s.statusName" :value="s.statusLabelId">
-                  <el-tag :type="s.color" size="small">{{ s.statusName }}</el-tag>
-                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -794,9 +756,6 @@ const categoryList = ref([])
 // 资产模型列表 (P0)
 const modelList = ref([])
 
-// 状态标签列表 (P0)
-const statusLabelList = ref([])
-
 // 用户列表（用于映射使用人）
 const userList = ref([])
 const userMap = ref({})
@@ -819,7 +778,6 @@ const searchForm = reactive({
   department: '',   // 使用部门
   storageLocation: '', // 存放地点
   responsiblePerson: '', // 责任人
-  statusLabelId: null // P0: 状态标签
 })
 
 // 分页信息
@@ -848,7 +806,6 @@ const assetForm = reactive({
   supplier: '',
   storageLocation: '',
   status: 0,
-  statusLabelId: null,
   userId: null,
   department: '',
   warrantyInfo: '',
@@ -949,7 +906,6 @@ const formRules = reactive({
 onMounted(() => {
   getCategoryList()
   loadModelList()
-  loadStatusLabelList()
   loadUserList()
   loadDepartmentList()
   loadLocationList()
@@ -1041,16 +997,6 @@ const loadModelList = async () => {
   }
 }
 
-// P0: 加载状态标签列表
-const loadStatusLabelList = async () => {
-  try {
-    const res = await request.get('/statusLabel/list')
-    statusLabelList.value = res.data || []
-  } catch (error) {
-    statusLabelList.value = []
-  }
-}
-
 // P0: 选择模型时自动填充折旧参数
 const onModelChange = (modelId) => {
   if (!modelId) return
@@ -1059,18 +1005,6 @@ const onModelChange = (modelId) => {
   if (m.depreciationYears) assetForm.depreciationYears = m.depreciationYears
   if (m.depreciationMethod) assetForm.depreciationMethod = m.depreciationMethod
   if (!assetForm.model) assetForm.model = m.modelName
-}
-
-// P0: 获取状态标签名
-const getStatusLabelName = (id) => {
-  const s = statusLabelList.value.find(s => s.statusLabelId === id)
-  return s ? s.statusName : ''
-}
-
-// P0: 获取状态标签颜色
-const getStatusLabelColor = (id) => {
-  const s = statusLabelList.value.find(s => s.statusLabelId === id)
-  return s ? s.color : 'info'
 }
 
 // P0: EOL临近判断（3个月内）
@@ -1106,7 +1040,6 @@ const getAssetList = async () => {
         department: searchForm.department || undefined,
         storageLocation: searchForm.storageLocation || undefined,
         responsiblePerson: searchForm.responsiblePerson || undefined,
-        statusLabelId: searchForm.statusLabelId || undefined,
         sortColumn: sortColumn.value || undefined,
         sortOrder: sortOrder.value || undefined
       }
@@ -1135,7 +1068,6 @@ const resetSearch = () => {
   searchForm.tagNo = ''
   searchForm.storageLocation = ''
   searchForm.responsiblePerson = ''
-  searchForm.statusLabelId = null
   pagination.current = 1
   getAssetList()
 }
@@ -1146,7 +1078,6 @@ const showAddDialog = async () => {
   await loadLocationList()
   await loadUserList()
   await loadModelList()
-  await loadStatusLabelList()
   await loadCustomFieldDefs()
   isEditMode.value = false
   // 重置自定义字段值
@@ -1165,7 +1096,6 @@ const showAddDialog = async () => {
     supplier: '',
     storageLocation: '',
     status: 0,
-    statusLabelId: null,
     userId: null,
     department: '',
     warrantyInfo: '',
@@ -1189,7 +1119,6 @@ const showEditDialog = async (row) => {
   await loadLocationList()
   await loadUserList()
   await loadModelList()
-  await loadStatusLabelList()
   await loadCustomFieldDefs()
   await loadCustomFieldValues(row.assetId)
   Object.assign(assetForm, {
@@ -1206,7 +1135,6 @@ const showEditDialog = async (row) => {
     supplier: row.supplier || '',
     storageLocation: row.storageLocation || '',
     status: row.status,
-    statusLabelId: row.statusLabelId || null,
     userId: row.userId || null,
     department: parseDepartment(row.remark) !== '-' ? parseDepartment(row.remark) : '',
     warrantyInfo: row.warrantyInfo || '',

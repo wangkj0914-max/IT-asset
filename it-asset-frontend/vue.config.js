@@ -1,8 +1,7 @@
 const { defineConfig } = require('@vue/cli-service')
-const path = require('path')
 module.exports = defineConfig({
   transpileDependencies: true,
-  outputDir: 'D:\\AI\\dist-v2',
+  outputDir: 'dist',
   chainWebpack: config => {
     config.module.rule('js').use('babel-loader').tap(options => {
       options = options || {}
