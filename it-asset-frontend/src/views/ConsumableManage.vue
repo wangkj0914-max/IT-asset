@@ -5,6 +5,7 @@
       <el-button type="primary" size="small" @click="showAdd" v-if="userRole === 2">
         <el-icon><Plus /></el-icon> 新增耗材
       </el-button>
+      <el-button size="small" type="warning" @click="showUseRecords"><el-icon><Tickets /></el-icon> 申请记录</el-button>
       <el-button size="small" @click="exportConsumable"><el-icon><Download /></el-icon> 导出</el-button>
     </div>
 
@@ -103,13 +104,33 @@
       </el-table>
       <el-empty v-if="!recordLoading && recordList.length===0" description="暂无操作记录" />
     </el-dialog>
+
+    <!-- 领用申请记录 -->
+    <el-dialog v-model="useRecordVisible" title="领用申请记录" width="760px">
+      <el-table :data="useRecordList" v-loading="useRecordLoading" border max-height="400" size="small">
+        <el-table-column type="index" label="#" width="50" />
+        <el-table-column prop="consumableName" label="耗材名称" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="applicant" label="申请人" width="100" />
+        <el-table-column prop="department" label="部门" width="100" />
+        <el-table-column prop="quantity" label="数量" width="70" align="center" />
+        <el-table-column prop="usePurpose" label="用途" min-width="140" show-overflow-tooltip />
+        <el-table-column label="审批状态" width="90" align="center">
+          <template #default="{row}">
+            <el-tag :type="approveType(row.approveStatus)" size="small">{{ approveText(row.approveStatus) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="approveUser" label="审批人" width="90" />
+        <el-table-column prop="createTime" label="申请时间" width="160" />
+      </el-table>
+      <el-empty v-if="!useRecordLoading && useRecordList.length===0" description="暂无申请记录" />
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Tickets } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import { exportCSV } from '@/utils/export'
 
@@ -118,6 +139,7 @@ const loading=ref(false),tableData=ref([]),lowStockList=ref([]),dialogVisible=re
 const stockVisible=ref(false),stockInMode=ref(true),stockTarget=ref(null)
 const useVisible=ref(false),useTarget=ref(null),useForm=reactive({quantity:1,applicant:localStorage.getItem('username')||'',department:'',usePurpose:''})
 const recordVisible=ref(false),recordTarget=ref(null),recordLoading=ref(false),recordList=ref([])
+const useRecordVisible=ref(false),useRecordLoading=ref(false),useRecordList=ref([])
 const form=reactive({consumableId:null,consumableName:'',category:'',unit:'个',currentStock:0,minStock:5,price:null,supplier:''})
 const rules=reactive({consumableName:[{required:true,message:'请输入名称',trigger:'blur'}]})
 const stockForm=reactive({quantity:1,remark:''})
@@ -164,6 +186,20 @@ const showRecords = async (row) => {
     recordList.value = r.data || []
   } catch { recordList.value = [] }
   recordLoading.value = false
+}
+
+// 领用申请记录
+const approveText = (s) => ({ 0: '待审批', 1: '已通过', 2: '已拒绝' }[s] || '待审批')
+const approveType = (s) => ({ 0: 'warning', 1: 'success', 2: 'danger' }[s] || 'info')
+
+const showUseRecords = async () => {
+  useRecordVisible.value = true
+  useRecordLoading.value = true
+  try {
+    const r = await request.get('/consumable-use/page', { params: { current: 1, size: 100 } })
+    useRecordList.value = (r.data && r.data.records) || r.data || []
+  } catch { useRecordList.value = [] }
+  useRecordLoading.value = false
 }
 
 const exportConsumable = async () => {

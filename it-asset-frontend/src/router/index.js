@@ -49,12 +49,6 @@ const routes = [
     meta: { title: '资产模型', requireAuth: true }
   },
   {
-    path: '/status-label-manage',
-    name: 'StatusLabelManage',
-    component: () => import('@/views/StatusLabelManage.vue'),
-    meta: { title: '状态标签', requireAuth: true }
-  },
-  {
     path: '/asset-manage',
     name: 'AssetManage',
     component: AssetManage,

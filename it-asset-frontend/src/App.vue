@@ -104,10 +104,6 @@
               <el-icon><Box /></el-icon>
               <span>资产模型</span>
             </el-menu-item>
-            <el-menu-item index="/status-label-manage" @click="navigateTo('/status-label-manage')">
-              <el-icon><Tag /></el-icon>
-              <span>状态标签</span>
-            </el-menu-item>
             <el-menu-item index="/department-info" @click="navigateTo('/department-info')">
               <el-icon><View /></el-icon>
               <span>部门信息</span>
@@ -239,7 +235,7 @@ import {
   House, User, UserFilled, Document, List, 
   Tools, Setting, MoreFilled, ArrowDown,
   DocumentAdd, Grid, Notification, View, Briefcase,
-  Plus, Search, Switch, Delete, Fold, Expand, Location, Box, Key, Tag,
+  Plus, Search, Switch, Delete, Fold, Expand, Location, Box, Key,
   Headset, Cpu, Check, DataLine, Goods, PhoneFilled
 } from '@element-plus/icons-vue'
 
