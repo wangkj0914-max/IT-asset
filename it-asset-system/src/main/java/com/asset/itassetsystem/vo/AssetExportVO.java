@@ -1,5 +1,6 @@
 package com.asset.itassetsystem.vo;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 
@@ -72,12 +73,12 @@ public class AssetExportVO {
     @ExcelProperty("使用部门")
     private String department;
 
-    /** 使用人 */
-    @ExcelProperty("使用人")
+    /** 使用人（仅保留字段，作为责任人回退数据源；不再单独导出 Excel 列） */
+    @ExcelIgnore
     private String userName;
 
-    /** 责任人 */
-    @ExcelProperty("责任人")
+    /** 责任人（导出列名为「使用人」） */
+    @ExcelProperty("使用人")
     private String responsiblePerson;
 
     /** 存放地点 */

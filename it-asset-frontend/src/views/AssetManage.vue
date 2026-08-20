@@ -56,7 +56,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-input v-model="searchForm.responsiblePerson" placeholder="责任人" clearable style="width:160px" />
+          <el-input v-model="searchForm.responsiblePerson" placeholder="使用人" clearable style="width:160px" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -208,8 +208,8 @@
           </template>
         </el-table-column>
 
-        <!-- 责任人 -->
-        <el-table-column prop="responsiblePerson" label="责任人" width="90" align="center">
+        <!-- 使用人 -->
+        <el-table-column prop="responsiblePerson" label="使用人" width="90" align="center">
           <template #default="{ row }">
             {{ row.responsiblePerson || row.userName || (row.userId ? getUserName(row.userId) : '-') }}
           </template>
