@@ -1,13 +1,17 @@
 package com.asset.itassetsystem.controller;
 
+import com.alibaba.excel.EasyExcel;
 import com.asset.itassetsystem.common.Result;
 import com.asset.itassetsystem.dto.BatchUpdateDTO;
+import com.asset.itassetsystem.entity.AssetCategory;
 import com.asset.itassetsystem.entity.AssetChangeLog;
 import com.asset.itassetsystem.entity.AssetInfo;
 import com.asset.itassetsystem.entity.AssetModel;
 import com.asset.itassetsystem.mapper.AssetChangeLogMapper;
+import com.asset.itassetsystem.service.AssetCategoryService;
 import com.asset.itassetsystem.service.AssetInfoService;
 import com.asset.itassetsystem.service.AssetModelService;
+import com.asset.itassetsystem.vo.AssetExportVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,14 +19,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 资产信息控制器
@@ -39,6 +52,9 @@ public class AssetInfoController {
 
     @Autowired
     private AssetModelService assetModelService;
+
+    @Autowired
+    private AssetCategoryService assetCategoryService;
 
     @Autowired
     private javax.servlet.http.HttpServletRequest httpRequest;
@@ -211,6 +227,230 @@ public class AssetInfoController {
         
         IPage<AssetInfo> result = assetInfoService.page(page, wrapper);
         return Result.success(result);
+    }
+
+    /**
+     * 导出资产台账 Excel（.xlsx）
+     * 查询条件与分页查询 /page 完全一致（关键字/分类/状态/部门/责任人/存放地点等），
+     * 搜索条件为空时导出全部；按 site 站点隔离，只导出当前站点数据。
+     * 走既有 JWT 鉴权（GET 请求需登录），响应为 Excel 文件流，前端以 blob 下载。
+     */
+    @GetMapping("/export")
+    public void exportAsset(
+            @RequestParam(required = false) String assetName,
+            @RequestParam(required = false) String assetCode,
+            @RequestParam(required = false) String storageLocation,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String department,
+            @RequestParam(required = false) String responsiblePerson,
+            @RequestParam(required = false) String site,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String tagNo,
+            @RequestParam(required = false) Long modelId,
+            @RequestParam(required = false) Long statusLabelId,
+            @RequestParam(required = false) String sortColumn,
+            @RequestParam(required = false) String sortOrder,
+            HttpServletResponse response) throws IOException {
+
+        // 站点隔离：优先取 query 参数 site，缺省时兜底取请求头 X-Site（前端 request.js 两者都会带）
+        String querySite = site;
+        if (!StringUtils.hasText(querySite)) {
+            String headerSite = httpRequest.getHeader("X-Site");
+            if (StringUtils.hasText(headerSite)) {
+                try {
+                    querySite = URLDecoder.decode(headerSite, StandardCharsets.UTF_8.name());
+                } catch (Exception ignored) {
+                    querySite = headerSite;
+                }
+            }
+        }
+
+        // 与 /page 列表查询一致的查询条件
+        LambdaQueryWrapper<AssetInfo> wrapper = new LambdaQueryWrapper<>();
+
+        // 关键字搜索（资产名称或编号）
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(w -> w.like(AssetInfo::getAssetName, keyword)
+                              .or()
+                              .like(AssetInfo::getAssetCode, keyword));
+        }
+
+        // 标签号搜索（序列号或资产编号）
+        if (StringUtils.hasText(tagNo)) {
+            wrapper.and(w -> w.like(AssetInfo::getSerialNumber, tagNo)
+                              .or()
+                              .like(AssetInfo::getAssetCode, tagNo));
+        }
+
+        // 模糊搜索资产名称
+        if (StringUtils.hasText(assetName)) {
+            wrapper.like(AssetInfo::getAssetName, assetName);
+        }
+
+        // 模糊搜索资产编号
+        if (StringUtils.hasText(assetCode)) {
+            wrapper.like(AssetInfo::getAssetCode, assetCode);
+        }
+
+        // 精确匹配存放位置
+        if (StringUtils.hasText(storageLocation)) {
+            wrapper.eq(AssetInfo::getStorageLocation, storageLocation);
+        }
+
+        // 按分类筛选
+        if (categoryId != null) {
+            wrapper.eq(AssetInfo::getCategoryId, categoryId);
+        }
+
+        // 按状态筛选
+        if (status != null) {
+            wrapper.eq(AssetInfo::getStatus, status);
+        }
+
+        // 按部门筛选
+        if (StringUtils.hasText(department)) {
+            wrapper.eq(AssetInfo::getDepartment, department);
+        }
+
+        // 按责任人筛选（模糊匹配：同时查 responsible_person 和 user_name）
+        if (StringUtils.hasText(responsiblePerson)) {
+            wrapper.and(w -> w.like(AssetInfo::getResponsiblePerson, responsiblePerson)
+                .or().like(AssetInfo::getUserName, responsiblePerson));
+        }
+
+        // 按站点隔离
+        if (StringUtils.hasText(querySite)) {
+            wrapper.eq(AssetInfo::getSite, querySite);
+        }
+
+        // 按资产模型筛选
+        if (modelId != null) {
+            wrapper.eq(AssetInfo::getModelId, modelId);
+        }
+
+        // 按状态标签筛选
+        if (statusLabelId != null) {
+            wrapper.eq(AssetInfo::getStatusLabelId, statusLabelId);
+        }
+
+        // 动态排序，默认按创建时间倒序（与列表一致）
+        if (StringUtils.hasText(sortColumn)) {
+            boolean asc = "asc".equalsIgnoreCase(sortOrder);
+            String dbColumn = switch (sortColumn) {
+                case "assetName" -> "asset_name";
+                case "assetCode" -> "asset_code";
+                case "purchasePrice" -> "purchase_price";
+                case "purchaseCost" -> "purchase_cost";
+                case "currentValue" -> "current_value";
+                case "eolDate" -> "eol_date";
+                case "createTime" -> "create_time";
+                case "status" -> "status";
+                case "department" -> "department";
+                default -> "create_time";
+            };
+            wrapper.last("ORDER BY " + dbColumn + (asc ? " ASC" : " DESC"));
+        } else {
+            wrapper.orderByDesc(AssetInfo::getCreateTime);
+        }
+
+        // 导出全部符合条件的资产（不分页）
+        List<AssetInfo> assetList = assetInfoService.list(wrapper);
+
+        // 分类 ID -> 分类名称 映射
+        Map<Long, String> categoryMap = new HashMap<>();
+        for (AssetCategory cat : assetCategoryService.list()) {
+            categoryMap.put(cat.getCategoryId(), cat.getCategoryName());
+        }
+
+        // 组装导出数据（字段与前端表格列一致）
+        List<AssetExportVO> exportList = new ArrayList<>();
+        int index = 1;
+        for (AssetInfo a : assetList) {
+            AssetExportVO vo = new AssetExportVO();
+            vo.setIndex(index++);
+            vo.setAssetCode(a.getAssetCode());
+            vo.setAssetName(a.getAssetName());
+            vo.setCategoryName(categoryMap.getOrDefault(a.getCategoryId(), ""));
+            vo.setModel(a.getModel());
+            vo.setBrand(a.getBrand());
+            vo.setQuantity(a.getQuantity());
+            vo.setPurchaseDate(a.getPurchaseDate() != null ? a.getPurchaseDate().toString() : "");
+            vo.setPurchasePrice(a.getPurchasePrice());
+            vo.setCurrentValue(a.getCurrentValue());
+            vo.setEolDate(a.getEolDate() != null ? a.getEolDate().toString() : "");
+            vo.setWarrantyExpireDate(a.getWarrantyExpireDate() != null ? a.getWarrantyExpireDate().toString() : "");
+            vo.setNextMaintenanceDate(a.getNextMaintenanceDate() != null ? a.getNextMaintenanceDate().toString() : "");
+            vo.setDepreciationMethod(formatDepreciationMethod(a.getDepreciationMethod()));
+            vo.setDepartment(resolveDepartment(a));
+            vo.setUserName(a.getUserName());
+            vo.setResponsiblePerson(StringUtils.hasText(a.getResponsiblePerson()) ? a.getResponsiblePerson() : a.getUserName());
+            vo.setStorageLocation(a.getStorageLocation());
+            vo.setStatus(formatStatus(a.getStatus()));
+            vo.setRemark(cleanRemark(a.getRemark()));
+            exportList.add(vo);
+        }
+
+        // 写入 Excel 响应流（EasyExcel 自动关闭输出流）
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode(
+                "固定资产台账_" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")),
+                StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
+        response.setHeader("Content-Disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), AssetExportVO.class)
+                .sheet("固定资产台账")
+                .doWrite(exportList);
+    }
+
+    /**
+     * 状态显示文本（0-未领用 1-已领用 2-维修中 3-已报废）
+     */
+    private String formatStatus(Integer status) {
+        if (status == null) return "";
+        return switch (status) {
+            case 0 -> "未领用";
+            case 1 -> "已领用";
+            case 2 -> "维修中";
+            case 3 -> "已报废";
+            default -> "";
+        };
+    }
+
+    /**
+     * 折旧方法显示文本
+     */
+    private String formatDepreciationMethod(String method) {
+        if (method == null) return "";
+        return switch (method) {
+            case "straight_line" -> "直线折旧";
+            case "declining_balance" -> "余额递减";
+            default -> method;
+        };
+    }
+
+    /**
+     * 使用部门：优先取 department 字段，为空时从 remark 中解析 "部门:xxx" 信息（与前端展示一致）
+     */
+    private String resolveDepartment(AssetInfo asset) {
+        if (StringUtils.hasText(asset.getDepartment())) {
+            return asset.getDepartment();
+        }
+        if (asset.getRemark() != null) {
+            Matcher m = Pattern.compile("部门[:：]([^,，\\s]+)").matcher(asset.getRemark());
+            if (m.find()) {
+                return m.group(1);
+            }
+        }
+        return "";
+    }
+
+    /**
+     * 备注清洗：去除备注中内嵌的部门信息（与前端展示一致）
+     */
+    private String cleanRemark(String remark) {
+        if (remark == null) return "";
+        return remark.replaceAll("部门[:：][^,，\\s]*[，,]?\\s*", "").trim();
     }
 
     /**

@@ -79,6 +79,9 @@
       <el-button type="info" @click="handleBatchImport">
         <el-icon><Upload /></el-icon> 批量导入
       </el-button>
+      <el-button type="primary" plain @click="exportExcel" :loading="exporting">
+        <el-icon><Download /></el-icon> 导出 Excel
+      </el-button>
       <el-button type="warning" @click="showBatchEditDialog" :disabled="selectedRows.length === 0">
         <el-icon><Edit /></el-icon> 批量修改 ({{ selectedRows.length }})
       </el-button>
@@ -726,6 +729,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Download, RefreshRight, Printer, Upload, Edit } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import axios from 'axios'
 import QRCode from 'qrcode'
 
 const router = useRouter()
@@ -737,6 +741,7 @@ const assetFormRef = ref(null)
 // 加载状态
 const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 const loading = ref(false)
+const exporting = ref(false)
 const sortColumn = ref('')
 const sortOrder = ref('')
 
@@ -1489,6 +1494,55 @@ const downloadTemplate = () => {
   link.download = '资产批量导入模板.csv'
   link.click()
   ElMessage.success('模板下载成功')
+}
+
+// 导出资产台账 Excel（携带当前搜索条件，与列表查询 /page 同参数，blob 下载）
+// 站点参数 site 由 request.js 自动携带，此处用原生 axios 下载二进制流（参考报表导出写法）
+const exportExcel = async () => {
+  exporting.value = true
+  try {
+    const response = await axios.get('/asset/assetInfo/export', {
+      params: {
+        keyword: searchForm.keyword || undefined,
+        categoryId: searchForm.categoryId || undefined,
+        tagNo: searchForm.tagNo || undefined,
+        status: searchForm.status === '' || searchForm.status === null ? undefined : searchForm.status,
+        department: searchForm.department || undefined,
+        storageLocation: searchForm.storageLocation || undefined,
+        responsiblePerson: searchForm.responsiblePerson || undefined,
+        sortColumn: sortColumn.value || undefined,
+        sortOrder: sortOrder.value || undefined,
+        site: localStorage.getItem('site') || undefined
+      },
+      responseType: 'blob',
+      headers: { token: localStorage.getItem('token') }
+    })
+
+    // 后端异常（401/403/500）返回 JSON，而非 Excel 流，需单独处理
+    if (response.data && response.data.type && response.data.type.includes('application/json')) {
+      const text = await response.data.text()
+      let msg = '导出失败'
+      try { msg = JSON.parse(text).msg || msg } catch (e) { /* 忽略解析失败 */ }
+      ElMessage.error(msg)
+      return
+    }
+
+    const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    a.download = `固定资产台账_${dateStr}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败：' + (error.response?.status ? 'HTTP ' + error.response.status : error.message || '网络错误'))
+  } finally {
+    exporting.value = false
+  }
 }
 
 // 解析CSV文本
