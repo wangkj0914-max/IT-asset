@@ -49,6 +49,11 @@ public interface AssetInventoryService extends IService<AssetInventory> {
     
     /**
      * 分页查询盘点任务
+     *
+     * @param pageNum  页码
+     * @param pageSize 每页条数
+     * @param status   盘点状态（可选）
+     * @param site     站点（可选，站点隔离过滤）
      */
-    Object listPage(Integer pageNum, Integer pageSize, Integer status);
+    Object listPage(Integer pageNum, Integer pageSize, Integer status, String site);
 }

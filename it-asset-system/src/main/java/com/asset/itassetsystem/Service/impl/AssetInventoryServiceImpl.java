@@ -86,11 +86,15 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
         inventory.setRemark(dto.getRemark());
         
         // 从请求上下文获取当前站点
+        String currentSite = null;
         try {
             var attrs = org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes();
             if (attrs instanceof org.springframework.web.context.request.ServletRequestAttributes) {
                 String s = ((org.springframework.web.context.request.ServletRequestAttributes) attrs).getRequest().getParameter("site");
-                if (s != null && !s.isEmpty()) inventory.setSite(s);
+                if (s != null && !s.isEmpty()) {
+                    currentSite = s;
+                    inventory.setSite(s);
+                }
             }
         } catch (Exception ignored) {}
         
@@ -98,7 +102,8 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
         log.info("盘点任务主记录创建成功，ID: {}", inventory.getInventoryId());
         
         // 4. 根据筛选条件获取资产列表，生成盘点明细
-        List<AssetInfo> assets = getAssetsByFilter(dto);
+        // 站点隔离：将当前站点传入筛选条件，确保仅拉取本站点资产生成明细
+        List<AssetInfo> assets = getAssetsByFilter(dto, currentSite);
         log.info("筛选到资产数量：{}", assets.size());
         
         if (CollectionUtils.isEmpty(assets)) {
@@ -302,12 +307,17 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
     }
     
     @Override
-    public Object listPage(Integer pageNum, Integer pageSize, Integer status) {
+    public Object listPage(Integer pageNum, Integer pageSize, Integer status, String site) {
         Page<AssetInventory> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<AssetInventory> wrapper = new LambdaQueryWrapper<>();
         
         if (status != null) {
             wrapper.eq(AssetInventory::getStatus, status);
+        }
+        
+        // 站点隔离：当前站点非空时，仅查询本站点的盘点任务
+        if (site != null && !site.isEmpty()) {
+            wrapper.eq(AssetInventory::getSite, site);
         }
         
         wrapper.orderByDesc(AssetInventory::getCreateTime);
@@ -325,9 +335,17 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
     /**
      * 根据筛选条件获取资产列表
      * 支持多维度组合筛选
+     *
+     * @param dto  盘点创建参数
+     * @param site 当前站点（可选，站点隔离过滤；为空时保持原行为）
      */
-    private List<AssetInfo> getAssetsByFilter(InventoryCreateDTO dto) {
+    private List<AssetInfo> getAssetsByFilter(InventoryCreateDTO dto, String site) {
         LambdaQueryWrapper<AssetInfo> wrapper = new LambdaQueryWrapper<>();
+
+        // 站点隔离：当前站点非空时，所有筛选分支统一追加站点条件，避免拉取其他站点资产
+        if (site != null && !site.isEmpty()) {
+            wrapper.eq(AssetInfo::getSite, site);
+        }
         
         switch (dto.getInventoryRange()) {
             case RANGE_ALL:

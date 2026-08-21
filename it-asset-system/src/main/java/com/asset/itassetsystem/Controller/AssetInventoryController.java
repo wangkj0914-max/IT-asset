@@ -41,6 +41,11 @@ public class AssetInventoryController {
     public Result<Map<String, Object>> scanAsset(@RequestParam String code) {
         var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<AssetInfo>()
             .eq(AssetInfo::getAssetCode, code);
+        // 站点隔离：当前站点非空时，仅允许扫码本站点资产，避免扫到其他站点资产
+        String site = request.getParameter("site");
+        if (site != null && !site.isEmpty()) {
+            wrapper.eq(AssetInfo::getSite, site);
+        }
         AssetInfo asset = assetInfoService.getOne(wrapper);
         if (asset == null) {
             return Result.fail("未找到资产: " + code);
@@ -121,6 +126,14 @@ public class AssetInventoryController {
     @GetMapping("/report")
     public Result<InventoryReportDTO> report(@RequestParam Long inventoryId) {
         try {
+            // 站点隔离：先校验盘点单归属站点，越权访问直接拒绝
+            AssetInventory inventory = assetInventoryService.getDetail(inventoryId);
+            if (inventory == null) {
+                return Result.fail("盘点任务不存在");
+            }
+            if (!checkSiteAccess(inventory)) {
+                return Result.fail("无权访问该站点数据");
+            }
             InventoryReportDTO report = assetInventoryService.generateReport(inventoryId);
             return Result.success(report);
         } catch (Exception e) {
@@ -137,6 +150,10 @@ public class AssetInventoryController {
         if (inventory == null) {
             return Result.fail("盘点任务不存在");
         }
+        // 站点隔离：盘点单归属站点与当前站点不一致时拒绝访问
+        if (!checkSiteAccess(inventory)) {
+            return Result.fail("无权访问该站点数据");
+        }
         return Result.success(inventory);
     }
     
@@ -145,6 +162,14 @@ public class AssetInventoryController {
      */
     @GetMapping("/details")
     public Result<List<AssetInventoryDetail>> details(@RequestParam Long inventoryId) {
+        // 站点隔离：先确认盘点单归属站点，越权访问直接拒绝
+        AssetInventory inventory = assetInventoryService.getDetail(inventoryId);
+        if (inventory == null) {
+            return Result.fail("盘点任务不存在");
+        }
+        if (!checkSiteAccess(inventory)) {
+            return Result.fail("无权访问该站点数据");
+        }
         List<AssetInventoryDetail> list = assetInventoryService.listDetails(inventoryId);
         return Result.success(list);
     }
@@ -157,17 +182,24 @@ public class AssetInventoryController {
                                    @RequestParam(defaultValue = "10") Integer pageSize,
                                    @RequestParam(required = false) Integer status,
                                    @RequestParam(required = false) String site) {
-        Object result = assetInventoryService.listPage(pageNum, pageSize, status);
-        if (site != null && !site.isEmpty() && result != null) {
-            try {
-                @SuppressWarnings("unchecked")
-                java.util.List<Object> records = (java.util.List<Object>) result.getClass().getMethod("getRecords").invoke(result);
-                if (records != null) {
-                    records.removeIf(r -> { try { return !site.equals(r.getClass().getMethod("getSite").invoke(r)); } catch(Exception e) { return false; } });
-                    result.getClass().getMethod("setTotal", long.class).invoke(result, (long) records.size());
-                }
-            } catch(Exception ignored) {}
-        }
+        // 站点隔离：将站点传入 service，由 SQL 原生过滤本站点数据，保证分页 total 正确
+        Object result = assetInventoryService.listPage(pageNum, pageSize, status, site);
         return Result.success(result);
+    }
+
+    /**
+     * 站点隔离校验：盘点单归属站点与当前请求站点是否一致
+     * 盘点单站点为空（旧数据）或当前请求未携带站点时放行，保持向后兼容
+     */
+    private boolean checkSiteAccess(AssetInventory inventory) {
+        String inventorySite = inventory.getSite();
+        if (inventorySite == null || inventorySite.isEmpty()) {
+            return true;
+        }
+        String site = request.getParameter("site");
+        if (site == null || site.isEmpty()) {
+            return true;
+        }
+        return site.equals(inventorySite);
     }
 }
