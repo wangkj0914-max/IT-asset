@@ -76,7 +76,7 @@ const routes = [
     path: '/asset-return',
     name: 'AssetReturn',
     component: () => import('@/views/AssetReturn.vue'),
-    meta: { title: '资产归还管理', requireAuth: true }
+    meta: { title: '资产归还', requireAuth: true }
   },
   {
     path: '/asset-repair',

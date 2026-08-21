@@ -65,8 +65,8 @@
               <span>资产领用</span>
             </el-menu-item>
             <el-menu-item index="/asset-return" @click="navigateTo('/asset-return')">
-              <el-icon><Refresh /></el-icon>
-              <span>归还记录</span>
+              <el-icon><Back /></el-icon>
+              <span>资产归还</span>
             </el-menu-item>
             <el-menu-item index="/asset-repair" @click="navigateTo('/asset-repair')">
               <el-icon><Tools /></el-icon>
@@ -236,7 +236,7 @@ import {
   Tools, Setting, MoreFilled, ArrowDown,
   DocumentAdd, Grid, Notification, View, Briefcase,
   Plus, Search, Switch, Delete, Fold, Expand, Location, Box, Key,
-  Headset, Cpu, Check, DataLine, Goods, PhoneFilled
+  Headset, Cpu, Check, DataLine, Goods, PhoneFilled, Back
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -310,7 +310,7 @@ const updateTitle = (path) => {
     '/category-manage': '资产分类',
     '/asset-manage': '固定资产',
     '/asset-use': '资产领用',
-    '/asset-return': '归还记录',
+    '/asset-return': '资产归还',
     '/asset-repair': '资产维修',
     '/asset-inbound': '资产入库',
     '/asset-inventory': '资产盘点',

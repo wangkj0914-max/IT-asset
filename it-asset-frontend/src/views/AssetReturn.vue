@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <div class="header-title"><span>归还记录</span></div>
+    <div class="header-title"><span>资产归还</span></div>
     
     <div class="search-section">
       <el-form :model="searchForm" inline>
@@ -10,6 +10,9 @@
             <el-option label="已通过" :value="1" />
             <el-option label="已拒绝" :value="2" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="关键字">
+          <el-input v-model="searchForm.keyword" placeholder="资产编号/名称" clearable style="width:180px" @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -26,6 +29,9 @@
         <el-table-column prop="assetName" label="资产名称" min-width="150" />
         <el-table-column prop="returnPerson" label="归还人" width="100" />
         <el-table-column prop="department" label="部门" width="120" />
+        <el-table-column label="站点" width="90">
+          <template #default="{ row }">{{ row.site || '-' }}</template>
+        </el-table-column>
         <el-table-column label="归还时间" width="160">
           <template #default="{ row }">{{ row.returnDate ? formatDate(row.returnDate) : '-' }}</template>
         </el-table-column>
@@ -45,7 +51,7 @@
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && tableData.length === 0" description="暂无归还记录" />
+      <el-empty v-if="!loading && tableData.length === 0" description="暂无资产归还记录" />
       <div class="pagination-container">
         <el-pagination
           v-model:current-page="pagination.current"
@@ -111,7 +117,9 @@
         <el-descriptions-item label="资产状况">
           {{ ['完好','损坏','需维修'][currentRecord.conditionStatus] }}
         </el-descriptions-item>
-        <el-descriptions-item label="站点">{{ currentRecord.site }}</el-descriptions-item>
+        <el-descriptions-item label="站点">{{ currentRecord.site || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="记录ID">{{ currentRecord.returnId }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ currentRecord.createTime ? formatDate(currentRecord.createTime) : '-' }}</el-descriptions-item>
         <el-descriptions-item label="归还说明" :span="2">{{ currentRecord.returnReason || '-' }}</el-descriptions-item>
         <el-descriptions-item label="审批人">{{ currentRecord.approveUser || '-' }}</el-descriptions-item>
         <el-descriptions-item label="审批时间">{{ currentRecord.approveTime ? formatDate(currentRecord.approveTime) : '-' }}</el-descriptions-item>
@@ -128,7 +136,7 @@ import request from '@/utils/request'
 const userRole = computed(() => parseInt(localStorage.getItem('role')||'1'))
 const loading = ref(false)
 const tableData = ref([])
-const searchForm = reactive({ approveStatus: null })
+const searchForm = reactive({ approveStatus: null, keyword: '' })
 const pagination = reactive({ current: 1, size: 10, total: 0 })
 const submitVisible = ref(false)
 const detailVisible = ref(false)
@@ -153,6 +161,7 @@ const loadData = async () => {
   try {
     const params = { current: pagination.current, size: pagination.size }
     if (searchForm.approveStatus !== null && searchForm.approveStatus !== '') params.approveStatus = searchForm.approveStatus
+    if (searchForm.keyword) params.keyword = searchForm.keyword
     const res = await request.get('/return/page', { params })
     if (res.code === 200) {
       tableData.value = res.data.records || []
