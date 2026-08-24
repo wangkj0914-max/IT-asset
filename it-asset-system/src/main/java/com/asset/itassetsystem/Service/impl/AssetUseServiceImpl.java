@@ -8,6 +8,7 @@ import com.asset.itassetsystem.service.AssetInfoService;
 import com.asset.itassetsystem.service.AssetUseService;
 import com.asset.itassetsystem.vo.UseRecordVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -89,6 +90,11 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
             AssetInfo asset = assetInfoService.getById(record.getAssetId());
             if (asset != null) {
                 asset.setStatus(1); // 已领用
+                // 同步使用人：领用申请的使用人（contactPerson）同步到资产台账 userName
+                if (StringUtils.hasText(record.getContactPerson())) {
+                    asset.setUserName(record.getContactPerson());
+                    asset.setUserId(null); // 手动填写场景无用户ID，保持台账显示与申请一致
+                }
                 assetInfoService.updateById(asset);
             }
         }
@@ -130,9 +136,13 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
         }
         updateById(borrowRecord);
 
-        // 更新资产状态为未领用
-        asset.setStatus(0);
-        return assetInfoService.updateById(asset);
+        // 更新资产状态为未领用并清空使用人
+        // 注意:updateById 默认忽略 null 字段,清空 user_name/user_id 需用 UpdateWrapper 显式 set null
+        return assetInfoService.update(new LambdaUpdateWrapper<AssetInfo>()
+            .eq(AssetInfo::getAssetId, assetId)
+            .set(AssetInfo::getStatus, 0)
+            .set(AssetInfo::getUserName, null)
+            .set(AssetInfo::getUserId, null));
     }
 
     @Override
