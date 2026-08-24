@@ -54,7 +54,6 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
         record.setUserId(1L); // 默认用户 ID，实际应从 token 中获取
         record.setDepartment(dto.getDepartment());
         record.setContactPerson(dto.getContactPerson());
-        record.setContactPhone(dto.getContactPhone());
         record.setUseType(1); // 领用
         record.setUseDate(LocalDateTime.now());
         record.setExpectedReturnDate(dto.getExpectedReturnDate());

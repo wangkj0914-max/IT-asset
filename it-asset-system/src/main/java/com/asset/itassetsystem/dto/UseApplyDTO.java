@@ -19,9 +19,6 @@ public class UseApplyDTO {
     @NotBlank(message = "联系人不能为空")
     private String contactPerson;
     
-    @NotBlank(message = "联系电话不能为空")
-    private String contactPhone;
-    
     private LocalDateTime expectedReturnDate;
     
     private String remark;

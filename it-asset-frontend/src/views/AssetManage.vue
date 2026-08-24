@@ -470,14 +470,7 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="使用人">
-              <el-select v-model="assetForm.userId" placeholder="请选择使用人" style="width: 100%;" clearable filterable>
-                <el-option
-                  v-for="user in userList"
-                  :key="user.userId"
-                  :label="user.realName || user.username"
-                  :value="user.userId"
-                />
-              </el-select>
+              <el-input v-model="assetForm.userName" placeholder="请输入使用人" style="width: 100%;" clearable />
             </el-form-item>
           </el-col>
         </el-row>
@@ -545,11 +538,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="联系人" prop="contactPerson">
-          <el-input v-model="applyForm.contactPerson" placeholder="请输入联系人" />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="contactPhone">
-          <el-input v-model="applyForm.contactPhone" placeholder="请输入联系电话" />
+        <el-form-item label="使用人" prop="contactPerson">
+          <el-input v-model="applyForm.contactPerson" placeholder="请输入使用人" />
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="applyForm.remark" type="textarea" :rows="2" placeholder="请输入备注（可选）" />
@@ -576,7 +566,7 @@
             <el-tag :type="row.useType === 1 ? '' : 'warning'" size="small">{{ getUseTypeText(row.useType) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="申请人" width="80" align="center">
+        <el-table-column label="使用人" width="80" align="center">
           <template #default="{ row }">{{ row.contactPerson || '-' }}</template>
         </el-table-column>
         <el-table-column label="部门" width="100" align="center" prop="department" />
@@ -812,6 +802,7 @@ const assetForm = reactive({
   storageLocation: '',
   status: 0,
   userId: null,
+  userName: '',
   department: '',
   warrantyInfo: '',
   depreciationMethod: 'straight_line',
@@ -884,13 +875,11 @@ const applyForm = reactive({
   assetId: null,
   department: '',
   contactPerson: '',
-  contactPhone: '',
   remark: ''
 })
 const applyRules = reactive({
   department: [{ required: true, message: '请选择部门', trigger: 'change' }],
-  contactPerson: [{ required: true, message: '请输入联系人', trigger: 'blur' }],
-  contactPhone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }]
+  contactPerson: [{ required: true, message: '请输入使用人', trigger: 'blur' }]
 })
 
 // 领用记录相关
@@ -1102,6 +1091,7 @@ const showAddDialog = async () => {
     storageLocation: '',
     status: 0,
     userId: null,
+    userName: '',
     department: '',
     warrantyInfo: '',
     depreciationMethod: 'straight_line',
@@ -1141,6 +1131,7 @@ const showEditDialog = async (row) => {
     storageLocation: row.storageLocation || '',
     status: row.status,
     userId: row.userId || null,
+    userName: row.userName || (row.userId ? getUserName(row.userId) : ''),
     department: parseDepartment(row.remark) !== '-' ? parseDepartment(row.remark) : '',
     warrantyInfo: row.warrantyInfo || '',
     depreciationMethod: row.depreciationMethod || 'straight_line',
@@ -1753,7 +1744,6 @@ const handleApplyAsset = (row) => {
   applyForm.assetId = row.assetId
   applyForm.department = parseDepartment(row.remark) !== '-' ? parseDepartment(row.remark) : ''
   applyForm.contactPerson = ''
-  applyForm.contactPhone = ''
   applyForm.remark = ''
   applyDialogVisible.value = true
 }
@@ -1767,7 +1757,6 @@ const resetApplyForm = () => {
   applyForm.assetId = null
   applyForm.department = ''
   applyForm.contactPerson = ''
-  applyForm.contactPhone = ''
   applyForm.remark = ''
 }
 

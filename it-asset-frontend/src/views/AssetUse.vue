@@ -83,8 +83,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="department" label="领用部门" width="110" align="center" />
-        <el-table-column prop="contactPerson" label="联系人" width="90" align="center" />
-        <el-table-column prop="contactPhone" label="联系电话" width="130" align="center" />
+        <el-table-column prop="contactPerson" label="使用人" width="90" align="center" />
         <el-table-column label="领用类型" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="row.useType === 1 ? '' : 'warning'" size="small">
@@ -186,14 +185,9 @@
           </el-select>
         </el-form-item>
         <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="联系人" prop="contactPerson">
-              <el-input v-model="applyForm.contactPerson" placeholder="请输入联系人" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="联系电话" prop="contactPhone">
-              <el-input v-model="applyForm.contactPhone" placeholder="请输入联系电话" />
+          <el-col :span="24">
+            <el-form-item label="使用人" prop="contactPerson">
+              <el-input v-model="applyForm.contactPerson" placeholder="请输入使用人" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -232,8 +226,7 @@
         <el-descriptions-item label="资产名称">{{ currentRecord.assetName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="领用部门">{{ currentRecord.department || '-' }}</el-descriptions-item>
         <el-descriptions-item label="领用类型">{{ getUseTypeText(currentRecord.useType) }}</el-descriptions-item>
-        <el-descriptions-item label="联系人">{{ currentRecord.contactPerson || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="联系电话">{{ currentRecord.contactPhone || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="使用人">{{ currentRecord.contactPerson || '-' }}</el-descriptions-item>
         <el-descriptions-item label="领用时间">{{ currentRecord.useDate ? formatDate(currentRecord.useDate) : '-' }}</el-descriptions-item>
         <el-descriptions-item label="预期归还">{{ currentRecord.expectedReturnDate ? formatDate(currentRecord.expectedReturnDate) : '-' }}</el-descriptions-item>
         <el-descriptions-item label="实际归还">{{ currentRecord.actualReturnDate ? formatDate(currentRecord.actualReturnDate) : '-' }}</el-descriptions-item>
@@ -293,7 +286,6 @@ const applyForm = reactive({
   assetId: null,
   department: '',
   contactPerson: '',
-  contactPhone: '',
   expectedReturnDate: '',
   remark: ''
 })
@@ -301,8 +293,7 @@ const applyForm = reactive({
 const applyRules = reactive({
   assetId: [{ required: true, message: '请选择资产', trigger: 'change' }],
   department: [{ required: true, message: '请选择部门', trigger: 'change' }],
-  contactPerson: [{ required: true, message: '请输入联系人', trigger: 'blur' }],
-  contactPhone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }]
+  contactPerson: [{ required: true, message: '请输入使用人', trigger: 'blur' }]
 })
 
 const applyFormRef = ref(null)
@@ -420,7 +411,6 @@ const resetApplyForm = () => {
   applyForm.assetId = null
   applyForm.department = ''
   applyForm.contactPerson = ''
-  applyForm.contactPhone = ''
   applyForm.expectedReturnDate = ''
   applyForm.remark = ''
 }
