@@ -187,8 +187,11 @@ const searchAssets = async (kw) => {
 const onAssetSelect = (val) => {
   const found = assetOptions.value.find(a => a.assetId === val)
   if (found) {
-    if (!submitForm.returnPerson) submitForm.returnPerson = localStorage.getItem('username') || ''
-    if (!submitForm.department) submitForm.department = found.department || ''
+    // 根据固定资产自动带出归还人与部门
+    // 归还人:优先取资产使用人(userName),兜底责任人(responsiblePerson)或当前登录用户
+    submitForm.returnPerson = found.userName || found.responsiblePerson || localStorage.getItem('username') || ''
+    // 部门:取资产使用部门
+    submitForm.department = found.department || ''
   }
 }
 
