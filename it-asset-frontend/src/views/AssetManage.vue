@@ -145,11 +145,11 @@
           </template>
         </el-table-column>
 
-        <!-- 原始价值 -->
-        <el-table-column label="原始价值" width="100" align="right">
+        <!-- 采购成本（原「原始价值」列,显示 purchaseCost 优先,兜底 purchasePrice） -->
+        <el-table-column label="采购成本" width="100" align="right">
           <template #default="{ row }">
-            <span v-if="row.purchasePrice" class="price-text">
-              ¥{{ Number(row.purchasePrice).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
+            <span v-if="row.purchaseCost != null || row.purchasePrice" class="price-text">
+              ¥{{ Number(row.purchaseCost != null ? row.purchaseCost : row.purchasePrice).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
             </span>
             <span v-else>-</span>
           </template>
@@ -209,9 +209,9 @@
         </el-table-column>
 
         <!-- 使用人 -->
-        <el-table-column prop="responsiblePerson" label="使用人" width="90" align="center">
+        <el-table-column prop="userName" label="使用人" width="90" align="center">
           <template #default="{ row }">
-            {{ row.responsiblePerson || row.userName || (row.userId ? getUserName(row.userId) : '-') }}
+            {{ row.userName || row.responsiblePerson || (row.userId ? getUserName(row.userId) : '-') }}
           </template>
         </el-table-column>
 
