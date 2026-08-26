@@ -789,6 +789,7 @@ const isEditMode = ref(false)
 // 资产表单数据
 const assetForm = reactive({
   assetId: null,
+  assetCode: '',
   assetName: '',
   categoryId: null,
   brand: '',
@@ -815,6 +816,39 @@ const assetForm = reactive({
   nextMaintenanceDate: '',
   remark: ''
 })
+
+// 重置资产表单(打开新增/编辑对话框前调用,防止残留)
+const resetAssetForm = () => {
+  Object.assign(assetForm, {
+    assetId: null,
+    assetCode: '',
+    assetName: '',
+    categoryId: null,
+    brand: '',
+    model: '',
+    modelId: null,
+    serialNumber: '',
+    purchasePrice: '',
+    purchaseCost: '',
+    purchaseDate: '',
+    supplier: '',
+    storageLocation: '',
+    status: 0,
+    userId: null,
+    userName: '',
+    department: '',
+    warrantyInfo: '',
+    depreciationMethod: 'straight_line',
+    depreciationYears: null,
+    depreciationRate: null,
+    eolDate: '',
+    currentValue: null,
+    warrantyExpireDate: '',
+    maintenanceCycleDays: null,
+    nextMaintenanceDate: '',
+    remark: ''
+  })
+}
 
 // 领用申请相关
 const applyDialogVisible = ref(false)
@@ -1110,6 +1144,8 @@ const showAddDialog = async () => {
 // 显示编辑对话框
 const showEditDialog = async (row) => {
   isEditMode.value = true
+  // 先重置表单,防止残留上次编辑的字段(尤其是 Object.assign 未列出的字段)
+  resetAssetForm()
   await loadDepartmentList(row.department)
   await loadLocationList()
   await loadUserList()
@@ -1118,6 +1154,7 @@ const showEditDialog = async (row) => {
   await loadCustomFieldValues(row.assetId)
   Object.assign(assetForm, {
     assetId: row.assetId,
+    assetCode: row.assetCode || '',
     assetName: row.assetName,
     categoryId: row.categoryId,
     brand: row.brand || '',
