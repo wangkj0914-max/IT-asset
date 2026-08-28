@@ -1392,10 +1392,10 @@ const buildLabelHtml = (row, qrDataUrl, siteLabel) => `
 const LABEL_STYLE = `
   @page { size: 50mm 30mm; margin: 0; }
   * { box-sizing: border-box; }
-  body { font-family: "Courier New", "Dot Matrix", monospace, Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
+  body { font-family: Arial, "Helvetica Neue", sans-serif; margin: 0; padding: 0; background: #fff; }
   .label {
     width: 50mm; height: 30mm;
-    border: 1.5px solid #000;
+    border: none;
     border-radius: 2mm;
     padding: 1.2mm 2mm 1.2mm 2mm;
     position: relative;
@@ -1407,12 +1407,12 @@ const LABEL_STYLE = `
     justify-content: space-between;
   }
   .label .qr {
-    position: absolute; top: 1.2mm; right: 1.2mm;
+    position: absolute; top: 1.2mm; right: 3.2mm;
     width: 11mm; height: 11mm;
   }
   .label .qr img { width: 100%; height: 100%; display: block; }
-  .label .title { font-size: 7pt; font-weight: bold; color: #000; line-height: 1.2; padding-right: 12mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .label .row { font-size: 8pt; line-height: 1.25; display: flex; gap: 1mm; align-items: baseline; }
+  .label .title { font-size: 8pt; font-weight: bold; color: #000; line-height: 1.2; padding-right: 12mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .label .row { font-size: 8pt; line-height: 1.25; display: flex; gap: 1mm; align-items: baseline; margin-left: -3mm; }
   .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 16mm; }
   .label .row .val { flex: 1; word-break: break-all; overflow-wrap: anywhere; }
   .label .row.desc { line-height: 1.15; align-items: flex-start; }
