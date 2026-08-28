@@ -1334,11 +1334,11 @@ const exportLabels = async () => {
   }
 
   // 批量标签打印（50mm×30mm,与单标签同一模板）
-  const siteLabel = localStorage.getItem('site') || 'NAI'
+  const siteLabel = toSiteEn(localStorage.getItem('site') || 'NAI')
   const labels = await Promise.all(list.map(async a => {
     const code = a.assetCode || ''
     const qr = await buildQr(code)
-    return buildLabelHtml(a, qr, a.site || siteLabel)
+    return buildLabelHtml(a, qr, toSiteEn(a.site || siteLabel))
   }))
 
   const w = window.open('', '_blank', 'width=900,height=600')
@@ -1365,6 +1365,15 @@ const exportLabels = async () => {
   <div class="labels-wrap">${labels.join('')}</div>
 </body></html>`)
   w.document.close()
+}
+
+// 站点名 → 英文（标签标题用,如 苏州→Suzhou,Penang 本身为英文保持）
+const toSiteEn = (site) => {
+  if (!site) return 'NAI'
+  let s = site
+  try { if (s.includes('%')) s = decodeURIComponent(s) } catch (e) { /* 非编码站点名,忽略 */ }
+  const map = { '苏州': 'Suzhou', 'Suzhou': 'Suzhou', 'Penang': 'Penang' }
+  return map[s] || s
 }
 
 // 单标签打印（浏览器直接打印 + 真实二维码）
@@ -1421,8 +1430,8 @@ const printSingleLabel = async (row) => {
   try { qrDataUrl = await QRCode.toDataURL(code, { width: 220, margin: 0, errorCorrectionLevel: 'M' }) }
   catch (e) { qrDataUrl = '' }
 
-  // 站点优先取 row.site,兜底 localStorage.site,再兜底"NAI"
-  const siteLabel = row.site || localStorage.getItem('site') || 'NAI'
+  // 站点优先取 row.site,兜底 localStorage.site,再兜底"NAI";统一转英文显示
+  const siteLabel = toSiteEn(row.site || localStorage.getItem('site') || 'NAI')
 
   const w = window.open('', '_blank', 'width=420,height=260,left=200,top=100,resizable=yes')
   if (!w) return
