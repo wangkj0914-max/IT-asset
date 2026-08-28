@@ -1395,7 +1395,7 @@ const LABEL_STYLE = `
   body { font-family: Arial, "Helvetica Neue", sans-serif; margin: 0; padding: 0; background: #fff; }
   .label {
     width: 50mm; height: 30mm;
-    border: none;
+    border: 1px dashed #ccc;
     border-radius: 2mm;
     padding: 1.2mm 2mm 1.2mm 2mm;
     position: relative;
@@ -1420,6 +1420,7 @@ const LABEL_STYLE = `
   @media print {
     body { background: #fff; }
     .no-print { display: none !important; }
+    .label { border: none !important; }
   }
 `
 
