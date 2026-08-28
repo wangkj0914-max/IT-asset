@@ -1402,7 +1402,7 @@ const LABEL_STYLE = `
     width: 11mm; height: 11mm;
   }
   .label .qr img { width: 100%; height: 100%; display: block; }
-  .label .title { font-size: 9pt; font-weight: bold; color: #000; line-height: 1.15; padding-right: 12mm; }
+  .label .title { font-size: 8pt; font-weight: bold; color: #000; line-height: 1.2; padding-right: 12mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: Arial, "Helvetica Neue", sans-serif; }
   .label .row { font-size: 8pt; line-height: 1.25; display: flex; gap: 1mm; align-items: baseline; }
   .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 16mm; }
   .label .row .val { flex: 1; word-break: break-all; overflow-wrap: anywhere; }
