@@ -1407,15 +1407,15 @@ const LABEL_STYLE = `
     justify-content: space-between;
   }
   .label .qr {
-    position: absolute; top: 1.2mm; right: 3.2mm;
-    width: 11mm; height: 11mm;
+    position: absolute; top: 1.2mm; right: 1.5mm;
+    width: 10mm; height: 10mm;
   }
   .label .qr img { width: 100%; height: 100%; display: block; }
   .label .title { font-size: 8pt; font-weight: bold; color: #000; line-height: 1.2; padding-right: 12mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .label .row { font-size: 8pt; line-height: 1.25; display: flex; gap: 1mm; align-items: baseline; margin-left: -3mm; }
-  .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 16mm; }
+  .label .row { font-size: 8pt; line-height: 1.3; display: flex; gap: 1mm; align-items: baseline; }
+  .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 14mm; }
   .label .row .val { flex: 1; word-break: break-all; overflow-wrap: anywhere; }
-  .label .row.desc { line-height: 1.15; align-items: flex-start; }
+  .label .row.desc { line-height: 1.2; align-items: flex-start; }
   .label .row.desc .lbl { padding-top: 0.2mm; }
   @media print {
     body { background: #fff; }
