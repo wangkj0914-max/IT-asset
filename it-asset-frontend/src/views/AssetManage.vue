@@ -1374,9 +1374,9 @@ const buildLabelHtml = (row, qrDataUrl, siteLabel) => `
   <img class="qr" src="${qrDataUrl}" alt="QR" />
   <div class="title">NAI (${siteLabel}) Property</div>
   <div class="row"><span class="lbl">FA Code:</span><span class="val">${row.assetCode || 'N/A'}</span></div>
-  <div class="row"><span class="lbl">ME Code:</span><span class="val">${row.model || row.serialNumber || 'N/A'}</span></div>
-  <div class="row desc"><span class="lbl">Description:</span><span class="val">${row.assetName || 'N/A'}</span></div>
-  <div class="row"><span class="lbl">Date:</span><span class="val">${(function(){const m=String(row.purchaseDate||'').match(/(\d{4})[-/](\d{1,2})(?:\/(\d{1,2}))?/);return m?`${m[1]}/${m[2]}${m[3]?'/'+m[3].padStart(2,'0'):''}`:'N/A'})()}</span></div>
+  <div class="row"><span class="lbl">ME Code:</span><span class="val">${row.assetName || 'N/A'}</span></div>
+  <div class="row desc"><span class="lbl">Description:</span><span class="val">${row.model || row.serialNumber || 'N/A'}</span></div>
+  <div class="row"><span class="lbl">Date:</span><span class="val">${(function(){const m=String(row.purchaseDate||'').match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);return m?`${m[1]}/${m[2].padStart(2,'0')}/${m[3].padStart(2,'0')}`:'N/A'})()}</span></div>
 </div>`
 
 // 标签打印共用样式（50mm×30mm 圆角,含打印纸张设置）
@@ -1402,7 +1402,7 @@ const LABEL_STYLE = `
     width: 11mm; height: 11mm;
   }
   .label .qr img { width: 100%; height: 100%; display: block; }
-  .label .title { font-size: 8pt; font-weight: bold; color: #000; line-height: 1.2; padding-right: 12mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: Arial, "Helvetica Neue", sans-serif; }
+  .label .title { font-size: 7pt; font-weight: bold; color: #000; line-height: 1.2; padding-right: 12mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .label .row { font-size: 8pt; line-height: 1.25; display: flex; gap: 1mm; align-items: baseline; }
   .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 16mm; }
   .label .row .val { flex: 1; word-break: break-all; overflow-wrap: anywhere; }
