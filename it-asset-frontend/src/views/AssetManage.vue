@@ -1333,111 +1333,107 @@ const exportLabels = async () => {
     return m ? `${m[1]}年${m[2].padStart(2,'0')}月` : '2024年12月'
   }
 
-  // 批量标签打印
+  // 批量标签打印（50mm×30mm,与单标签同一模板）
+  const siteLabel = localStorage.getItem('site') || 'NAI'
   const labels = await Promise.all(list.map(async a => {
-    const code = a.assetCode || 'N/A'
-    const meCode = a.model || a.serialNumber || 'N/A'
-    const desc = a.assetName || 'N/A'
-    const date = fmtDate(a.purchaseDate)
-    const qr = await buildQr(`${code}|${a.assetName}`)
-    return `
-      <div class="label">
-        <div class="qr"><img src="${qr}" alt="QR" /></div>
-        <div class="row"><span class="lbl">FA Code:</span><span class="val">${code}</span></div>
-        <div class="row"><span class="lbl">ME Code:</span><span class="val">${meCode}</span></div>
-        <div class="row"><span class="lbl">Description:</span><span class="val">${desc}</span></div>
-        <div class="row"><span class="lbl">Date:</span><span class="val">${date}</span></div>
-      </div>`
-  }));
+    const code = a.assetCode || ''
+    const qr = await buildQr(code)
+    return buildLabelHtml(a, qr, a.site || siteLabel)
+  }))
 
   const w = window.open('', '_blank', 'width=900,height=600')
   if (!w) return
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>资产标签 - NAI Suzhou</title>
-<style>
-  @page { size: A4; margin: 5mm; }
-  * { box-sizing: border-box; }
-  body { font-family: "Microsoft YaHei", Arial, sans-serif; margin: 0; padding: 0; }
-  .toolbar { padding: 10px; text-align: center; background: #f5f5f5; border-bottom: 1px solid #ddd; }
-  .toolbar button { padding: 8px 24px; font-size: 14px; cursor: pointer; background: #409EFF; color: white; border: 0; border-radius: 4px; }
-  .toolbar span { margin-left: 12px; color: #666; font-size: 13px; }
-  .page { width: 200mm; min-height: 290mm; padding: 2mm; margin: 10px auto; background: white; }
-  .grid { display: grid; grid-template-columns: repeat(5, 37.8mm); gap: 0; justify-content: start; }
-  .label {
-    width: 37.8mm; height: 29.6mm;
-    border: 1px dashed #aaa;
-    padding: 1.2mm 1.8mm;
-    position: relative;
-    overflow: hidden;
-    background: #fff;
-  }
-  .label .qr {
-    position: absolute; top: 1.2mm; right: 1.2mm;
-    width: 9mm; height: 9mm;
-  }
-  .label .qr img { width: 100%; height: 100%; display: block; }
-  .label .row {
-    font-size: 6.5pt; line-height: 1.35;
-    display: flex; gap: 1mm; margin-bottom: 0.4mm;
-    align-items: baseline;
-  }
-  .label .lbl { color: #1a8a3a; font-weight: bold; flex-shrink: 0; }
-  .label .val { color: #000; word-break: break-all; flex: 1; font-size: 6.5pt; }
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>资产标签 - ${siteLabel}</title>
+<style>${LABEL_STYLE}
+  body { padding: 4mm; background: #f5f5f5; }
+  .print-toolbar { padding: 8px 0; text-align: center; margin-bottom: 6mm; }
+  .print-toolbar button { padding: 8px 24px; font-size: 14px; cursor: pointer; background: #409EFF; color: white; border: 0; border-radius: 4px; }
+  .print-toolbar span { margin-left: 12px; color: #666; font-size: 13px; }
+  .labels-wrap { display: flex; flex-wrap: wrap; gap: 2mm; justify-content: flex-start; }
+  .label { box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
   @media print {
-    .toolbar { display: none; }
-    .page { margin: 0; padding: 0; box-shadow: none; }
-    .label { border: 1px solid #000; }
+    body { padding: 0; background: #fff; }
+    .print-toolbar { display: none !important; }
+    .labels-wrap { gap: 0; }
+    .label { box-shadow: none; }
   }
 </style></head><body>
-  <div class="toolbar">
+  <div class="print-toolbar">
     <button onclick="window.print()">🖨️ 打印全部标签</button>
-    <span>共 ${list.length} 条 · 标签尺寸 37.8mm × 29.6mm · 5 列布局</span>
+    <span>共 ${list.length} 条 · 标签尺寸 50mm × 30mm</span>
   </div>
-  <div class="page"><div class="grid">${labels}</div></div>
+  <div class="labels-wrap">${labels.join('')}</div>
 </body></html>`)
   w.document.close()
 }
 
 // 单标签打印（浏览器直接打印 + 真实二维码）
-const printSingleLabel = async (row) => {
-  const code = row.assetCode || 'N/A'
-  const meCode = row.model || row.serialNumber || 'N/A'
-  const desc = row.assetName || 'N/A'
-  const date = (() => { const m = String(row.purchaseDate||'').match(/(\d{4})[-/](\d{1,2})/); return m ? `${m[1]}年${m[2].padStart(2,'0')}月` : '2024年12月' })()
+// 生成单个 50mm×30mm 标签 HTML（与用户提供的模板一致）
+const buildLabelHtml = (row, qrDataUrl, siteLabel) => `
+<div class="label">
+  <img class="qr" src="${qrDataUrl}" alt="QR" />
+  <div class="title">NAI (${siteLabel}) Property</div>
+  <div class="row"><span class="lbl">FA Code:</span><span class="val">${row.assetCode || 'N/A'}</span></div>
+  <div class="row"><span class="lbl">ME Code:</span><span class="val">${row.model || row.serialNumber || 'N/A'}</span></div>
+  <div class="row desc"><span class="lbl">Description:</span><span class="val">${row.assetName || 'N/A'}</span></div>
+  <div class="row"><span class="lbl">Date:</span><span class="val">${(function(){const m=String(row.purchaseDate||'').match(/(\d{4})[-/](\d{1,2})(?:\/(\d{1,2}))?/);return m?`${m[1]}/${m[2]}${m[3]?'/'+m[3].padStart(2,'0'):''}`:'N/A'})()}</span></div>
+</div>`
 
+// 标签打印共用样式（50mm×30mm 圆角,含打印纸张设置）
+const LABEL_STYLE = `
+  @page { size: 50mm 30mm; margin: 0; }
+  * { box-sizing: border-box; }
+  body { font-family: "Courier New", "Dot Matrix", monospace, Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
+  .label {
+    width: 50mm; height: 30mm;
+    border: 1.5px solid #000;
+    border-radius: 2mm;
+    padding: 1.2mm 2mm 1.2mm 2mm;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .label .qr {
+    position: absolute; top: 1.2mm; right: 1.2mm;
+    width: 11mm; height: 11mm;
+  }
+  .label .qr img { width: 100%; height: 100%; display: block; }
+  .label .title { font-size: 9pt; font-weight: bold; color: #000; line-height: 1.15; padding-right: 12mm; }
+  .label .row { font-size: 8pt; line-height: 1.25; display: flex; gap: 1mm; align-items: baseline; }
+  .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 16mm; }
+  .label .row .val { flex: 1; word-break: break-all; overflow-wrap: anywhere; }
+  .label .row.desc { line-height: 1.15; align-items: flex-start; }
+  .label .row.desc .lbl { padding-top: 0.2mm; }
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+  }
+`
+
+const printSingleLabel = async (row) => {
+  const code = row.assetCode || ''
   // 本地生成二维码（无需外网）
   let qrDataUrl = ''
-  try { qrDataUrl = await QRCode.toDataURL(code, { width: 200, margin: 0, errorCorrectionLevel: 'H' }) }
+  try { qrDataUrl = await QRCode.toDataURL(code, { width: 220, margin: 0, errorCorrectionLevel: 'M' }) }
   catch (e) { qrDataUrl = '' }
 
-  const w = window.open('', '_blank', 'width=500,height=420,left=200,top=100,resizable=yes')
+  // 站点优先取 row.site,兜底 localStorage.site,再兜底"NAI"
+  const siteLabel = row.site || localStorage.getItem('site') || 'NAI'
+
+  const w = window.open('', '_blank', 'width=420,height=260,left=200,top=100,resizable=yes')
   if (!w) return
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>标签预览 - ${code}</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-  .container { max-width: 440px; margin: 0 auto; }
-  .preview { background: #fff; width: 170px; height: 135px; border: 2px solid #000; padding: 8px 10px; position: relative; margin: 0 auto 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  .preview .row { font-size: 8pt; line-height: 1.4; }
-  .preview .qr { position: absolute; top: 6px; right: 6px; width: 50px; height: 50px; }
-  .preview .qr img { width: 100%; height: 100%; display: block; }
-  .footer { text-align: center; }
-  .footer button { padding: 8px 24px; border: 0; border-radius: 4px; cursor: pointer; font-size: 14px; color: #fff; background: #67C23A; }
-  @media print {
-    body { background: #fff; margin: 0; }
-    .footer { display: none; }
-    .preview { border: none; box-shadow: none; }
-  }
-</style></head><body>
-<div class="container">
-  <div class="preview">
-    <div class="qr"><img src="${qrDataUrl}" alt="QR" /></div>
-    <div class="row"><b>FA:</b> ${code}</div>
-    <div class="row"><b>ME:</b> ${meCode}</div>
-    <div class="row"><b>Desc:</b> ${desc}</div>
-    <div class="row"><b>Date:</b> ${date}</div>
-  </div>
-  <div class="footer"><button onclick="window.print()">🖨️ 打印标签</button></div>
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>标签 - ${code}</title>
+<style>${LABEL_STYLE}</style></head><body>
+<div class="no-print" style="padding:8px 0;text-align:center;">
+  <button onclick="window.print()" style="padding:6px 18px;border:0;border-radius:3px;background:#67C23A;color:#fff;cursor:pointer;">🖨️ 打印标签</button>
+  <span style="margin-left:10px;color:#666;font-size:12px;">标签尺寸 50mm × 30mm</span>
 </div>
-<` + `/body></html>`)
+${buildLabelHtml(row, qrDataUrl, siteLabel)}
+</body></html>`)
   w.document.close()
 }
 
