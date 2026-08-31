@@ -1378,17 +1378,20 @@ const toSiteEn = (site) => {
 
 // 单标签打印（浏览器直接打印 + 真实二维码）
 // 生成单个 50mm×30mm 标签 HTML（与用户提供的模板一致）
+// 布局：左列文字（整体靠左）+ 右列 QR（垂直居中，从右上角下移并左移到右列）
 const buildLabelHtml = (row, qrDataUrl, siteLabel) => `
 <div class="label">
+  <div class="text">
+    <div class="title">NAI (${siteLabel}) Property</div>
+    <div class="row"><span class="lbl">FA Code:</span><span class="val">${row.assetCode || 'N/A'}</span></div>
+    <div class="row"><span class="lbl">ME Code:</span><span class="val">${row.assetName || 'N/A'}</span></div>
+    <div class="row desc"><span class="lbl">Description:</span><span class="val">${row.model || row.serialNumber || 'N/A'}</span></div>
+    <div class="row"><span class="lbl">Date:</span><span class="val">${(function(){const m=String(row.purchaseDate||'').match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);return m?`${m[1]}/${m[2].padStart(2,'0')}/${m[3].padStart(2,'0')}`:'N/A'})()}</span></div>
+  </div>
   <img class="qr" src="${qrDataUrl}" alt="QR" />
-  <div class="title">NAI (${siteLabel}) Property</div>
-  <div class="row"><span class="lbl">FA Code:</span><span class="val">${row.assetCode || 'N/A'}</span></div>
-  <div class="row"><span class="lbl">ME Code:</span><span class="val">${row.assetName || 'N/A'}</span></div>
-  <div class="row desc"><span class="lbl">Description:</span><span class="val">${row.model || row.serialNumber || 'N/A'}</span></div>
-  <div class="row"><span class="lbl">Date:</span><span class="val">${(function(){const m=String(row.purchaseDate||'').match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);return m?`${m[1]}/${m[2].padStart(2,'0')}/${m[3].padStart(2,'0')}`:'N/A'})()}</span></div>
 </div>`
 
-// 标签打印共用样式（50mm×30mm 圆角,含打印纸张设置）
+// 标签打印共用样式（50mm×30mm 圆角,双列布局：左文右码,含打印纸张设置）
 const LABEL_STYLE = `
   @page { size: 50mm 30mm; margin: 0; }
   * { box-sizing: border-box; }
@@ -1397,26 +1400,26 @@ const LABEL_STYLE = `
     width: 50mm; height: 30mm;
     border: 1px dashed #ccc;
     border-radius: 2mm;
-    padding: 1.2mm 2mm 1.2mm 2mm;
-    position: relative;
-    overflow: hidden;
+    padding: 1mm 1mm;
     background: #fff;
     page-break-inside: avoid;
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.3mm;
   }
-  .label .qr {
-    position: absolute; top: 1.2mm; right: 1.5mm;
-    width: 10mm; height: 10mm;
+  .label .text {
+    flex: 1 1 auto; min-width: 0; align-self: stretch;
+    display: flex; flex-direction: column; justify-content: space-between;
   }
-  .label .qr img { width: 100%; height: 100%; display: block; }
-  .label .title { font-size: 8pt; font-weight: bold; color: #000; line-height: 1.2; padding-right: 12mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .label .row { font-size: 8pt; line-height: 1.3; display: flex; gap: 1mm; align-items: baseline; }
-  .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 14mm; }
-  .label .row .val { flex: 1; word-break: break-all; overflow-wrap: anywhere; }
-  .label .row.desc { line-height: 1.2; align-items: flex-start; }
-  .label .row.desc .lbl { padding-top: 0.2mm; }
+  .label .qr { width: 10mm; height: 10mm; flex-shrink: 0; display: block; }
+  .label .title { font-size: 8pt; font-weight: bold; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .label .row { font-size: 8pt; line-height: 1.2; display: flex; gap: 0.3mm; align-items: baseline; }
+  .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 9mm; }
+  .label .row .val { flex: 1; min-width: 0; overflow-wrap: break-word; }
+  .label .row.desc { line-height: 1.15; align-items: flex-start; }
+  .label .row.desc .lbl { padding-top: 0.1mm; }
   @media print {
     body { background: #fff; }
     .no-print { display: none !important; }
