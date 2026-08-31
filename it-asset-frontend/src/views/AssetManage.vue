@@ -1406,14 +1406,14 @@ const LABEL_STYLE = `
     overflow: hidden;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.3mm;
   }
   .label .text {
     flex: 1 1 auto; min-width: 0; align-self: stretch;
     display: flex; flex-direction: column; justify-content: space-between;
   }
-  .label .qr { width: 10mm; height: 10mm; flex-shrink: 0; display: block; }
+  .label .qr { width: 10mm; height: 10mm; flex-shrink: 0; display: block; margin-top: 0.2mm; }
   .label .title { font-size: 8pt; font-weight: bold; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .label .row { font-size: 8pt; line-height: 1.2; display: flex; gap: 0.3mm; align-items: baseline; }
   .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 9mm; }
