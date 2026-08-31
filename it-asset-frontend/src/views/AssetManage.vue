@@ -1413,7 +1413,7 @@ const LABEL_STYLE = `
     flex: 1 1 auto; min-width: 0; align-self: stretch;
     display: flex; flex-direction: column; justify-content: space-between;
   }
-  .label .qr { width: 10mm; height: 10mm; flex-shrink: 0; display: block; margin-top: 0.2mm; }
+  .label .qr { width: 10mm; height: 10mm; flex-shrink: 0; display: block; margin-top: 1.2mm; margin-right: 0.8mm; }
   .label .title { font-size: 8pt; font-weight: bold; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .label .row { font-size: 8pt; line-height: 1.2; display: flex; gap: 0.3mm; align-items: baseline; }
   .label .row .lbl { font-weight: bold; flex-shrink: 0; min-width: 9mm; }
