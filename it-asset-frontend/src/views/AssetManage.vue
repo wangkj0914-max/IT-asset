@@ -1352,8 +1352,7 @@ const exportLabels = async () => {
   // 批量标签打印（50mm×30mm,与单标签同一模板）
   const siteLabel = toSiteEn(localStorage.getItem('site') || 'NAI')
   const labels = await Promise.all(list.map(async a => {
-    const code = a.assetCode || ''
-    const qr = await buildQr(code)
+    const qr = await buildQr(buildQrText(a))
     return buildLabelHtml(a, qr, toSiteEn(a.site || siteLabel))
   }))
 
@@ -1392,16 +1391,25 @@ const toSiteEn = (site) => {
   return map[s] || s
 }
 
+// 二维码内容 = FA,ME,Description,Date 逗号分隔（空值省略,2026-09-09）
+// FA=assetCode(资产编号) ME=deviceNo(设备编号) Description=assetName(资产名称) Date=purchaseDate(购置日期)
+const buildQrText = (row) => {
+  const m = String(row.purchaseDate || '').match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/)
+  const dateStr = m ? `${m[1]}/${m[2].padStart(2, '0')}/${m[3].padStart(2, '0')}` : ''
+  return [row.assetCode, row.deviceNo, row.assetName, dateStr].filter(Boolean).join(',')
+}
+
 // 单标签打印（浏览器直接打印 + 真实二维码）
 // 生成单个 50mm×30mm 标签 HTML（与用户提供的模板一致）
 // 布局：左列文字（整体靠左）+ 右列 QR（垂直居中，从右上角下移并左移到右列）
+// 字段语义(2026-09-09)：ME Code=设备编号(deviceNo)  Description=资产名称(assetName)
 const buildLabelHtml = (row, qrDataUrl, siteLabel) => `
 <div class="label">
   <div class="text">
     <div class="title">NAI (${siteLabel}) Property</div>
     <div class="row"><span class="lbl">FA Code:</span><span class="val">${row.assetCode || 'N/A'}</span></div>
-    <div class="row"><span class="lbl">ME Code:</span><span class="val">${row.assetName || 'N/A'}</span></div>
-    <div class="row desc"><span class="lbl">Description:</span><span class="val">${row.model || row.serialNumber || 'N/A'}</span></div>
+    <div class="row"><span class="lbl">ME Code:</span><span class="val">${row.deviceNo || 'N/A'}</span></div>
+    <div class="row desc"><span class="lbl">Description:</span><span class="val">${row.assetName || row.model || 'N/A'}</span></div>
     <div class="row"><span class="lbl">Date:</span><span class="val">${(function(){const m=String(row.purchaseDate||'').match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);return m?`${m[1]}/${m[2].padStart(2,'0')}/${m[3].padStart(2,'0')}`:'N/A'})()}</span></div>
   </div>
   <img class="qr" src="${qrDataUrl}" alt="QR" />
@@ -1445,9 +1453,9 @@ const LABEL_STYLE = `
 
 const printSingleLabel = async (row) => {
   const code = row.assetCode || ''
-  // 本地生成二维码（无需外网）
+  // 本地生成二维码（无需外网）：内容=FA,ME,Description,Date 逗号分隔
   let qrDataUrl = ''
-  try { qrDataUrl = await QRCode.toDataURL(code, { width: 220, margin: 0, errorCorrectionLevel: 'M' }) }
+  try { qrDataUrl = await QRCode.toDataURL(buildQrText(row), { width: 220, margin: 0, errorCorrectionLevel: 'M' }) }
   catch (e) { qrDataUrl = '' }
 
   // 站点优先取 row.site,兜底 localStorage.site,再兜底"NAI";统一转英文显示
