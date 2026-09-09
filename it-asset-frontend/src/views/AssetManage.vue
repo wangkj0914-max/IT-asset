@@ -124,6 +124,13 @@
           </template>
         </el-table-column>
 
+        <!-- 设备编号 -->
+        <el-table-column prop="deviceNo" label="设备编号" width="130" align="center" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.deviceNo || '-' }}
+          </template>
+        </el-table-column>
+
         <!-- 资产品牌 -->
         <el-table-column prop="brand" label="资产品牌" width="120" align="center" show-overflow-tooltip>
           <template #default="{ row }">
@@ -296,6 +303,11 @@
           <el-col :span="12">
             <el-form-item label="资产编号">
               <el-input v-model="assetForm.assetCode" placeholder="留空自动生成" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="设备编号">
+              <el-input v-model="assetForm.deviceNo" placeholder="请输入设备编号" clearable />
             </el-form-item>
           </el-col>
         </el-row>
@@ -822,6 +834,7 @@ const resetAssetForm = () => {
   Object.assign(assetForm, {
     assetId: null,
     assetCode: '',
+    deviceNo: '',
     assetName: '',
     categoryId: null,
     brand: '',
@@ -1112,6 +1125,8 @@ const showAddDialog = async () => {
   Object.keys(customFieldValues).forEach(k => delete customFieldValues[k])
   Object.assign(assetForm, {
     assetId: null,
+    assetCode: '',
+    deviceNo: '',
     assetName: '',
     categoryId: null,
     brand: '',
@@ -1155,6 +1170,7 @@ const showEditDialog = async (row) => {
   Object.assign(assetForm, {
     assetId: row.assetId,
     assetCode: row.assetCode || '',
+    deviceNo: row.deviceNo || '',
     assetName: row.assetName,
     categoryId: row.categoryId,
     brand: row.brand || '',

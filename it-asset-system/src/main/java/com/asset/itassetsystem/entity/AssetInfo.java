@@ -23,6 +23,7 @@ public class AssetInfo {
 
     private String site; // 站点
     private String assetCode; // 资产编号
+    private String deviceNo; // 设备编号 (Excel「资产名称」列, 2026-09-09 新增)
 
     @NotBlank(message = "资产名称不能为空")
     private String assetName;

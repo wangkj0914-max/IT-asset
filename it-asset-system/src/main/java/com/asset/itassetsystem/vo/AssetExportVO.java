@@ -21,6 +21,10 @@ public class AssetExportVO {
     @ExcelProperty("资产编号")
     private String assetCode;
 
+    /** 设备编号 */
+    @ExcelProperty("设备编号")
+    private String deviceNo;
+
     /** 资产名称 */
     @ExcelProperty("资产名称")
     private String assetName;

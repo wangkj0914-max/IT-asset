@@ -370,6 +370,7 @@ public class AssetInfoController {
             AssetExportVO vo = new AssetExportVO();
             vo.setIndex(index++);
             vo.setAssetCode(a.getAssetCode());
+            vo.setDeviceNo(a.getDeviceNo());
             vo.setAssetName(a.getAssetName());
             vo.setCategoryName(categoryMap.getOrDefault(a.getCategoryId(), ""));
             vo.setModel(a.getModel());
