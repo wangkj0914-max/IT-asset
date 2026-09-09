@@ -152,13 +152,43 @@
           </template>
         </el-table-column>
 
-        <!-- 采购成本（原「原始价值」列,显示 purchaseCost 优先,兜底 purchasePrice） -->
-        <el-table-column label="采购成本" width="100" align="right">
+        <!-- 采购成本（原「原始价值」列,显示 purchaseCost 优先,兜底 purchasePrice; 2026-09-09 改美元符号） -->
+        <el-table-column label="采购成本(USD)" width="110" align="right">
           <template #default="{ row }">
             <span v-if="row.purchaseCost != null || row.purchasePrice" class="price-text">
-              ¥{{ Number(row.purchaseCost != null ? row.purchaseCost : row.purchasePrice).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
+              ${{ Number(row.purchaseCost != null ? row.purchaseCost : row.purchasePrice).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
             </span>
             <span v-else>-</span>
+          </template>
+        </el-table-column>
+
+        <!-- 使用部门 -->
+        <el-table-column label="使用部门" width="110" align="center" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.department || parseDepartment(row.remark) || '-' }}
+          </template>
+        </el-table-column>
+
+        <!-- 使用人 -->
+        <el-table-column prop="userName" label="使用人" width="90" align="center">
+          <template #default="{ row }">
+            {{ row.userName || row.responsiblePerson || (row.userId ? getUserName(row.userId) : '-') }}
+          </template>
+        </el-table-column>
+
+        <!-- 存放地点 -->
+        <el-table-column prop="storageLocation" label="存放地点" width="100" align="center" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.storageLocation || '-' }}
+          </template>
+        </el-table-column>
+
+        <!-- 状态 -->
+        <el-table-column label="状态" width="80" align="center">
+          <template #default="{ row }">
+            <span :class="['status-tag', getStatusClass(row.status)]">
+              {{ getStatusText(row.status) }}
+            </span>
           </template>
         </el-table-column>
 
@@ -205,36 +235,6 @@
         <el-table-column label="折旧方法" width="90" align="center">
           <template #default="{ row }">
             {{ getDepText(row.depreciationMethod) }}
-          </template>
-        </el-table-column>
-
-        <!-- 使用部门 -->
-        <el-table-column label="使用部门" width="110" align="center" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.department || parseDepartment(row.remark) || '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 使用人 -->
-        <el-table-column prop="userName" label="使用人" width="90" align="center">
-          <template #default="{ row }">
-            {{ row.userName || row.responsiblePerson || (row.userId ? getUserName(row.userId) : '-') }}
-          </template>
-        </el-table-column>
-
-        <!-- 存放地点 -->
-        <el-table-column prop="storageLocation" label="存放地点" width="100" align="center" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.storageLocation || '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 状态 -->
-        <el-table-column label="状态" width="80" align="center">
-          <template #default="{ row }">
-            <span :class="['status-tag', getStatusClass(row.status)]">
-              {{ getStatusText(row.status) }}
-            </span>
           </template>
         </el-table-column>
 
@@ -433,8 +433,8 @@
         <el-divider content-position="left">财务与折旧</el-divider>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="采购成本">
-              <el-input v-model="assetForm.purchaseCost" placeholder="采购成本" type="number" step="0.01" clearable />
+            <el-form-item label="采购成本(USD)">
+              <el-input v-model="assetForm.purchaseCost" placeholder="采购成本(USD)" type="number" step="0.01" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -1532,7 +1532,7 @@ const resetImport = () => {
 const downloadTemplate = () => {
   const headers = [
     '资产名称*', '资产分类名称*', '品牌', '型号', '序列号',
-    '数量', '原始价值', '购置日期(YYYY-MM-DD)', '折旧方法',
+    '数量', '采购成本(USD)', '购置日期(YYYY-MM-DD)', '折旧方法',
     '使用部门', '责任人', '存放地点', '供应商', '维保信息', '备注'
   ]
   const example = [

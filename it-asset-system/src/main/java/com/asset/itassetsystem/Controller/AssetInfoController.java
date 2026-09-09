@@ -377,7 +377,7 @@ public class AssetInfoController {
             vo.setBrand(a.getBrand());
             vo.setQuantity(a.getQuantity());
             vo.setPurchaseDate(a.getPurchaseDate() != null ? a.getPurchaseDate().toString() : "");
-            vo.setPurchasePrice(a.getPurchasePrice());
+            vo.setPurchaseCost(a.getPurchaseCost() != null ? a.getPurchaseCost() : a.getPurchasePrice());
             vo.setCurrentValue(a.getCurrentValue());
             vo.setEolDate(a.getEolDate() != null ? a.getEolDate().toString() : "");
             vo.setWarrantyExpireDate(a.getWarrantyExpireDate() != null ? a.getWarrantyExpireDate().toString() : "");

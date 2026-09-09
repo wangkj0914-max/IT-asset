@@ -8,7 +8,9 @@ import java.math.BigDecimal;
 
 /**
  * 资产台账 Excel 导出 VO
- * 字段与前端 AssetManage.vue 表格列保持一致（含 型号/使用人 等明细字段）
+ * 列顺序与前端 AssetManage.vue 表格列保持一致：
+ * 状态列在「当前价值/EOL日期/保修到期/下次维护/折旧方法」之前（2026-09-09 列表列位调整后同步）
+ * 采购成本列导出为 USD（purchaseCost 优先，兜底旧字段 purchasePrice）
  */
 @Data
 public class AssetExportVO {
@@ -49,29 +51,9 @@ public class AssetExportVO {
     @ExcelProperty("购置日期")
     private String purchaseDate;
 
-    /** 原始价值（元） */
-    @ExcelProperty("原始价值(元)")
-    private BigDecimal purchasePrice;
-
-    /** 当前价值（元） */
-    @ExcelProperty("当前价值(元)")
-    private BigDecimal currentValue;
-
-    /** EOL日期 */
-    @ExcelProperty("EOL日期")
-    private String eolDate;
-
-    /** 保修到期 */
-    @ExcelProperty("保修到期")
-    private String warrantyExpireDate;
-
-    /** 下次维护 */
-    @ExcelProperty("下次维护")
-    private String nextMaintenanceDate;
-
-    /** 折旧方法（直线折旧/余额递减） */
-    @ExcelProperty("折旧方法")
-    private String depreciationMethod;
+    /** 采购成本(USD)：导出时取 purchaseCost，null 则兜底旧字段 purchasePrice */
+    @ExcelProperty("采购成本(USD)")
+    private BigDecimal purchaseCost;
 
     /** 使用部门 */
     @ExcelProperty("使用部门")
@@ -92,6 +74,26 @@ public class AssetExportVO {
     /** 状态（未领用/已领用/维修中/已报废） */
     @ExcelProperty("状态")
     private String status;
+
+    /** 当前价值（按采购成本直线折旧自动计算；是否与采购成本一同改 USD 标注待用户确认） */
+    @ExcelProperty("当前价值(元)")
+    private BigDecimal currentValue;
+
+    /** EOL日期 */
+    @ExcelProperty("EOL日期")
+    private String eolDate;
+
+    /** 保修到期 */
+    @ExcelProperty("保修到期")
+    private String warrantyExpireDate;
+
+    /** 下次维护 */
+    @ExcelProperty("下次维护")
+    private String nextMaintenanceDate;
+
+    /** 折旧方法（直线折旧/余额递减） */
+    @ExcelProperty("折旧方法")
+    private String depreciationMethod;
 
     /** 备注（去除备注中内嵌的部门信息，与前端展示一致） */
     @ExcelProperty("备注")
