@@ -35,7 +35,7 @@
 | 无认证拦截器 | /system/* 裸奔 | 新增 HandlerInterceptor，拦截除 /login 外的所有 /asset/* 请求 |
 | RBAC 表定义但无实现 | 4 个 Entity 只有空壳 | 新增 Mapper/Service/Controller + 建表 SQL |
 | 路由冲突 | 两个 Controller 都 `@RequestMapping("/system")` | SystemInitController → `/system-init`，SystemDataController → `/system-data` |
-| 数据库密码硬编码 | `password: CHNX#000` | 改为 `${DB_PASSWORD:CHNX#000}`（环境变量 + 默认值兜底） |
+| 数据库密码硬编码 | `password: <明文口令>` | 改为 `${DB_PASSWORD}`（仅环境变量注入、无默认值；缺失则启动失败） |
 
 #### 1.2 技术选型
 
@@ -554,7 +554,7 @@ Client              AuthInterceptor     DepartmentController    SysDepartmentSer
 **工作内容**：
 1. `pom.xml`：添加 jjwt（3 个模块）+ spring-security-crypto 依赖
 2. `application.yml`：
-   - `spring.datasource.password` 改为 `${DB_PASSWORD:CHNX#000}`（环境变量 + 默认值兜底）
+   - `spring.datasource.password` 改为 `${DB_PASSWORD}`（仅环境变量注入、无默认值）
    - 新增 `jwt.secret`、`jwt.expiration` 配置项
 3. SQL 迁移脚本：创建 `sys_role`、`sys_permission`、`sys_user_role`、`sys_role_permission` 四张表 + 预置数据
 4. `JwtUtil.java`：令牌签发（HMAC-SHA256）、验证、解析 Claims（sub/username/role）

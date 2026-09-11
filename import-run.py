@@ -1,4 +1,10 @@
 import mysql.connector
+import os
+
+# 口令从环境变量注入（禁止硬编码，2026-09-11 P0 整改）
+DB_PASS = os.environ.get("DB_PASSWORD")
+if not DB_PASS:
+    raise SystemExit("请先设置环境变量 DB_PASSWORD")
 
 data = open("E:/it-asset-system/penang-import.py", "r", encoding="utf-8").read()
 start = data.find("data = \"\"\"")
@@ -6,7 +12,7 @@ end = data.find("\"\"\".strip()", start)
 lines = data[start+9:end].strip().split('\n')
 
 conn = mysql.connector.connect(
-    host='localhost', user='root', password='CHNX#000',
+    host='localhost', user='root', password=DB_PASS,
     database='it_asset_manage', charset='utf8mb4')
 cur = conn.cursor()
 

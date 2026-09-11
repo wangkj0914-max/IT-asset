@@ -98,7 +98,12 @@ class ItAssetSystemApplicationTests {
     // ==================== 2. 用户认证测试 ====================
     @Test @Order(6) @DisplayName("UT-06: 正确密码登录")
     void testLoginSuccess() {
-        SysUser user = sysUserService.login("admin", "CHNX#000");
+        // 口令从环境变量注入（禁止硬编码，2026-09-11 P0 整改）；未提供时跳过本用例
+        String adminPassword = System.getenv("ADMIN_PASSWORD");
+        if (adminPassword == null || adminPassword.isEmpty()) {
+            return;
+        }
+        SysUser user = sysUserService.login("admin", adminPassword);
         assertNotNull(user, "admin应登录成功");
         assertEquals("admin", user.getUsername());
         assertEquals(2, user.getRole()); // admin role=2

@@ -6,7 +6,8 @@
 BACKUP_DIR="./backups"
 DB_NAME="it_asset_manage"
 DB_USER="root"
-DB_PASS="CHNX#000"
+# 口令从环境变量注入（禁止硬编码，2026-09-11 P0 整改）
+DB_PASS="${DB_PASSWORD:?请先设置环境变量 DB_PASSWORD}"
 RETENTION_DAYS=${1:-7}
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 FILE="${BACKUP_DIR}/${DB_NAME}_${TIMESTAMP}.sql.gz"

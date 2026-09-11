@@ -55,8 +55,14 @@ raw = [
 "CE0343SZ	HP笔记本	HP 440G3 Laptop	CE0360SZ				在用",
 ]
 
+# 口令从环境变量注入（禁止硬编码，2026-09-11 P0 整改）
+import os
+DB_PASS = os.environ.get("DB_PASSWORD")
+if not DB_PASS:
+    raise SystemExit("请先设置环境变量 DB_PASSWORD")
+
 conn = mysql.connector.connect(
-    host='localhost', user='root', password='CHNX#000',
+    host='localhost', user='root', password=DB_PASS,
     database='it_asset_manage', charset='utf8mb4')
 cur = conn.cursor()
 
