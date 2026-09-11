@@ -72,6 +72,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             request.setAttribute("userId", claims.get("userId"));
             request.setAttribute("username", claims.get("username"));
             request.setAttribute("role", claims.get("role"));
+            request.setAttribute("site", claims.get("site"));   // 站点 attribute（供 Controller / Advice 使用）
         }
 
         // 登录接口放行（context-path 为 /asset，登录路径为 /asset/login）

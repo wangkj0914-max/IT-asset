@@ -119,7 +119,7 @@ class ItAssetSystemApplicationTests {
     // ==================== 3. JWT Token 测试 ====================
     @Test @Order(9) @DisplayName("UT-09: JWT生成与解析")
     void testJwtCreateAndParse() {
-        String token = JwtUtil.generateToken(1L, "admin", 2);
+        String token = JwtUtil.generateToken(1L, "admin", 2, "苏州");
         assertNotNull(token);
         String username = JwtUtil.getUsername(token);
         assertEquals("admin", username);

@@ -47,7 +47,7 @@ public class GroupController {
                 return site;
             }
         }
-        return "苏州";
+        return null;
     }
 
     /**

@@ -34,7 +34,7 @@ public class CustomFieldController {
             } catch (Exception ignored) {
             }
         }
-        return site != null ? site : "苏州";
+        return site != null ? site : null;
     }
 
     /**

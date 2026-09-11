@@ -10,7 +10,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/it_asset_manage?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USER:root}
-    password: ${DB_PASSWORD:CHNX#000}
+    password: ${DB_PASSWORD}
   thymeleaf:
     cache: false
   # Flyway 数据库迁移（现有系统默认关闭，新部署使用 --spring.profiles.active=flyway 启用）
@@ -21,7 +21,7 @@ spring:
 
 # JWT 配置
 jwt:
-  secret: ${JWT_SECRET:it-asset-system-default-secret-key}
+  secret: ${JWT_SECRET}
   # Token 过期时间：8 小时（毫秒）
   expiration: 28800000
 

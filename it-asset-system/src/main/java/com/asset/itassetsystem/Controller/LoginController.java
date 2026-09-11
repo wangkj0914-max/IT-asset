@@ -49,8 +49,8 @@ public class LoginController {
             return Result.fail("账号或密码不正确");
         }
 
-        // 使用 JWT 生成 token（静态方法）
-        String token = JwtUtil.generateToken(user.getUserId(), user.getUsername(), user.getRole());
+        // 使用 JWT 生成 token（静态方法）；site 写入 payload 供后端站点强制隔离使用
+        String token = JwtUtil.generateToken(user.getUserId(), user.getUsername(), user.getRole(), user.getSite());
 
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);

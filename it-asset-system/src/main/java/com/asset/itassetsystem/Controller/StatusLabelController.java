@@ -27,7 +27,7 @@ public class StatusLabelController {
 
     private String getSite() {
         String site = httpRequest.getParameter("site");
-        return (site != null && !site.isEmpty()) ? site : "苏州";
+        return (site != null && !site.isEmpty()) ? site : null;
     }
 
     /**

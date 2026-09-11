@@ -5,8 +5,10 @@ services:
     image: mysql:8.0
     container_name: asset-mysql
     restart: always
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: CHNX#000
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?required}
       TZ: Asia/Shanghai
     command:
       - --character-set-server=utf8mb4
@@ -16,7 +18,8 @@ services:
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pCHNX#000"]
+      # CMD-SHELL + $$ 运行时展开：口令不出现在 docker inspect / compose config 输出
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD"']
       interval: 10s
       timeout: 5s
       retries: 15
@@ -25,12 +28,14 @@ services:
     build: ./backend
     container_name: asset-backend
     restart: always
+    env_file:
+      - .env
     environment:
       DB_HOST: mysql
       DB_PORT: "3306"
       DB_USER: root
-      DB_PASSWORD: CHNX#000
-      JWT_SECRET: it-asset-system-default-secret-key
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?required}
+      JWT_SECRET: ${JWT_SECRET:?required}
       TZ: Asia/Shanghai
     depends_on:
       mysql:
@@ -52,3 +57,10 @@ services:
 
 volumes:
   mysql-data:
+
+# 固定默认网络子网（生产服务器 172.19.4.244 上的既有配置，2026-09-11 补回仓库以消除本地/服务器漂移）
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.22.0.0/24

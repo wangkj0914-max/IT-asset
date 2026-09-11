@@ -76,10 +76,12 @@ public class AssetInfoController {
             assetInfo.setAssetCode(generateAssetCode());
         }
         assetInfo.setCreateTime(LocalDateTime.now());
-        // 自动设置站点（从请求参数读取）
+        // 自动设置站点（从请求参数读取）。
+        // 非管理员已被 SiteIsolationFilter 的 Wrapper 强制为 token 站点，管理员则拿到前端选择值；
+        // 真为空时保持 null，绝不静默落到某个站点。
         if (assetInfo.getSite() == null || assetInfo.getSite().isEmpty()) {
             String site = httpRequest.getParameter("site");
-            assetInfo.setSite(site != null && !site.isEmpty() ? site : "苏州");
+            assetInfo.setSite(site);
         }
         
         // 如果选择了资产模型，从模型继承折旧参数
