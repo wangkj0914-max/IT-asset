@@ -132,6 +132,7 @@ public class AssetInfoController {
             @RequestParam(required = false) String site,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String tagNo,
+            @RequestParam(required = false) String deviceNo,
             @RequestParam(required = false) Long modelId,
             @RequestParam(required = false) Long statusLabelId,
             @RequestParam(required = false) String sortColumn,
@@ -152,6 +153,11 @@ public class AssetInfoController {
             wrapper.and(w -> w.like(AssetInfo::getSerialNumber, tagNo)
                               .or()
                               .like(AssetInfo::getAssetCode, tagNo));
+        }
+
+        // 模糊搜索设备编号（2026-09-09 新增查询条件）
+        if (StringUtils.hasText(deviceNo)) {
+            wrapper.like(AssetInfo::getDeviceNo, deviceNo);
         }
 
         // 模糊搜索资产名称
@@ -247,6 +253,7 @@ public class AssetInfoController {
             @RequestParam(required = false) String site,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String tagNo,
+            @RequestParam(required = false) String deviceNo,
             @RequestParam(required = false) Long modelId,
             @RequestParam(required = false) Long statusLabelId,
             @RequestParam(required = false) String sortColumn,
@@ -281,6 +288,11 @@ public class AssetInfoController {
             wrapper.and(w -> w.like(AssetInfo::getSerialNumber, tagNo)
                               .or()
                               .like(AssetInfo::getAssetCode, tagNo));
+        }
+
+        // 模糊搜索设备编号（2026-09-09 新增查询条件）
+        if (StringUtils.hasText(deviceNo)) {
+            wrapper.like(AssetInfo::getDeviceNo, deviceNo);
         }
 
         // 模糊搜索资产名称

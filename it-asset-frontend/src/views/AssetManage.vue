@@ -38,6 +38,14 @@
           />
         </el-form-item>
         <el-form-item>
+          <el-input
+            v-model="searchForm.deviceNo"
+            placeholder="请输入设备编号"
+            clearable
+            style="width: 180px;"
+          />
+        </el-form-item>
+        <el-form-item>
           <el-select v-model="searchForm.status" placeholder="状态" clearable style="width:140px">
             <el-option label="未领用" :value="0" />
             <el-option label="已领用" :value="1" />
@@ -781,6 +789,7 @@ const searchForm = reactive({
   keyword: '',      // 资产名称或编号
   categoryId: null, // 资产分类
   tagNo: '',        // 资产标签号
+  deviceNo: '',     // 设备编号
   status: null,     // 状态
   department: '',   // 使用部门
   storageLocation: '', // 存放地点
@@ -1077,6 +1086,7 @@ const getAssetList = async () => {
         keyword: searchForm.keyword || undefined,
         categoryId: searchForm.categoryId || undefined,
         tagNo: searchForm.tagNo || undefined,
+        deviceNo: searchForm.deviceNo || undefined,
         status: searchForm.status === '' || searchForm.status === null ? undefined : searchForm.status,
         department: searchForm.department || undefined,
         storageLocation: searchForm.storageLocation || undefined,
@@ -1107,6 +1117,7 @@ const resetSearch = () => {
   searchForm.categoryId = null
   searchForm.department = ''
   searchForm.tagNo = ''
+  searchForm.deviceNo = ''
   searchForm.storageLocation = ''
   searchForm.responsiblePerson = ''
   pagination.current = 1
@@ -1567,6 +1578,7 @@ const exportExcel = async () => {
         keyword: searchForm.keyword || undefined,
         categoryId: searchForm.categoryId || undefined,
         tagNo: searchForm.tagNo || undefined,
+        deviceNo: searchForm.deviceNo || undefined,
         status: searchForm.status === '' || searchForm.status === null ? undefined : searchForm.status,
         department: searchForm.department || undefined,
         storageLocation: searchForm.storageLocation || undefined,
