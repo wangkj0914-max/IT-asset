@@ -227,7 +227,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import request from '@/utils/request'
@@ -244,10 +244,15 @@ const router = useRouter()
 
 const username = ref(localStorage.getItem('username') || '用户')
 const realName = ref(localStorage.getItem('realName') || localStorage.getItem('username') || '用户')
-const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
+// userRole / currentSite 需随路由变化从 localStorage 重新同步：
+// App.vue 是根组件，Login.vue 用 router.push 做 SPA 导航不会重新 mount，
+// 若只读一次初值会导致「管理员下拉框不出现」「Penang 用户标签误显示苏州」。
+const userRoleRef = ref(parseInt(localStorage.getItem('role') || '1'))
+const userRole = computed(() => userRoleRef.value)
 const currentTitle = ref('')
 const sidebarCollapsed = ref(false)
-const currentSite = ref(localStorage.getItem('site') || '苏州')
+const currentSiteRef = ref(localStorage.getItem('site') || '苏州')
+const currentSite = currentSiteRef // 保持 ref，支持模板 v-model 双向绑定
 const pendingTotal = ref(0)
 let pendingTimer = null
 
@@ -256,7 +261,51 @@ const switchSite = (val) => {
   window.location.reload()
 }
 
+// 从 localStorage 重新同步由登录态派生的响应式状态（挂载时与路由变化时调用）
+const syncFromStorage = () => {
+  userRoleRef.value = parseInt(localStorage.getItem('role') || '1')
+  currentSiteRef.value = localStorage.getItem('site') || '苏州'
+}
+
 const isFullscreenPage = computed(() => route.path === '/' || route.path.startsWith('/mobile'))
+
+// ---- 待审批轮询控制（防止「僵尸定时器」在登录页持续发起无 token 的 401 请求）----
+// 停止轮询：清理定时器并置空
+const stopPendingPolling = () => {
+  if (pendingTimer) {
+    clearInterval(pendingTimer)
+    pendingTimer = null
+  }
+}
+
+// 拉取待审批数：每次执行前先校验登录态，无 token 立即停表并跳过请求
+const fetchPending = async () => {
+  if (!localStorage.getItem('token')) {
+    stopPendingPolling()
+    return
+  }
+  try {
+    const r = await request.get('/approval/pending')
+    if (r.code === 200) pendingTotal.value = r.data?.totalPending?.count || 0
+  } catch (e) {
+    // 鉴权失败（401/403）或 token 已被清理时主动停表，避免在登录页反复触发无 token 请求与提示；
+    // 其它瞬时网络异常不打断轮询，保证待审批数能自动恢复
+    const status = e?.response?.status
+    if (status === 401 || status === 403 || !localStorage.getItem('token')) {
+      stopPendingPolling()
+    }
+  }
+}
+
+// 启动轮询：仅在「非全屏页（非登录页/移动端）」且「管理员且已登录」时启动；重复调用无副作用
+const startPendingPolling = () => {
+  if (pendingTimer) return
+  if (isFullscreenPage.value) return
+  if (parseInt(localStorage.getItem('role') || '1') !== 2) return
+  if (!localStorage.getItem('token')) return
+  fetchPending()
+  pendingTimer = setInterval(fetchPending, 30000)
+}
 
 const activeMenu = computed(() => {
   const pathMap = {
@@ -365,6 +414,8 @@ const handleCommand = async (command) => {
 }
 
 onMounted(() => {
+  // 挂载时先从 localStorage 同步登录态派生状态（角色/站点）
+  syncFromStorage()
   updateTitle(route.path)
   
   // 检查登录状态
@@ -372,21 +423,25 @@ onMounted(() => {
     router.push('/')
   }
 
-  // 定期拉取待审批数
-  const fetchPending = async () => {
-    try {
-      const r = await request.get('/approval/pending')
-      if (r.code === 200) pendingTotal.value = r.data?.totalPending?.count || 0
-    } catch (e) { /* 网络异常静默忽略 */ }
-  }
-  if (userRole.value === 2) {
-    fetchPending()
-    pendingTimer = setInterval(fetchPending, 30000)
+  // 定期拉取待审批数（仅管理员且非登录页/移动端；内部已做登录态与角色校验）
+  startPendingPolling()
+})
+
+// 路由切换时：
+// 1) 先同步登录态派生状态（角色/站点）——登录 SPA 跳转 / → /home 后下拉框/站点立即生效；
+// 2) 再决定轮询开关：进入登录页 `/` 或移动端 → 停表；离开全屏页 → 恢复轮询（内部有幂等与登录态校验）
+watch(() => route.path, (path) => {
+  syncFromStorage()
+  const fullscreen = path === '/' || path.startsWith('/mobile')
+  if (fullscreen) {
+    stopPendingPolling()
+  } else {
+    startPendingPolling()
   }
 })
 
 onUnmounted(() => {
-  if (pendingTimer) clearInterval(pendingTimer)
+  stopPendingPolling()
 })
 </script>
 

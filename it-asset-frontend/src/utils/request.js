@@ -8,6 +8,38 @@ const request = axios.create({
   timeout: 10000 // 请求超时时间
 })
 
+// 清理本地登录态
+const clearAuth = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('username')
+  localStorage.removeItem('realName')
+  localStorage.removeItem('role')
+  localStorage.removeItem('userId')
+}
+
+/**
+ * 统一的 401/403 未授权处理。
+ * 关键：区分「本地本来就没有 token」与「本地有 token 但被拒」两种情况——
+ * - 无 token（如登录页上的轮询/无谓请求）：静默忽略，不弹提示、不跳转，直接 reject；
+ * - 有 token 但被拒（正常登录过期/无权限）：提示、清理登录态并跳转登录页。
+ * 注意：判断是否持有 token 必须在清理 localStorage 之前读取。
+ * @param {string} [message] 有 token 时展示的提示文案，缺省使用「登录已过期或无权限，请重新登录！」
+ * @returns {boolean} true 表示有 token（已提示并处理），false 表示本来无 token（已静默忽略）
+ */
+const handleUnauthorized = (message) => {
+  const hadToken = !!localStorage.getItem('token')
+  if (!hadToken) {
+    // 未登录状态下的无谓请求：静默拒绝，避免在登录页弹出「登录已过期」误导提示
+    return false
+  }
+  ElMessage.error(message || '登录已过期或无权限，请重新登录！')
+  clearAuth()
+  if (router.currentRoute.value.path !== '/') {
+    router.push('/')
+  }
+  return true
+}
+
 // 请求拦截器：添加 token + 站点
 request.interceptors.request.use(
   config => {
@@ -38,17 +70,11 @@ request.interceptors.response.use(
 
     // 检查后端返回的状态码
     if (res.code !== 200) {
-      ElMessage.error(res.msg || '请求失败')
-      // 401 未授权，跳转到登录页
+      // 401/403 未授权：统一走 handleUnauthorized（无 token 静默忽略，有 token 才提示并跳登录页）
       if (res.code === 401 || res.code === 403) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('username')
-        localStorage.removeItem('realName')
-        localStorage.removeItem('role')
-        localStorage.removeItem('userId')
-        if (router.currentRoute.value.path !== '/') {
-          router.push('/')
-        }
+        handleUnauthorized(res.msg)
+      } else {
+        ElMessage.error(res.msg || '请求失败')
       }
       return Promise.reject(new Error(res.msg || '请求失败'))
     }
@@ -58,15 +84,8 @@ request.interceptors.response.use(
   error => {
     // HTTP 错误
     if (error.response?.status === 401 || error.response?.status === 403) {
-      ElMessage.error('登录已过期或无权限，请重新登录！')
-      localStorage.removeItem('token')
-      localStorage.removeItem('username')
-      localStorage.removeItem('realName')
-      localStorage.removeItem('role')
-      localStorage.removeItem('userId')
-      if (router.currentRoute.value.path !== '/') {
-        router.push('/')
-      }
+      // 统一未授权处理：登录页等无 token 场景静默忽略，正常过期场景仍提示并跳登录页
+      handleUnauthorized()
     } else {
       ElMessage.error(error.response?.data?.msg || error.message || '网络异常，请稍后重试')
     }
