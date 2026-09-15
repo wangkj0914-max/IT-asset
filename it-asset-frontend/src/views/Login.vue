@@ -1,16 +1,16 @@
 <template>
   <div class="login-page">
+    <!-- 装饰层：低透明度几何元素，铺满整页（纯 CSS，aria-hidden） -->
+    <div class="brand-decor" aria-hidden="true">
+      <span class="decor-ring decor-ring-1"></span>
+      <span class="decor-ring decor-ring-2"></span>
+      <span class="decor-ring decor-ring-3"></span>
+      <span class="decor-grid"></span>
+      <span class="decor-beam"></span>
+    </div>
+
     <!-- ============ 左栏：品牌区 ============ -->
     <section class="brand-panel">
-      <!-- 装饰层：低透明度几何元素（纯 CSS，aria-hidden） -->
-      <div class="brand-decor" aria-hidden="true">
-        <span class="decor-ring decor-ring-1"></span>
-        <span class="decor-ring decor-ring-2"></span>
-        <span class="decor-ring decor-ring-3"></span>
-        <span class="decor-grid"></span>
-        <span class="decor-beam"></span>
-      </div>
-
       <div class="brand-content">
         <!-- NAI logo：白底图，放白色圆角 chip 内，避免深色背景上的白方块 -->
         <div class="brand-logo-chip">
@@ -19,14 +19,6 @@
 
         <h1 class="brand-title">IT 固定资产管理系统</h1>
         <p class="brand-subtitle">IT Fixed Asset Management System</p>
-
-        <div class="brand-divider"></div>
-
-        <ul class="brand-desc">
-          <li>资产全生命周期管理</li>
-          <li>苏州 · Penang 双站点协同</li>
-          <li>覆盖入库、领用、维修、报废等全流程</li>
-        </ul>
       </div>
     </section>
 
@@ -94,7 +86,6 @@
 
         <!-- 轻量提示区（替代原先的大块 el-alert） -->
         <div class="form-tips">
-          <p class="form-tips-main">首次登录请联系管理员获取账号</p>
           <p class="form-tips-sub">忘记密码请向管理员申请重置 · 请妥善保管账号信息</p>
         </div>
 
@@ -187,27 +178,29 @@ const handleLogin = async () => {
 
 <style scoped>
 /* ============================================================
-   1. 页面容器：左右分栏，全屏 100vh
+   1. 页面容器：整页统一深藏青底色（不再分区留白）
    ============================================================ */
 .login-page {
+  position: relative;
   display: flex;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #f0f2f5;
+  /* 全页底色 = 品牌区颜色，与系统侧栏同色系 */
+  background: linear-gradient(160deg, #1f2d3d 0%, #304156 55%, #2b3a4b 100%);
 }
 
 /* ============================================================
-   2. 左栏：品牌区（深藏青，与系统侧栏同色系）
+   2. 左栏：品牌区（背景透明，与整页底色连成一体）
    ============================================================ */
 .brand-panel {
   position: relative;
+  z-index: 2;
   flex: 0 0 55%;
   display: flex;
   align-items: center;
   padding: 0 8%;
   overflow: hidden;
-  background: linear-gradient(160deg, #1f2d3d 0%, #304156 55%, #2b3a4b 100%);
 }
 
 .brand-content {
@@ -252,41 +245,7 @@ const handleLogin = async () => {
   text-transform: uppercase;
 }
 
-.brand-divider {
-  width: 64px;
-  height: 3px;
-  margin: 26px 0;
-  border-radius: 2px;
-  background: #409EFF;
-}
-
-.brand-desc {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.brand-desc li {
-  position: relative;
-  padding-left: 18px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.brand-desc li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(64, 158, 255, 0.85);
-}
-
-/* ---- 装饰层（低透明度几何元素）---- */
+/* ---- 装饰层（低透明度几何元素，铺满整页）---- */
 .brand-decor {
   position: absolute;
   inset: 0;
@@ -357,14 +316,16 @@ const handleLogin = async () => {
 }
 
 /* ============================================================
-   3. 右栏：表单区（白底居中）
+   3. 右栏：表单区（背景透明，与左栏同一底色）
    ============================================================ */
 .form-panel {
+  position: relative;
+  z-index: 2;
   flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: transparent;
   padding: 24px;
 }
 
@@ -394,7 +355,7 @@ const handleLogin = async () => {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #303133;
+  color: #ffffff;
 }
 
 /* ---- 表单标题 ---- */
@@ -402,13 +363,13 @@ const handleLogin = async () => {
   margin: 0;
   font-size: 26px;
   font-weight: 700;
-  color: #303133;
+  color: #ffffff;
 }
 
 .form-subtitle {
   margin: 10px 0 0;
   font-size: 14px;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 /* ---- 表单主体 ---- */
@@ -420,12 +381,46 @@ const handleLogin = async () => {
   margin-bottom: 22px;
 }
 
+/* 深色背景下的输入框：半透明玻璃质感，保证可读性 */
 .login-form :deep(.el-input__wrapper) {
   border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+  transition: box-shadow 0.2s, background-color 0.2s;
+}
+
+.login-form :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.32) inset;
+}
+
+.login-form :deep(.el-input__wrapper.is-focus) {
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px #409EFF inset;
 }
 
 .login-form :deep(.el-input__inner) {
   height: 44px;
+  color: #ffffff;
+  caret-color: #ffffff;
+}
+
+.login-form :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 前缀图标 / 清除与密码可见性图标 */
+.login-form :deep(.el-input__prefix),
+.login-form :deep(.el-input__suffix),
+.login-form :deep(.el-input__suffix .el-icon) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 浏览器自动填充时仍保持深色底浅色字 */
+.login-form :deep(.el-input__inner:-webkit-autofill),
+.login-form :deep(.el-input__inner:-webkit-autofill:hover),
+.login-form :deep(.el-input__inner:-webkit-autofill:focus) {
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0 1000px #3a4a5b inset;
 }
 
 .login-btn-group {
@@ -447,8 +442,8 @@ const handleLogin = async () => {
   margin-top: 24px;
   padding: 14px 16px;
   border-radius: 8px;
-  background: #f7f8fa;
-  border: 1px solid #ebeef5;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .form-tips p {
@@ -456,15 +451,9 @@ const handleLogin = async () => {
   line-height: 1.6;
 }
 
-.form-tips-main {
-  font-size: 13px;
-  color: #606266;
-}
-
 .form-tips-sub {
-  margin-top: 4px !important;
   font-size: 12px;
-  color: #a0a4ab;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* ---- 版权 ---- */
@@ -472,7 +461,7 @@ const handleLogin = async () => {
   margin-top: 40px;
   text-align: center;
   font-size: 12px;
-  color: #c0c4cc;
+  color: rgba(255, 255, 255, 0.38);
   letter-spacing: 0.5px;
 }
 
@@ -494,7 +483,7 @@ const handleLogin = async () => {
     flex: 1 1 auto;
     min-height: 100vh;
     padding: 40px 24px;
-    background: #ffffff;
+    background: transparent;
   }
 
   /* 窄屏顶部显示小 logo + 标题 */
