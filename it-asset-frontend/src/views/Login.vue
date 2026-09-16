@@ -1,24 +1,51 @@
 <template>
   <div class="login-page">
-    <!-- 装饰层：低透明度几何元素，铺满整页（纯 CSS，aria-hidden） -->
+    <!-- 装饰层：极淡几何纹理（纯 CSS，aria-hidden） -->
     <div class="brand-decor" aria-hidden="true">
-      <span class="decor-ring decor-ring-1"></span>
-      <span class="decor-ring decor-ring-2"></span>
-      <span class="decor-ring decor-ring-3"></span>
-      <span class="decor-grid"></span>
-      <span class="decor-beam"></span>
+      <span class="decor-rings"></span>
+      <span class="decor-wave"></span>
     </div>
 
     <!-- ============ 左栏：品牌区 ============ -->
     <section class="brand-panel">
       <div class="brand-content">
-        <!-- NAI logo：白底图，放白色圆角 chip 内，避免深色背景上的白方块 -->
+        <!-- NAI logo：白底图，装进白色圆角 chip，避免深色背景上的白方块 -->
         <div class="brand-logo-chip">
           <img src="/nai-logo.png" alt="NAI - Reliable Connectivity Solutions" class="brand-logo" />
         </div>
 
         <h1 class="brand-title">IT 固定资产管理系统</h1>
         <p class="brand-subtitle">IT Fixed Asset Management System</p>
+
+        <!-- 蓝色短横线 -->
+        <span class="brand-accent-line"></span>
+
+        <p class="brand-slogan">专业 · 高效 · 安全 · 智能</p>
+        <p class="brand-desc">助力企业实现 IT 资产全生命周期管理</p>
+
+        <!-- 底部 4 个能力卡片 -->
+        <div class="capability-row">
+          <div class="cap-card">
+            <span class="cap-icon"><el-icon><Box /></el-icon></span>
+            <span class="cap-title">资产全生命周期</span>
+            <span class="cap-sub">采购·使用·维护·报废</span>
+          </div>
+          <div class="cap-card">
+            <span class="cap-icon"><el-icon><PieChart /></el-icon></span>
+            <span class="cap-title">数据可视化</span>
+            <span class="cap-sub">多维报表·洞察分析</span>
+          </div>
+          <div class="cap-card">
+            <span class="cap-icon"><el-icon><Lock /></el-icon></span>
+            <span class="cap-title">安全合规</span>
+            <span class="cap-sub">权限管控·数据安全</span>
+          </div>
+          <div class="cap-card">
+            <span class="cap-icon"><el-icon><Cloudy /></el-icon></span>
+            <span class="cap-title">高效协同</span>
+            <span class="cap-sub">流程驱动·提升效率</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -33,60 +60,74 @@
           <h1 class="form-brand-mini-title">IT 固定资产管理系统</h1>
         </div>
 
-        <h2 class="form-title">欢迎登录</h2>
-        <p class="form-subtitle">请输入您的账号信息以继续</p>
+        <div class="form-card">
+          <!-- 标题区：图标块 + 两行文字 -->
+          <div class="form-head">
+            <span class="head-icon"><el-icon><UserFilled /></el-icon></span>
+            <div class="head-text">
+              <h2 class="form-title">欢迎登录</h2>
+              <p class="form-subtitle">请输入您的账号信息以继续</p>
+            </div>
+          </div>
 
-        <el-form
-          :model="loginForm"
-          :rules="loginRules"
-          ref="loginFormRef"
-          class="login-form"
-        >
-          <el-form-item prop="username">
-            <el-input
-              v-model="loginForm.username"
-              placeholder="请输入用户名"
-              size="large"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><User /></el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+          <div class="form-divider"></div>
 
-          <el-form-item prop="password">
-            <el-input
-              v-model="loginForm.password"
-              type="password"
-              placeholder="请输入密码"
-              size="large"
-              show-password
-              clearable
-              @keyup.enter="handleLogin"
-            >
-              <template #prefix>
-                <el-icon><Lock /></el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+          <el-form
+            :model="loginForm"
+            :rules="loginRules"
+            ref="loginFormRef"
+            class="login-form"
+          >
+            <el-form-item prop="username">
+              <el-input
+                v-model="loginForm.username"
+                placeholder="请输入用户名"
+                size="large"
+                clearable
+              >
+                <template #prefix>
+                  <el-icon><User /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-          <el-form-item class="login-btn-group">
-            <el-button
-              type="primary"
-              @click="handleLogin"
-              class="login-btn"
-              :loading="loading"
-              size="large"
-            >
-              {{ loading ? '登录中...' : '登 录' }}
-            </el-button>
-          </el-form-item>
-        </el-form>
+            <el-form-item prop="password">
+              <el-input
+                v-model="loginForm.password"
+                type="password"
+                placeholder="请输入密码"
+                size="large"
+                show-password
+                clearable
+                @keyup.enter="handleLogin"
+              >
+                <template #prefix>
+                  <el-icon><Lock /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-        <!-- 轻量提示区（替代原先的大块 el-alert） -->
-        <div class="form-tips">
-          <p class="form-tips-sub">忘记密码请向管理员申请重置 · 请妥善保管账号信息</p>
+            <el-form-item class="login-btn-group">
+              <el-button
+                type="primary"
+                @click="handleLogin"
+                class="login-btn"
+                :loading="loading"
+                size="large"
+              >
+                {{ loading ? '登录中...' : '登 录' }}
+              </el-button>
+            </el-form-item>
+          </el-form>
+
+          <!-- 提示区：铃铛图标块 + 两行文字 -->
+          <div class="form-tips">
+            <span class="tips-icon"><el-icon><Bell /></el-icon></span>
+            <div class="tips-text">
+              <p class="tips-line">忘记密码请向管理员申请重置，</p>
+              <p class="tips-line">请妥善保管账号信息</p>
+            </div>
+          </div>
         </div>
 
         <div class="form-copyright">© {{ currentYear }} NAI · IT Asset Management</div>
@@ -97,7 +138,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { User, Lock } from '@element-plus/icons-vue'
+import { User, Lock, Box, PieChart, Cloudy, UserFilled, Bell } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import request from '@/utils/request'
@@ -178,7 +219,7 @@ const handleLogin = async () => {
 
 <style scoped>
 /* ============================================================
-   1. 页面容器：整页统一深藏青底色（不再分区留白）
+   1. 页面容器：左右分栏（左 57% 品牌区 / 右 43% 表单区）
    ============================================================ */
 .login-page {
   position: relative;
@@ -186,66 +227,137 @@ const handleLogin = async () => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  /* 全页底色 = 品牌区颜色，与系统侧栏同色系 */
-  background: linear-gradient(160deg, #1f2d3d 0%, #304156 55%, #2b3a4b 100%);
+  background: #051A39;
 }
 
 /* ============================================================
-   2. 左栏：品牌区（背景透明，与整页底色连成一体）
+   2. 左栏：品牌区
    ============================================================ */
 .brand-panel {
   position: relative;
   z-index: 2;
-  flex: 0 0 55%;
+  flex: 0 0 57%;
   display: flex;
   align-items: center;
-  padding: 0 8%;
+  padding: 0 6% 0 7%;
   overflow: hidden;
+  background: linear-gradient(180deg, #051A39 0%, #041B3B 45%, #021535 100%);
 }
 
 .brand-content {
   position: relative;
   z-index: 2;
-  max-width: 560px;
-  margin-top: -6vh; /* 视觉垂直居中偏上 */
+  width: 100%;
+  max-width: 640px;
+  margin-top: -2vh;
 }
 
-/* ---- NAI logo：白底 chip ---- */
+/* ---- NAI logo：白底 chip（放大版）---- */
 .brand-logo-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 18px;
+  padding: 14px 22px;
   background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .brand-logo {
   display: block;
-  height: 40px;
+  height: 62px;
   width: auto;
 }
 
 /* ---- 品牌文案 ---- */
 .brand-title {
-  margin: 30px 0 0;
-  font-size: 38px;
-  font-weight: 700;
+  margin: 34px 0 0;
+  font-size: 44px;
+  font-weight: 800;
   letter-spacing: 2px;
   color: #ffffff;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .brand-subtitle {
-  margin: 12px 0 0;
-  font-size: 15px;
-  letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.6);
+  margin: 14px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  color: #8FA0C0;
   text-transform: uppercase;
 }
 
-/* ---- 装饰层（低透明度几何元素，铺满整页）---- */
+/* 蓝色短横线 */
+.brand-accent-line {
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin: 26px 0 0;
+  border-radius: 2px;
+  background: #277BF7;
+}
+
+.brand-slogan {
+  margin: 22px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #ffffff;
+}
+
+.brand-desc {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: #8FA0C0;
+}
+
+/* ---- 4 个能力卡片 ---- */
+.capability-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 54px;
+}
+
+.cap-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.cap-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #277BF7, #4FC3F7);
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.cap-title {
+  margin-top: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.cap-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #8FA0C0;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   3. 背景装饰（极淡，不喧宾夺主）
+   ============================================================ */
 .brand-decor {
   position: absolute;
   inset: 0;
@@ -253,70 +365,38 @@ const handleLogin = async () => {
   pointer-events: none;
 }
 
-/* 同心圆环（右下角） */
-.decor-ring {
+/* 中部偏右的大半径同心弧线 */
+.decor-rings {
   position: absolute;
+  top: -10%;
+  left: 34%;
+  width: 1000px;
+  height: 1000px;
   border-radius: 50%;
-  border: 1px solid #ffffff;
-}
-
-.decor-ring-1 {
-  width: 560px;
-  height: 560px;
-  right: -190px;
-  bottom: -220px;
-  opacity: 0.05;
-}
-
-.decor-ring-2 {
-  width: 400px;
-  height: 400px;
-  right: -110px;
-  bottom: -140px;
-  opacity: 0.07;
-}
-
-.decor-ring-3 {
-  width: 250px;
-  height: 250px;
-  right: -35px;
-  bottom: -55px;
-  opacity: 0.09;
-}
-
-/* 细网格线 */
-.decor-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(#ffffff 1px, transparent 1px),
-    linear-gradient(90deg, #ffffff 1px, transparent 1px);
-  background-size: 52px 52px;
-  opacity: 0.04;
-  -webkit-mask-image: linear-gradient(115deg, transparent 45%, #000 100%);
-  mask-image: linear-gradient(115deg, transparent 45%, #000 100%);
-}
-
-/* 斜向光带 */
-.decor-beam {
-  position: absolute;
-  top: -25%;
-  right: 14%;
-  width: 160px;
-  height: 150%;
-  transform: rotate(18deg);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 1) 50%,
-    rgba(255, 255, 255, 0) 100%
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0 62px,
+    rgba(255, 255, 255, 0.06) 62px 63px
   );
-  opacity: 0.05;
-  filter: blur(3px);
+  -webkit-mask-image: radial-gradient(circle at center, #000 26%, transparent 74%);
+  mask-image: radial-gradient(circle at center, #000 26%, transparent 74%);
+}
+
+/* 底部波浪点阵纹理 */
+.decor-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.10) 1.2px, transparent 1.3px);
+  background-size: 16px 16px;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 60%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 60%, #000 100%);
 }
 
 /* ============================================================
-   3. 右栏：表单区（背景透明，与左栏同一底色）
+   4. 右栏：表单区
    ============================================================ */
 .form-panel {
   position: relative;
@@ -325,94 +405,131 @@ const handleLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
   padding: 24px;
+  background: linear-gradient(180deg, #0D2446 0%, #0C2140 60%, #0B1B3D 100%);
 }
 
 .form-inner {
-  width: 400px;
-  max-width: calc(100% - 48px);
+  width: 86%;
+  max-width: 460px;
 }
 
 /* ---- 窄屏品牌头（默认隐藏）---- */
 .form-brand-mini {
   display: none;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+  text-align: center;
 }
 
 .brand-logo-chip--mini {
-  padding: 8px 12px;
-  border-radius: 8px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
 
 .brand-logo-chip--mini .brand-logo {
-  height: 28px;
+  height: 44px;
 }
 
 .form-brand-mini-title {
   margin: 16px 0 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 1px;
   color: #ffffff;
 }
 
-/* ---- 表单标题 ---- */
+/* ---- 表单卡片 ---- */
+.form-card {
+  padding: 32px;
+  border-radius: 16px;
+  background: #243755;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
+/* 标题区 */
+.form-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.head-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #277BF7, #4FC3F7);
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.head-text {
+  min-width: 0;
+}
+
 .form-title {
   margin: 0;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   color: #ffffff;
+  line-height: 1.2;
 }
 
 .form-subtitle {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.55);
+  color: #8FA0C0;
+}
+
+.form-divider {
+  height: 1px;
+  margin: 22px 0 26px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ---- 表单主体 ---- */
-.login-form {
-  margin-top: 32px;
-}
-
 .login-form :deep(.el-form-item) {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
-/* 深色背景下的输入框：半透明玻璃质感，保证可读性 */
 .login-form :deep(.el-input__wrapper) {
+  height: 45px;
   border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+  background-color: #263A55;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.10) inset;
   transition: box-shadow 0.2s, background-color 0.2s;
+  padding: 1px 12px;
 }
 
 .login-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.32) inset;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22) inset;
 }
 
 .login-form :deep(.el-input__wrapper.is-focus) {
-  background-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 0 1px #409EFF inset;
+  background-color: #263A55;
+  box-shadow: 0 0 0 1px #277BF7 inset;
 }
 
 .login-form :deep(.el-input__inner) {
-  height: 44px;
+  height: 45px;
   color: #ffffff;
   caret-color: #ffffff;
 }
 
 .login-form :deep(.el-input__inner::placeholder) {
-  color: rgba(255, 255, 255, 0.4);
+  color: #8FA0C0;
 }
 
 /* 前缀图标 / 清除与密码可见性图标 */
 .login-form :deep(.el-input__prefix),
 .login-form :deep(.el-input__suffix),
 .login-form :deep(.el-input__suffix .el-icon) {
-  color: rgba(255, 255, 255, 0.5);
+  color: #8FA0C0;
 }
 
 /* 浏览器自动填充时仍保持深色底浅色字 */
@@ -420,58 +537,85 @@ const handleLogin = async () => {
 .login-form :deep(.el-input__inner:-webkit-autofill:hover),
 .login-form :deep(.el-input__inner:-webkit-autofill:focus) {
   -webkit-text-fill-color: #ffffff;
-  -webkit-box-shadow: 0 0 0 1000px #3a4a5b inset;
+  -webkit-box-shadow: 0 0 0 1000px #263A55 inset;
 }
 
 .login-btn-group {
-  margin-top: 30px;
+  margin-top: 28px;
   margin-bottom: 0;
 }
 
 .login-btn {
   width: 100%;
-  height: 46px;
+  height: 48px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 2px;
+  color: #ffffff;
+  border: none;
   border-radius: 8px;
+  background: #277BF7;
 }
 
-/* ---- 轻量提示区 ---- */
+.login-btn:hover,
+.login-btn:focus {
+  background: #3d8bf8;
+}
+
+/* ---- 提示区 ---- */
 .form-tips {
-  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
   padding: 14px 16px;
   border-radius: 8px;
+  background: #1A2C50;
+}
+
+.tips-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #8FA0C0;
+  font-size: 16px;
 }
 
-.form-tips p {
+.tips-text {
+  min-width: 0;
+}
+
+.tips-line {
   margin: 0;
-  line-height: 1.6;
-}
-
-.form-tips-sub {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #8FA0C0;
 }
 
 /* ---- 版权 ---- */
 .form-copyright {
-  margin-top: 40px;
+  margin-top: 22px;
   text-align: center;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.38);
+  color: #6B7A99;
   letter-spacing: 0.5px;
 }
 
 /* ============================================================
-   4. 响应式：<=900px 改为单栏
+   5. 响应式：<=900px 改为单栏
    ============================================================ */
 @media (max-width: 900px) {
   .login-page {
     flex-direction: column;
     overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
+    min-height: 100vh;
   }
 
   /* 隐藏左侧大品牌区 */
@@ -483,16 +627,21 @@ const handleLogin = async () => {
     flex: 1 1 auto;
     min-height: 100vh;
     padding: 40px 24px;
-    background: transparent;
   }
 
-  /* 窄屏顶部显示小 logo + 标题 */
+  .form-inner {
+    width: min(420px, calc(100% - 48px));
+    max-width: none;
+  }
+
+  /* 窄屏顶部显示小 logo + 系统名 */
   .form-brand-mini {
     display: block;
   }
 
-  .form-title {
-    font-size: 22px;
+  /* 单栏下隐藏绝对定位的整页装饰，避免错位 */
+  .brand-decor {
+    display: none;
   }
 }
 </style>
