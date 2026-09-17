@@ -257,7 +257,7 @@ const handleLogin = async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 22px;
+  padding: 12px 18px;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
@@ -265,7 +265,7 @@ const handleLogin = async () => {
 
 .brand-logo {
   display: block;
-  height: 62px;
+  height: 88px;
   width: auto;
 }
 
@@ -422,13 +422,13 @@ const handleLogin = async () => {
 }
 
 .brand-logo-chip--mini {
-  padding: 12px 18px;
+  padding: 10px 14px;
   border-radius: 10px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
 
 .brand-logo-chip--mini .brand-logo {
-  height: 44px;
+  height: 56px;
 }
 
 .form-brand-mini-title {
