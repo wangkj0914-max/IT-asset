@@ -11,8 +11,10 @@ public interface AssetInboundService extends IService<AssetInbound> {
     
     /**
      * 分页查询入库记录
+     *
+     * @param site 站点（下推到 SQL 条件，为空时不按站点过滤）
      */
-    IPage<AssetInbound> pageInbounds(Long current, Long size, String assetName, String inboundNo, Integer status);
+    IPage<AssetInbound> pageInbounds(Long current, Long size, String assetName, String inboundNo, Integer status, String site);
     
     /**
      * 提交入库申请

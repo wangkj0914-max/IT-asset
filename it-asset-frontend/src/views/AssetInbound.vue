@@ -309,6 +309,8 @@ const handleSubmit = async () => {
     
     const submitData = {
       ...inboundForm,
+      // 显式携带站点，与全局站点上下文保持一致（localStorage.site 为空时传空串，由后端兜底校验）
+      site: localStorage.getItem('site') || '',
       purchasePrice: inboundForm.purchasePrice ? Number(inboundForm.purchasePrice) : null
     }
     

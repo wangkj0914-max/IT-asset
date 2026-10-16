@@ -58,7 +58,7 @@ public class AssetInboundServiceImpl extends ServiceImpl<AssetInboundMapper, Ass
     private AssetInfoService assetInfoService;
 
     @Override
-    public IPage<AssetInbound> pageInbounds(Long current, Long size, String assetName, String inboundNo, Integer status) {
+    public IPage<AssetInbound> pageInbounds(Long current, Long size, String assetName, String inboundNo, Integer status, String site) {
         IPage<AssetInbound> page = new Page<>(current, size);
         LambdaQueryWrapper<AssetInbound> wrapper = new LambdaQueryWrapper<>();
         
@@ -71,6 +71,10 @@ public class AssetInboundServiceImpl extends ServiceImpl<AssetInboundMapper, Ass
         if (status != null) {
             wrapper.eq(AssetInbound::getStatus, status);
         }
+        // 站点条件下推到 SQL，保证分页 total 正确、跨页记录不丢失
+        if (StringUtils.hasText(site)) {
+            wrapper.eq(AssetInbound::getSite, site);
+        }
         
         wrapper.orderByDesc(AssetInbound::getApplyTime);
         return page(page, wrapper);
@@ -79,6 +83,11 @@ public class AssetInboundServiceImpl extends ServiceImpl<AssetInboundMapper, Ass
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean apply(AssetInbound inbound, String applicant) {
+        // 纵深防御：站点必须非空，杜绝被 DB 列默认值静默兜底到错误站点
+        if (inbound == null || !StringUtils.hasText(inbound.getSite())) {
+            throw new IllegalArgumentException("未指定站点，无法入库");
+        }
+
         // 生成入库单号
         String inboundNo = "IN" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + 
                           (int)(Math.random() * 1000);
@@ -87,6 +96,7 @@ public class AssetInboundServiceImpl extends ServiceImpl<AssetInboundMapper, Ass
         inbound.setStatus(0); // 待审核
         inbound.setApplicant(applicant);
         inbound.setApplyTime(LocalDateTime.now());
+        inbound.setSite(inbound.getSite().trim());
         
         return save(inbound);
     }
@@ -117,6 +127,9 @@ public class AssetInboundServiceImpl extends ServiceImpl<AssetInboundMapper, Ass
             asset.setPurchasePrice(inbound.getPurchasePrice());
             asset.setStorageLocation(inbound.getStorageLocation());
             asset.setStatus(0); // 未领用
+            // 站点继承：审核通过生成的资产必须归属入库单站点，
+            // 否则会再次落入 DB 列默认值（苏州）或 NULL，导致按站点过滤时该资产消失。
+            asset.setSite(inbound.getSite());
             asset.setRemark(inbound.getRemark());
             
             assetInfoService.save(asset);

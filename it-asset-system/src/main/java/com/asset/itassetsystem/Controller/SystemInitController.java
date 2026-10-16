@@ -35,6 +35,7 @@ public class SystemInitController {
                 "`storage_location` VARCHAR(200) DEFAULT NULL COMMENT '存放位置'," +
                 "`status` INT NOT NULL DEFAULT 0 COMMENT '状态：0-待审核 1-已入库 2-已拒绝'," +
                 "`applicant` VARCHAR(50) DEFAULT NULL COMMENT '申请人'," +
+                "`site` VARCHAR(20) DEFAULT NULL COMMENT '站点'," +
                 "`apply_time` DATETIME DEFAULT NULL COMMENT '申请时间'," +
                 "`auditor` VARCHAR(50) DEFAULT NULL COMMENT '审核人'," +
                 "`audit_time` DATETIME DEFAULT NULL COMMENT '审核时间'," +
