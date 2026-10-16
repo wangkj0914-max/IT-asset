@@ -11,6 +11,7 @@ import com.asset.itassetsystem.mapper.AssetInventoryMapper;
 import com.asset.itassetsystem.service.AssetInfoService;
 import com.asset.itassetsystem.service.AssetInventoryService;
 import com.asset.itassetsystem.service.SysUserService;
+import com.asset.itassetsystem.util.SiteContextUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -85,18 +86,12 @@ public class AssetInventoryServiceImpl extends ServiceImpl<AssetInventoryMapper,
         inventory.setStatus(0); // 待盘点
         inventory.setRemark(dto.getRemark());
         
-        // 从请求上下文获取当前站点
-        String currentSite = null;
-        try {
-            var attrs = org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes();
-            if (attrs instanceof org.springframework.web.context.request.ServletRequestAttributes) {
-                String s = ((org.springframework.web.context.request.ServletRequestAttributes) attrs).getRequest().getParameter("site");
-                if (s != null && !s.isEmpty()) {
-                    currentSite = s;
-                    inventory.setSite(s);
-                }
-            }
-        } catch (Exception ignored) {}
+        // 从请求上下文解析站点：缺失即拒绝，避免落库 NULL 或触发缺列报错
+        String currentSite = SiteContextUtil.resolveSite();
+        if (currentSite == null || currentSite.trim().isEmpty()) {
+            throw new IllegalArgumentException("未指定站点，无法提交");
+        }
+        inventory.setSite(currentSite.trim());
         
         inventoryMapper.insert(inventory);
         log.info("盘点任务主记录创建成功，ID: {}", inventory.getInventoryId());

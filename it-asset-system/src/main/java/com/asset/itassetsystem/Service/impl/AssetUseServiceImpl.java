@@ -6,6 +6,7 @@ import com.asset.itassetsystem.entity.AssetUseRecord;
 import com.asset.itassetsystem.mapper.AssetUseRecordMapper;
 import com.asset.itassetsystem.service.AssetInfoService;
 import com.asset.itassetsystem.service.AssetUseService;
+import com.asset.itassetsystem.util.SiteContextUtil;
 import com.asset.itassetsystem.vo.UseRecordVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -60,6 +61,13 @@ public class AssetUseServiceImpl extends ServiceImpl<AssetUseRecordMapper, Asset
         record.setExpectedReturnDate(dto.getExpectedReturnDate());
         record.setApproveStatus(0); // 待审批
         record.setRemark(dto.getRemark());
+        
+        // 站点兜底：DTO 无 site 字段，落库表 site 列无默认值，必须显式回填
+        String site = SiteContextUtil.resolveSite();
+        if (site == null || site.trim().isEmpty()) {
+            throw new IllegalArgumentException("未指定站点，无法提交");
+        }
+        record.setSite(site.trim());
         
         boolean saved = save(record);
         

@@ -6,6 +6,7 @@ import com.asset.itassetsystem.entity.AssetTransferRecord;
 import com.asset.itassetsystem.mapper.AssetTransferRecordMapper;
 import com.asset.itassetsystem.service.AssetInfoService;
 import com.asset.itassetsystem.service.AssetTransferService;
+import com.asset.itassetsystem.util.SiteContextUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,13 @@ public class AssetTransferServiceImpl extends ServiceImpl<AssetTransferRecordMap
         record.setTransferReason(dto.getTransferReason());
         record.setTransferStatus(0); // 待审批
         record.setCreateTime(LocalDateTime.now());
+
+        // 站点兜底：DTO 无 site 字段，落库表 site 列无默认值，必须显式回填
+        String site = SiteContextUtil.resolveSite();
+        if (site == null || site.trim().isEmpty()) {
+            throw new IllegalArgumentException("未指定站点，无法提交");
+        }
+        record.setSite(site.trim());
 
         save(record);
     }

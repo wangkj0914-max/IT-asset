@@ -6,6 +6,7 @@ import com.asset.itassetsystem.entity.AssetScrapRecord;
 import com.asset.itassetsystem.mapper.AssetScrapRecordMapper;
 import com.asset.itassetsystem.service.AssetInfoService;
 import com.asset.itassetsystem.service.AssetScrapService;
+import com.asset.itassetsystem.util.SiteContextUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -49,6 +50,13 @@ public class AssetScrapServiceImpl extends ServiceImpl<AssetScrapRecordMapper, A
         record.setApplyDepartment(getUserDepartment(operator));
         record.setApproveStatus(0); // 待审批
         record.setRemark(dto.getRemark());
+        
+        // 站点兜底：DTO 无 site 字段，落库表 site 列无默认值，必须显式回填
+        String site = SiteContextUtil.resolveSite();
+        if (site == null || site.trim().isEmpty()) {
+            throw new IllegalArgumentException("未指定站点，无法提交");
+        }
+        record.setSite(site.trim());
         
         boolean saved = save(record);
         
