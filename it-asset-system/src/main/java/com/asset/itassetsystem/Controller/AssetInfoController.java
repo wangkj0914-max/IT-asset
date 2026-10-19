@@ -219,6 +219,7 @@ public class AssetInfoController {
             String dbColumn = switch (sortColumn) {
                 case "assetName" -> "asset_name";
                 case "assetCode" -> "asset_code";
+                case "deviceNo" -> "device_no";
                 case "purchasePrice" -> "purchase_price";
                 case "purchaseCost" -> "purchase_cost";
                 case "currentValue" -> "current_value";
@@ -354,6 +355,7 @@ public class AssetInfoController {
             String dbColumn = switch (sortColumn) {
                 case "assetName" -> "asset_name";
                 case "assetCode" -> "asset_code";
+                case "deviceNo" -> "device_no";
                 case "purchasePrice" -> "purchase_price";
                 case "purchaseCost" -> "purchase_cost";
                 case "currentValue" -> "current_value";

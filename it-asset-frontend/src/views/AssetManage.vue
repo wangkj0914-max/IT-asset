@@ -126,14 +126,14 @@
         </el-table-column>
 
         <!-- 资产编号 -->
-        <el-table-column prop="assetCode" label="资产编号" width="130" align="center" show-overflow-tooltip>
+        <el-table-column prop="assetCode" label="资产编号" width="130" align="center" show-overflow-tooltip sortable="custom">
           <template #default="{ row }">
             <span class="asset-code">{{ row.assetCode || '-' }}</span>
           </template>
         </el-table-column>
 
         <!-- 设备编号 -->
-        <el-table-column prop="deviceNo" label="设备编号" width="130" align="center" show-overflow-tooltip>
+        <el-table-column prop="deviceNo" label="设备编号" width="130" align="center" show-overflow-tooltip sortable="custom">
           <template #default="{ row }">
             {{ row.deviceNo || '-' }}
           </template>
