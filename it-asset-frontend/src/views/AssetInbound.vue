@@ -1,31 +1,31 @@
 <template>
   <div class="page-container">
     <div class="header-title">
-      <span>资产入库管理</span>
+      <span>{{ t('ui.资产入库管理') }}</span>
       <el-button type="primary" @click="showInboundDialog">
-        <el-icon><Plus /></el-icon> 新增入库
+        <el-icon><Plus /></el-icon> {{ t('ui.新增入库') }}
       </el-button>
     </div>
     
     <!-- 搜索区域 -->
     <div class="search-section">
       <el-form :inline="true" :model="searchForm">
-        <el-form-item label="资产名称">
-          <el-input v-model="searchForm.assetName" placeholder="请输入资产名称" clearable style="width: 180px;" />
+        <el-form-item :label="t('ui.资产名称')">
+          <el-input v-model="searchForm.assetName" :placeholder="t('ui.请输入资产名称')" clearable style="width: 180px;" />
         </el-form-item>
-        <el-form-item label="入库单号">
-          <el-input v-model="searchForm.inboundNo" placeholder="请输入入库单号" clearable style="width: 180px;" />
+        <el-form-item :label="t('ui.入库单号')">
+          <el-input v-model="searchForm.inboundNo" :placeholder="t('ui.请输入入库单号')" clearable style="width: 180px;" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 130px;">
-            <el-option label="待审核" :value="0" />
-            <el-option label="已入库" :value="1" />
-            <el-option label="已拒绝" :value="2" />
+        <el-form-item :label="t('ui.状态')">
+          <el-select v-model="searchForm.status" :placeholder="t('ui.全部状态')" clearable style="width: 130px;">
+            <el-option :label="t('ui.待审核')" :value="0" />
+            <el-option :label="t('ui.已入库')" :value="1" />
+            <el-option :label="t('ui.已拒绝')" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('ui.查询') }}</el-button>
+          <el-button @click="resetSearch">{{ t('ui.重置') }}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -33,40 +33,40 @@
     <!-- 入库记录列表 -->
     <div class="table-section">
       <el-table :data="inboundList" v-loading="loading" border stripe>
-        <el-table-column prop="inboundNo" label="入库单号" width="150" align="center" />
-        <el-table-column prop="assetName" label="资产名称" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="categoryName" label="分类" width="100" align="center" />
-        <el-table-column prop="brand" label="品牌" width="100" align="center" />
-        <el-table-column prop="model" label="型号" width="120" align="center" show-overflow-tooltip />
-        <el-table-column prop="purchasePrice" label="采购价格" width="100" align="center">
+        <el-table-column prop="inboundNo" :label="t('ui.入库单号')" width="150" align="center" />
+        <el-table-column prop="assetName" :label="t('ui.资产名称')" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="categoryName" :label="t('ui.分类')" width="100" align="center" />
+        <el-table-column prop="brand" :label="t('ui.品牌')" width="100" align="center" />
+        <el-table-column prop="model" :label="t('ui.型号')" width="120" align="center" show-overflow-tooltip />
+        <el-table-column prop="purchasePrice" :label="t('ui.采购价格')" width="100" align="center">
           <template #default="{ row }">
             <span v-if="row.purchasePrice">¥{{ row.purchasePrice.toFixed(2) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="supplier" label="供应商" width="150" align="center" />
-        <el-table-column label="状态" width="80" align="center">
+        <el-table-column prop="supplier" :label="t('ui.供应商')" width="150" align="center" />
+        <el-table-column :label="t('ui.状态')" width="80" align="center">
           <template #default="{ row }">
             <span :class="['status-tag', getStatusClass(row.status)]">
               {{ getStatusText(row.status) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column :label="t('ui.操作')" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <!-- 待审核状态，管理员显示审核按钮 -->
             <template v-if="row.status === 0 && userRole === 2">
-              <el-button type="success" size="small" @click="handleAudit(row, true)">审核</el-button>
-              <el-button type="danger" size="small" @click="handleAudit(row, false)">拒绝</el-button>
+              <el-button type="success" size="small" @click="handleAudit(row, true)">{{ t('ui.审核') }}</el-button>
+              <el-button type="danger" size="small" @click="handleAudit(row, false)">{{ t('ui.拒绝') }}</el-button>
             </template>
             <!-- 其他状态显示详情 -->
             <template v-else>
-              <el-button type="info" size="small" @click="showDetail(row)">详情</el-button>
+              <el-button type="info" size="small" @click="showDetail(row)">{{ t('ui.详情') }}</el-button>
             </template>
           </template>
         </el-table-column>
       </el-table>
       
-      <el-empty v-if="!loading && inboundList.length === 0" description="暂无数据" />
+      <el-empty v-if="!loading && inboundList.length === 0" :description="t('ui.暂无数据')" />
 
       <!-- 分页 -->
       <div class="pagination-container">
@@ -83,17 +83,17 @@
     </div>
     
     <!-- 新增入库对话框 -->
-    <el-dialog v-model="inboundDialogVisible" title="资产入库申请" width="650px">
+    <el-dialog v-model="inboundDialogVisible" :title="t('ui.资产入库申请')" width="650px">
       <el-form :model="inboundForm" :rules="inboundRules" ref="inboundFormRef" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="资产名称" prop="assetName">
-              <el-input v-model="inboundForm.assetName" placeholder="请输入资产名称" clearable />
+            <el-form-item :label="t('ui.资产名称')" prop="assetName">
+              <el-input v-model="inboundForm.assetName" :placeholder="t('ui.请输入资产名称')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="资产分类" prop="categoryId">
-              <el-select v-model="inboundForm.categoryId" placeholder="请选择分类" style="width: 100%;">
+            <el-form-item :label="t('ui.资产分类')" prop="categoryId">
+              <el-select v-model="inboundForm.categoryId" :placeholder="t('ui.请选择分类')" style="width: 100%;">
                 <el-option v-for="cat in categoryList" :key="cat.categoryId" :label="cat.categoryName" :value="cat.categoryId" />
               </el-select>
             </el-form-item>
@@ -102,39 +102,39 @@
         
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="品牌" prop="brand">
-              <el-input v-model="inboundForm.brand" placeholder="请输入品牌" clearable />
+            <el-form-item :label="t('ui.品牌')" prop="brand">
+              <el-input v-model="inboundForm.brand" :placeholder="t('ui.请输入品牌')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="型号" prop="model">
-              <el-input v-model="inboundForm.model" placeholder="请输入型号" clearable />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="序列号" prop="serialNumber">
-              <el-input v-model="inboundForm.serialNumber" placeholder="请输入序列号" clearable />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="采购价格" prop="purchasePrice">
-              <el-input v-model="inboundForm.purchasePrice" placeholder="请输入采购价格" type="number" step="0.01" clearable />
+            <el-form-item :label="t('ui.型号')" prop="model">
+              <el-input v-model="inboundForm.model" :placeholder="t('ui.请输入型号')" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="供应商" prop="supplier">
-              <el-input v-model="inboundForm.supplier" placeholder="请输入供应商" clearable />
+            <el-form-item :label="t('ui.序列号')" prop="serialNumber">
+              <el-input v-model="inboundForm.serialNumber" :placeholder="t('ui.请输入序列号')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="存放位置" prop="storageLocation">
-              <el-select v-model="inboundForm.storageLocation" placeholder="选择存放位置" filterable clearable style="width:100%">
+            <el-form-item :label="t('ui.采购价格')" prop="purchasePrice">
+              <el-input v-model="inboundForm.purchasePrice" :placeholder="t('ui.请输入采购价格')" type="number" step="0.01" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item :label="t('ui.供应商')" prop="supplier">
+              <el-input v-model="inboundForm.supplier" :placeholder="t('ui.请输入供应商')" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item :label="t('ui.存放位置')" prop="storageLocation">
+              <el-select v-model="inboundForm.storageLocation" :placeholder="t('ui.选择存放位置')" filterable clearable style="width:100%">
                 <el-option v-for="s in storageLocationList" :key="s.locationId" :label="s.locationName" :value="s.locationName" />
               </el-select>
             </el-form-item>
@@ -143,40 +143,40 @@
         
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="备注">
-              <el-input v-model="inboundForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+            <el-form-item :label="t('ui.备注')">
+              <el-input v-model="inboundForm.remark" type="textarea" :rows="3" :placeholder="t('ui.请输入备注')" />
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="inboundDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">提交申请</el-button>
+        <el-button @click="inboundDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleSubmit">{{ t('ui.提交申请') }}</el-button>
       </template>
     </el-dialog>
     
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="入库详情" width="600px">
+    <el-dialog v-model="detailDialogVisible" :title="t('ui.入库详情')" width="600px">
       <el-descriptions :column="1" border v-if="currentInbound">
-        <el-descriptions-item label="入库单号">{{ currentInbound.inboundNo }}</el-descriptions-item>
-        <el-descriptions-item label="资产名称">{{ currentInbound.assetName }}</el-descriptions-item>
-        <el-descriptions-item label="分类">{{ currentInbound.categoryName }}</el-descriptions-item>
-        <el-descriptions-item label="品牌">{{ currentInbound.brand }}</el-descriptions-item>
-        <el-descriptions-item label="型号">{{ currentInbound.model }}</el-descriptions-item>
-        <el-descriptions-item label="序列号">{{ currentInbound.serialNumber }}</el-descriptions-item>
-        <el-descriptions-item label="采购价格">
+        <el-descriptions-item :label="t('ui.入库单号')">{{ currentInbound.inboundNo }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.资产名称')">{{ currentInbound.assetName }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.分类')">{{ currentInbound.categoryName }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.品牌')">{{ currentInbound.brand }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.型号')">{{ currentInbound.model }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.序列号')">{{ currentInbound.serialNumber }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.采购价格')">
           <span v-if="currentInbound.purchasePrice">¥{{ currentInbound.purchasePrice.toFixed(2) }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="供应商">{{ currentInbound.supplier }}</el-descriptions-item>
-        <el-descriptions-item label="存放位置">{{ currentInbound.storageLocation }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item :label="t('ui.供应商')">{{ currentInbound.supplier }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.存放位置')">{{ currentInbound.storageLocation }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.状态')">
           <span :class="['status-tag', getStatusClass(currentInbound.status)]">
             {{ getStatusText(currentInbound.status) }}
           </span>
         </el-descriptions-item>
-        <el-descriptions-item label="申请人">{{ currentInbound.applicant }}</el-descriptions-item>
-        <el-descriptions-item label="申请时间">{{ currentInbound.applyTime }}</el-descriptions-item>
-        <el-descriptions-item label="备注">{{ currentInbound.remark || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.申请人')">{{ currentInbound.applicant }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.申请时间')">{{ currentInbound.applyTime }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.备注')">{{ currentInbound.remark || '-' }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -187,6 +187,9 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const inboundList = ref([])
@@ -224,11 +227,11 @@ const inboundForm = reactive({
 })
 
 const inboundRules = reactive({
-  assetName: [{ required: true, message: '请输入资产名称', trigger: 'blur' }],
-  categoryId: [{ required: true, message: '请选择资产分类', trigger: 'change' }],
-  brand: [{ required: true, message: '请输入品牌', trigger: 'blur' }],
-  serialNumber: [{ required: true, message: '请输入序列号', trigger: 'blur' }],
-  storageLocation: [{ required: true, message: '请选择存放位置', trigger: 'change' }]
+  assetName: [{ required: true, message: t('ui.请输入资产名称'), trigger: 'blur' }],
+  categoryId: [{ required: true, message: t('ui.请选择资产分类'), trigger: 'change' }],
+  brand: [{ required: true, message: t('ui.请输入品牌'), trigger: 'blur' }],
+  serialNumber: [{ required: true, message: t('ui.请输入序列号'), trigger: 'blur' }],
+  storageLocation: [{ required: true, message: t('ui.请选择存放位置'), trigger: 'change' }]
 })
 
 onMounted(() => {
@@ -268,7 +271,7 @@ const loadInboundList = async () => {
     inboundList.value = res.data.records || []
     pagination.total = res.data.total || 0
   } catch (error) {
-    ElMessage.error('加载入库列表失败')
+    ElMessage.error(t('ui.加载入库列表失败'))
   } finally {
     loading.value = false
   }
@@ -315,31 +318,31 @@ const handleSubmit = async () => {
     }
     
     await request.post('/inbound/apply', submitData)
-    ElMessage.success('入库申请提交成功，等待审核')
+    ElMessage.success(t('ui.入库申请提交成功，等待审核'))
     inboundDialogVisible.value = false
     loadInboundList()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('提交失败')
+      ElMessage.error(t('ui.提交失败'))
     }
   }
 }
 
 const handleAudit = async (row, approved) => {
-  const action = approved ? '通过' : '拒绝'
-  ElMessageBox.confirm(`确认要${action}该入库申请吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  const action = approved ? t('ui.通过') : t('ui.拒绝')
+  ElMessageBox.confirm(t('ui.确认要{action}该入库申请吗？', { action }), t('ui.提示'), {
+    confirmButtonText: t('ui.确定'),
+    cancelButtonText: t('ui.取消'),
     type: 'info'
   }).then(async () => {
     try {
       await request.post('/inbound/audit', null, {
         params: { inboundId: row.inboundId, approved }
       })
-      ElMessage.success(`${action}成功`)
+      ElMessage.success(t('ui.{action}成功', { action }))
       loadInboundList()
     } catch (error) {
-      ElMessage.error(`${action}失败`)
+      ElMessage.error(t('ui.{action}失败', { action }))
     }
   }).catch(() => {})
 }
@@ -350,8 +353,8 @@ const showDetail = (row) => {
 }
 
 const getStatusText = (status) => {
-  const map = { 0: '待审核', 1: '已入库', 2: '已拒绝' }
-  return map[status] || '未知'
+  const map = { 0: t('ui.待审核'), 1: t('ui.已入库'), 2: t('ui.已拒绝') }
+  return map[status] || t('ui.未知')
 }
 
 const getStatusClass = (status) => {

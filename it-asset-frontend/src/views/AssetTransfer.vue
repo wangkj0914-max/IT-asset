@@ -1,20 +1,20 @@
 <template>
   <div class="page-container">
-    <div class="header-title"><span>资产调拨</span></div>
+    <div class="header-title"><span>{{ t('ui.资产调拨') }}</span></div>
     
     <!-- 搜索 -->
     <div class="search-section">
       <el-form inline>
-        <el-form-item label="状态">
-          <el-select v-model="searchStatus" placeholder="全部" clearable @change="loadData">
-            <el-option label="待审批" :value="0" />
-            <el-option label="已通过" :value="1" />
-            <el-option label="已拒绝" :value="2" />
+        <el-form-item :label="t('ui.状态')">
+          <el-select v-model="searchStatus" :placeholder="t('ui.全部')" clearable @change="loadData">
+            <el-option :label="t('ui.待审批')" :value="0" />
+            <el-option :label="t('ui.已通过')" :value="1" />
+            <el-option :label="t('ui.已拒绝')" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadData">查询</el-button>
-          <el-button type="success" @click="showApply">新建调拨</el-button>
+          <el-button type="primary" @click="loadData">{{ t('ui.查询') }}</el-button>
+          <el-button type="success" @click="showApply">{{ t('ui.新建调拨') }}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -22,37 +22,37 @@
     <!-- 表格 -->
     <div class="table-section">
       <el-table :data="tableData" border stripe v-loading="loading">
-        <el-table-column prop="transferNo" label="调拨单号" width="160" />
-        <el-table-column prop="assetName" label="资产名称" min-width="140" />
-        <el-table-column prop="assetCode" label="资产编号" width="120" />
-        <el-table-column prop="fromDepartment" label="调出部门" width="100" />
-        <el-table-column prop="toDepartment" label="调入部门" width="100" />
-        <el-table-column prop="transferReason" label="调拨原因" min-width="140" show-overflow-tooltip />
-        <el-table-column prop="transferStatus" label="状态" width="90">
+        <el-table-column prop="transferNo" :label="t('ui.调拨单号')" width="160" />
+        <el-table-column prop="assetName" :label="t('ui.资产名称')" min-width="140" />
+        <el-table-column prop="assetCode" :label="t('ui.资产编号')" width="120" />
+        <el-table-column prop="fromDepartment" :label="t('ui.调出部门')" width="100" />
+        <el-table-column prop="toDepartment" :label="t('ui.调入部门')" width="100" />
+        <el-table-column prop="transferReason" :label="t('ui.调拨原因')" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="transferStatus" :label="t('ui.状态')" width="90">
           <template #default="{ row }">
             <el-tag :type="statusTag(row.transferStatus)">{{ statusText(row.transferStatus) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="申请时间" width="160" />
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column prop="createTime" :label="t('ui.申请时间')" width="160" />
+        <el-table-column :label="t('ui.操作')" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="showDetail(row)">详情</el-button>
+            <el-button size="small" @click="showDetail(row)">{{ t('ui.详情') }}</el-button>
             <el-button
               v-if="row.transferStatus === 0 && userRole === 2"
               size="small" type="success" @click="handleApprove(row, 1)"
-            >通过</el-button>
+            >{{ t('ui.通过') }}</el-button>
             <el-button
               v-if="row.transferStatus === 0 && userRole === 2"
               size="small" type="danger" @click="handleApprove(row, 2)"
-            >拒绝</el-button>
+            >{{ t('ui.拒绝') }}</el-button>
             <el-button
               v-if="row.transferStatus === 2 && userRole === 2"
               size="small" type="danger" @click="handleDelete(row)"
-            >删除</el-button>
+            >{{ t('ui.删除') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-if="!loading && tableData.length === 0" description="暂无调拨记录" />
+      <el-empty v-if="!loading && tableData.length === 0" :description="t('ui.暂无调拨记录')" />
       <div class="pagination-container">
         <el-pagination
           v-if="total > 0"
@@ -68,54 +68,54 @@
     </div>
 
     <!-- 新建对话框 -->
-    <el-dialog v-model="applyVisible" title="新建资产调拨" width="500px" @closed="resetApplyForm">
+    <el-dialog v-model="applyVisible" :title="t('ui.新建资产调拨')" width="500px" @closed="resetApplyForm">
       <el-form :model="applyForm" :rules="applyRules" ref="applyFormRef" label-width="100px">
-        <el-form-item label="选择资产" prop="assetId">
-          <el-select v-model="applyForm.assetId" filterable placeholder="搜索并选择资产" style="width:100%">
+        <el-form-item :label="t('ui.选择资产')" prop="assetId">
+          <el-select v-model="applyForm.assetId" filterable :placeholder="t('ui.搜索并选择资产')" style="width:100%">
             <el-option v-for="a in assetList" :key="a.assetId" :label="a.assetName + ' (' + (a.assetCode||'') + ')'" :value="a.assetId" />
           </el-select>
         </el-form-item>
-        <el-form-item label="调入部门" prop="toDepartment">
-          <el-select v-model="applyForm.toDepartment" filterable placeholder="请选择调入部门" style="width:100%">
+        <el-form-item :label="t('ui.调入部门')" prop="toDepartment">
+          <el-select v-model="applyForm.toDepartment" filterable :placeholder="t('ui.请选择调入部门')" style="width:100%">
             <el-option v-for="d in deptList" :key="d.deptId" :label="d.deptName" :value="d.deptName" />
           </el-select>
         </el-form-item>
-        <el-form-item label="调入位置">
-          <el-input v-model="applyForm.toLocation" placeholder="如：3楼机房" />
+        <el-form-item :label="t('ui.调入位置')">
+          <el-input v-model="applyForm.toLocation" :placeholder="t('ui.如：3楼机房')" />
         </el-form-item>
-        <el-form-item label="调入使用人">
-          <el-input v-model="applyForm.toUser" placeholder="如：张三" />
+        <el-form-item :label="t('ui.调入使用人')">
+          <el-input v-model="applyForm.toUser" :placeholder="t('ui.如：张三')" />
         </el-form-item>
-        <el-form-item label="调拨原因" prop="transferReason">
-          <el-input v-model="applyForm.transferReason" type="textarea" :rows="3" placeholder="请说明调拨原因" />
+        <el-form-item :label="t('ui.调拨原因')" prop="transferReason">
+          <el-input v-model="applyForm.transferReason" type="textarea" :rows="3" :placeholder="t('ui.请说明调拨原因')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="applyVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitApply" :loading="submitting">提交</el-button>
+        <el-button @click="applyVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitApply" :loading="submitting">{{ t('ui.提交') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="调拨详情" width="600px">
+    <el-dialog v-model="detailVisible" :title="t('ui.调拨详情')" width="600px">
       <el-descriptions :column="2" border v-if="currentRow">
-        <el-descriptions-item label="调拨单号">{{ currentRow.transferNo }}</el-descriptions-item>
-        <el-descriptions-item label="资产名称">{{ currentRow.assetName }}</el-descriptions-item>
-        <el-descriptions-item label="资产编号">{{ currentRow.assetCode || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="状态"><el-tag :type="statusTag(currentRow.transferStatus)">{{ statusText(currentRow.transferStatus) }}</el-tag></el-descriptions-item>
-        <el-descriptions-item label="调出部门">{{ currentRow.fromDepartment || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="调入部门">{{ currentRow.toDepartment || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="调出位置">{{ currentRow.fromLocation || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="调入位置">{{ currentRow.toLocation || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="调出使用人">{{ currentRow.fromUser || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="调入使用人">{{ currentRow.toUser || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="调拨原因" :span="2">{{ currentRow.transferReason || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="审批备注" :span="2">{{ currentRow.approveRemark || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="申请时间">{{ currentRow.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="审批时间">{{ currentRow.approveTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调拨单号')">{{ currentRow.transferNo }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.资产名称')">{{ currentRow.assetName }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.资产编号')">{{ currentRow.assetCode || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.状态')"><el-tag :type="statusTag(currentRow.transferStatus)">{{ statusText(currentRow.transferStatus) }}</el-tag></el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调出部门')">{{ currentRow.fromDepartment || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调入部门')">{{ currentRow.toDepartment || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调出位置')">{{ currentRow.fromLocation || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调入位置')">{{ currentRow.toLocation || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调出使用人')">{{ currentRow.fromUser || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调入使用人')">{{ currentRow.toUser || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.调拨原因')" :span="2">{{ currentRow.transferReason || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.审批备注')" :span="2">{{ currentRow.approveRemark || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.申请时间')">{{ currentRow.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.审批时间')">{{ currentRow.approveTime || '-' }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
+        <el-button @click="detailVisible = false">{{ t('ui.关闭') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -125,6 +125,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -147,13 +150,13 @@ const applyForm = reactive({
 })
 
 const applyRules = reactive({
-  assetId: [{ required: true, message: '请选择资产', trigger: 'change' }],
-  toDepartment: [{ required: true, message: '请填写调入部门', trigger: 'blur' }],
-  transferReason: [{ required: true, message: '请填写调拨原因', trigger: 'blur' }]
+  assetId: [{ required: true, message: t('ui.请选择资产'), trigger: 'change' }],
+  toDepartment: [{ required: true, message: t('ui.请填写调入部门'), trigger: 'blur' }],
+  transferReason: [{ required: true, message: t('ui.请填写调拨原因'), trigger: 'blur' }]
 })
 
 const statusTag = (s) => ({ 0: 'warning', 1: 'success', 2: 'danger' }[s] || 'info')
-const statusText = (s) => ({ 0: '待审批', 1: '已通过', 2: '已拒绝' }[s] || '未知')
+const statusText = (s) => ({ 0: t('ui.待审批'), 1: t('ui.已通过'), 2: t('ui.已拒绝') }[s] || t('ui.未知'))
 
 const loadData = async () => {
   loading.value = true
@@ -163,7 +166,7 @@ const loadData = async () => {
       tableData.value = res.data.records || []
       total.value = res.data.total || 0
     }
-  } catch { ElMessage.error('加载失败') } finally { loading.value = false }
+  } catch { ElMessage.error(t('ui.加载失败')) } finally { loading.value = false }
 }
 
 const loadAssets = async () => {
@@ -175,7 +178,7 @@ const loadAssets = async () => {
 
 const showApply = async () => {
   await loadAssets()
-  if (assetList.value.length === 0) { ElMessage.warning('没有可用资产'); return }
+  if (assetList.value.length === 0) { ElMessage.warning(t('ui.没有可用资产')); return }
   applyFormRef.value?.resetFields()
   applyVisible.value = true
 }
@@ -189,27 +192,27 @@ const submitApply = async () => {
     submitting.value = true
     const res = await request.post('/transfer/apply', applyForm)
     if (res.code === 200) {
-      ElMessage.success('调拨申请已提交')
+      ElMessage.success(t('ui.调拨申请已提交'))
       applyVisible.value = false
       loadData()
     }
-  } catch (e) { if (e !== 'cancel') ElMessage.error(e.response?.data?.msg || '提交失败') } finally { submitting.value = false }
+  } catch (e) { if (e !== 'cancel') ElMessage.error(e.response?.data?.msg || t('ui.提交失败')) } finally { submitting.value = false }
 }
 
 const handleApprove = async (row, status) => {
   try {
-    await ElMessageBox.confirm(`确定${status === 1 ? '通过' : '拒绝'}该调拨申请？`, '确认', { type: 'warning' })
+    await ElMessageBox.confirm(t('ui.确定{action}该调拨申请？', { action: status === 1 ? t('ui.通过') : t('ui.拒绝') }), t('ui.确认'), { type: 'warning' })
     const res = await request.post('/transfer/approve', null, { params: { transferId: row.transferId, status } })
-    if (res.code === 200) { ElMessage.success('操作成功'); loadData() }
-  } catch (e) { if (e !== 'cancel') ElMessage.error(e.response?.data?.msg || '操作失败') }
+    if (res.code === 200) { ElMessage.success(t('ui.操作成功')); loadData() }
+  } catch (e) { if (e !== 'cancel') ElMessage.error(e.response?.data?.msg || t('ui.操作失败')) }
 }
 
 const handleDelete = async (row) => {
   try {
-    await ElMessageBox.confirm('确定删除该调拨记录？', '确认', { type: 'warning' })
+    await ElMessageBox.confirm(t('ui.确定删除该调拨记录？'), t('ui.确认'), { type: 'warning' })
     const res = await request.post('/transfer/delete', null, { params: { transferId: row.transferId } })
-    if (res.code === 200) { ElMessage.success('已删除'); loadData() }
-  } catch (e) { if (e !== 'cancel') ElMessage.error('删除失败') }
+    if (res.code === 200) { ElMessage.success(t('ui.已删除')); loadData() }
+  } catch (e) { if (e !== 'cancel') ElMessage.error(t('ui.删除失败')) }
 }
 
 const showDetail = (row) => { currentRow.value = row; detailVisible.value = true }

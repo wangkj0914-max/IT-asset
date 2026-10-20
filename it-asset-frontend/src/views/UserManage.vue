@@ -1,11 +1,11 @@
 <template>
   <div class="page-container">
     <div class="header-title">
-      <span>用户管理</span>
+      <span>{{ t('ui.用户管理') }}</span>
       <div>
         <el-input
           v-model="searchKeyword"
-          placeholder="搜索用户名/姓名"
+          :placeholder="t('ui.搜索用户名/姓名')"
           style="width: 200px; margin-right: 10px;"
           clearable
           @clear="loadUsers"
@@ -14,7 +14,7 @@
           <template #prefix><el-icon><Search /></el-icon></template>
         </el-input>
         <el-button type="primary" size="small" @click="showAddDialog" v-if="userRole === 2">
-          <el-icon><Plus /></el-icon> 新增用户
+          <el-icon><Plus /></el-icon> {{ t('ui.新增用户') }}
         </el-button>
       </div>
     </div>
@@ -22,52 +22,52 @@
     <div class="table-section">
       <el-table :data="userList" v-loading="loading" border stripe>
         <el-table-column prop="userId" label="ID" width="70" align="center" />
-        <el-table-column prop="username" label="用户名" width="130" align="center" />
-        <el-table-column prop="realName" label="姓名" width="120" align="center" />
-        <el-table-column prop="department" label="部门" width="130" align="center">
+        <el-table-column prop="username" :label="t('ui.用户名')" width="130" align="center" />
+        <el-table-column prop="realName" :label="t('ui.姓名')" width="120" align="center" />
+        <el-table-column prop="department" :label="t('ui.部门')" width="130" align="center">
           <template #default="{ row }">
             {{ row.department || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="phone" label="电话" width="130" align="center">
+        <el-table-column prop="phone" :label="t('ui.电话')" width="130" align="center">
           <template #default="{ row }">
             {{ row.phone || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="email" label="邮箱" min-width="180">
+        <el-table-column prop="email" :label="t('ui.邮箱')" min-width="180">
           <template #default="{ row }">
             {{ row.email || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="角色" width="100" align="center">
+        <el-table-column :label="t('ui.角色')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.role === 2 ? 'danger' : 'info'" size="small">
-              {{ row.role === 2 ? '管理员' : '普通用户' }}
+              {{ row.role === 2 ? t('ui.管理员') : t('ui.普通用户') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="80" align="center">
+        <el-table-column :label="t('ui.状态')" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
-              {{ row.status === 1 ? '正常' : '禁用' }}
+              {{ row.status === 1 ? t('ui.正常') : t('ui.禁用') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="170" align="center">
+        <el-table-column prop="createTime" :label="t('ui.创建时间')" width="170" align="center">
           <template #default="{ row }">
             {{ formatTime(row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="250" align="center" fixed="right">
+        <el-table-column :label="t('ui.操作')" width="250" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="handleEdit(row)" v-if="userRole === 2">编辑</el-button>
-            <el-button type="warning" size="small" @click="handleResetPwd(row)" v-if="userRole === 2">重置密码</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)" v-if="userRole === 2">删除</el-button>
+            <el-button type="primary" size="small" @click="handleEdit(row)" v-if="userRole === 2">{{ t('ui.编辑') }}</el-button>
+            <el-button type="warning" size="small" @click="handleResetPwd(row)" v-if="userRole === 2">{{ t('ui.重置密码') }}</el-button>
+            <el-button type="danger" size="small" @click="handleDelete(row)" v-if="userRole === 2">{{ t('ui.删除') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && userList.length === 0" description="暂无数据" />
+      <el-empty v-if="!loading && userList.length === 0" :description="t('ui.暂无数据')" />
 
       <div class="pagination-section" v-if="total > pageSize">
         <el-pagination
@@ -83,41 +83,41 @@
     </div>
 
     <!-- 新增/编辑用户对话框 -->
-    <el-dialog v-model="dialogVisible" :title="isEditMode ? '编辑用户' : '新增用户'" width="500px" @close="resetForm">
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? t('ui.编辑用户') : t('ui.新增用户')" width="500px" @close="resetForm">
       <el-form :model="userForm" :rules="formRules" ref="userFormRef" label-width="90px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="userForm.username" placeholder="请输入用户名" :disabled="isEditMode" />
+        <el-form-item :label="t('ui.用户名')" prop="username">
+          <el-input v-model="userForm.username" :placeholder="t('ui.请输入用户名')" :disabled="isEditMode" />
         </el-form-item>
-        <el-form-item v-if="!isEditMode" label="密码" prop="password">
-          <el-input v-model="userForm.password" type="password" placeholder="请输入密码（默认123456）" show-password />
+        <el-form-item v-if="!isEditMode" :label="t('ui.密码')" prop="password">
+          <el-input v-model="userForm.password" type="password" :placeholder="t('ui.请输入密码（默认123456）')" show-password />
         </el-form-item>
-        <el-form-item label="姓名" prop="realName">
-          <el-input v-model="userForm.realName" placeholder="请输入真实姓名" />
+        <el-form-item :label="t('ui.姓名')" prop="realName">
+          <el-input v-model="userForm.realName" :placeholder="t('ui.请输入真实姓名')" />
         </el-form-item>
-        <el-form-item label="部门" prop="department">
-          <el-select v-model="userForm.department" placeholder="请选择部门" style="width: 100%;" clearable filterable>
+        <el-form-item :label="t('ui.部门')" prop="department">
+          <el-select v-model="userForm.department" :placeholder="t('ui.请选择部门')" style="width: 100%;" clearable filterable>
             <el-option v-for="dept in departmentList" :key="dept.deptId" :label="dept.deptName" :value="dept.deptName" />
           </el-select>
         </el-form-item>
-        <el-form-item label="电话" prop="phone">
-          <el-input v-model="userForm.phone" placeholder="请输入联系电话" />
+        <el-form-item :label="t('ui.电话')" prop="phone">
+          <el-input v-model="userForm.phone" :placeholder="t('ui.请输入联系电话')" />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="userForm.email" placeholder="请输入邮箱" />
+        <el-form-item :label="t('ui.邮箱')" prop="email">
+          <el-input v-model="userForm.email" :placeholder="t('ui.请输入邮箱')" />
         </el-form-item>
-        <el-form-item label="角色" prop="role">
+        <el-form-item :label="t('ui.角色')" prop="role">
           <el-radio-group v-model="userForm.role">
-            <el-radio :value="1">普通用户</el-radio>
-            <el-radio :value="2">管理员</el-radio>
+            <el-radio :value="1">{{ t('ui.普通用户') }}</el-radio>
+            <el-radio :value="2">{{ t('ui.管理员') }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="userForm.status" :active-value="1" :inactive-value="0" active-text="正常" inactive-text="禁用" />
+        <el-form-item :label="t('ui.状态')" prop="status">
+          <el-switch v-model="userForm.status" :active-value="1" :inactive-value="0" :active-text="t('ui.正常')" :inactive-text="t('ui.禁用')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -128,6 +128,9 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 
@@ -158,14 +161,14 @@ const userForm = reactive({
 
 const formRules = reactive({
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 2, max: 20, message: '用户名长度 2-20 个字符', trigger: 'blur' }
+    { required: true, message: t('ui.请输入用户名'), trigger: 'blur' },
+    { min: 2, max: 20, message: t('ui.用户名长度 2-20 个字符'), trigger: 'blur' }
   ],
   password: [
-    { min: 6, message: '密码长度不能少于 6 个字符', trigger: 'blur' }
+    { min: 6, message: t('ui.密码长度不能少于 6 个字符'), trigger: 'blur' }
   ],
   realName: [
-    { required: true, message: '请输入姓名', trigger: 'blur' }
+    { required: true, message: t('ui.请输入姓名'), trigger: 'blur' }
   ]
 })
 
@@ -189,7 +192,7 @@ const loadUsers = async () => {
     userList.value = res.data.records || []
     total.value = res.data.total || 0
   } catch (error) {
-    ElMessage.error('加载用户列表失败')
+    ElMessage.error(t('ui.加载用户列表失败'))
   } finally {
     loading.value = false
   }
@@ -244,16 +247,16 @@ const handleSubmit = async () => {
 
     if (isEditMode.value) {
       await request.post('/user/update', userForm)
-      ElMessage.success('用户信息更新成功')
+      ElMessage.success(t('ui.用户信息更新成功'))
     } else {
       await request.post('/user/create', userForm)
-      ElMessage.success('用户创建成功')
+      ElMessage.success(t('ui.用户创建成功'))
     }
     dialogVisible.value = false
     loadUsers()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(error.response?.data?.msg || (isEditMode.value ? '更新失败' : '创建失败'))
+      ElMessage.error(error.response?.data?.msg || (isEditMode.value ? t('ui.更新失败') : t('ui.创建失败')))
     }
   } finally {
     submitLoading.value = false
@@ -262,38 +265,38 @@ const handleSubmit = async () => {
 
 const handleResetPwd = (row) => {
   ElMessageBox.confirm(
-    '确认要重置用户 "' + (row.realName || row.username) + '" 的密码吗？密码将重置为 123456',
-    '重置密码',
-    { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+    t('ui.确认要重置用户 {name} 的密码吗？密码将重置为 123456', { name: row.realName || row.username }),
+    t('ui.重置密码'),
+    { confirmButtonText: t('ui.确定'), cancelButtonText: t('ui.取消'), type: 'warning' }
   ).then(async () => {
     try {
       await request.post('/user/reset-password', null, { params: { userId: row.userId } })
-      ElMessage.success('密码已重置为 123456')
+      ElMessage.success(t('ui.密码已重置为 123456'))
     } catch (error) {
-      ElMessage.error(error.response?.data?.msg || '重置失败')
+      ElMessage.error(error.response?.data?.msg || t('ui.重置失败'))
     }
   }).catch(() => {})
 }
 
 const handleDelete = (row) => {
   if (row.username === 'admin') {
-    ElMessage.warning('不能删除管理员账号')
+    ElMessage.warning(t('ui.不能删除管理员账号'))
     return
   }
   ElMessageBox.confirm(
-    '确认要删除用户 "' + (row.realName || row.username) + '" 吗？删除后不可恢复！',
-    '删除确认',
-    { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+    t('ui.确认要删除用户 {name} 吗？删除后不可恢复！', { name: row.realName || row.username }),
+    t('ui.删除确认'),
+    { confirmButtonText: t('ui.确定'), cancelButtonText: t('ui.取消'), type: 'warning' }
   ).then(async () => {
     try {
       await request.post('/user/delete', null, { params: { userId: row.userId } })
-      ElMessage.success('删除成功')
+      ElMessage.success(t('ui.删除成功'))
       if (userList.value.length === 1 && currentPage.value > 1) {
         currentPage.value--
       }
       loadUsers()
     } catch (error) {
-      ElMessage.error(error.response?.data?.msg || '删除失败')
+      ElMessage.error(error.response?.data?.msg || t('ui.删除失败'))
     }
   }).catch(() => {})
 }
