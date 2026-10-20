@@ -6,6 +6,8 @@ import './assets/global.css'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 // 引入路由
 import router from './router'
+// 国际化（中/英）
+import i18n from './i18n'
 
 // 静默 ResizeObserver 无害警告
 const e = window.onerror
@@ -13,5 +15,6 @@ window.onerror = function(msg) { if (String(msg).includes('ResizeObserver')) ret
 
 createApp(App)
   .use(ElementPlus, { locale: zhCn })
+  .use(i18n)
   .use(router)
   .mount('#app')

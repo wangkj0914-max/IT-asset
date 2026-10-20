@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <el-config-provider :locale="epLocale">
     <!-- 登录页不显示布局 -->
     <template v-if="isFullscreenPage">
       <router-view />
@@ -10,7 +11,7 @@
       <!-- 左侧导航栏 -->
       <el-aside :width="sidebarCollapsed ? '64px' : '220px'" class="sidebar" :class="{ collapsed: sidebarCollapsed }">
         <div class="logo" v-if="!sidebarCollapsed">
-          <span>IT 资产管理系统</span>
+          <span>{{ t('app.shortTitle') }}</span>
         </div>
         <div class="logo logo-mini" v-else>
           <span>IT</span>
@@ -36,13 +37,13 @@
           <!-- 系统首页 -->
           <el-menu-item index="/home" @click="navigateTo('/home')">
             <el-icon><House /></el-icon>
-            <span>系统首页</span>
+            <span>{{ t('menu.home') }}</span>
           </el-menu-item>
 
           <!-- 审批中心 -->
           <el-menu-item index="/approval-center" @click="navigateTo('/approval-center')" v-if="userRole === 2">
             <el-icon><Check /></el-icon>
-            <span>审批中心</span>
+            <span>{{ t('menu.approvalCenter') }}</span>
             <el-badge :value="pendingTotal" :hidden="pendingTotal === 0" class="approval-badge" />
           </el-menu-item>
 
@@ -50,43 +51,43 @@
           <el-sub-menu index="asset">
             <template #title>
               <el-icon><Briefcase /></el-icon>
-              <span>资产管理</span>
+              <span>{{ t('menu.asset') }}</span>
             </template>
             <el-menu-item index="/asset-manage" @click="navigateTo('/asset-manage')">
               <el-icon><Document /></el-icon>
-              <span>固定资产</span>
+              <span>{{ t('menu.assetManage') }}</span>
             </el-menu-item>
             <el-menu-item index="/asset-inbound" @click="navigateTo('/asset-inbound')">
               <el-icon><Plus /></el-icon>
-              <span>资产入库</span>
+              <span>{{ t('menu.assetInbound') }}</span>
             </el-menu-item>
             <el-menu-item index="/asset-use" @click="navigateTo('/asset-use')">
               <el-icon><User /></el-icon>
-              <span>资产领用</span>
+              <span>{{ t('menu.assetUse') }}</span>
             </el-menu-item>
             <el-menu-item index="/asset-return" @click="navigateTo('/asset-return')">
               <el-icon><Back /></el-icon>
-              <span>资产归还</span>
+              <span>{{ t('menu.assetReturn') }}</span>
             </el-menu-item>
             <el-menu-item index="/asset-repair" @click="navigateTo('/asset-repair')">
               <el-icon><Tools /></el-icon>
-              <span>资产维修</span>
+              <span>{{ t('menu.assetRepair') }}</span>
             </el-menu-item>
             <el-menu-item index="/asset-scrap" @click="navigateTo('/asset-scrap')">
               <el-icon><Delete /></el-icon>
-              <span>资产报废</span>
+              <span>{{ t('menu.assetScrap') }}</span>
             </el-menu-item>
             <el-menu-item index="/asset-inventory" @click="navigateTo('/asset-inventory')">
               <el-icon><Search /></el-icon>
-              <span>资产盘点</span>
+              <span>{{ t('menu.assetInventory') }}</span>
             </el-menu-item>
             <el-menu-item index="/mobile" @click="navigateTo('/mobile')">
               <el-icon><PhoneFilled /></el-icon>
-              <span>移动端</span>
+              <span>{{ t('menu.mobile') }}</span>
             </el-menu-item>
             <el-menu-item index="/asset-transfer" @click="navigateTo('/asset-transfer')">
               <el-icon><Switch /></el-icon>
-              <span>资产调拨</span>
+              <span>{{ t('menu.assetTransfer') }}</span>
             </el-menu-item>
           </el-sub-menu>
 
@@ -94,23 +95,23 @@
           <el-sub-menu index="base-data">
             <template #title>
               <el-icon><Grid /></el-icon>
-              <span>基础数据</span>
+              <span>{{ t('menu.baseData') }}</span>
             </template>
             <el-menu-item index="/category-manage" @click="navigateTo('/category-manage')">
               <el-icon><List /></el-icon>
-              <span>资产分类</span>
+              <span>{{ t('menu.category') }}</span>
             </el-menu-item>
             <el-menu-item index="/model-manage" @click="navigateTo('/model-manage')">
               <el-icon><Box /></el-icon>
-              <span>资产模型</span>
+              <span>{{ t('menu.model') }}</span>
             </el-menu-item>
             <el-menu-item index="/department-info" @click="navigateTo('/department-info')">
               <el-icon><View /></el-icon>
-              <span>部门信息</span>
+              <span>{{ t('menu.department') }}</span>
             </el-menu-item>
             <el-menu-item index="/storage-location" @click="navigateTo('/storage-location')">
               <el-icon><Location /></el-icon>
-              <span>存放地点</span>
+              <span>{{ t('menu.storageLocation') }}</span>
             </el-menu-item>
           </el-sub-menu>
 
@@ -118,67 +119,67 @@
           <el-sub-menu index="inventory">
             <template #title>
               <el-icon><Goods /></el-icon>
-              <span>物资管理</span>
+              <span>{{ t('menu.goods') }}</span>
             </template>
             <el-menu-item index="/consumable-manage" @click="navigateTo('/consumable-manage')">
               <el-icon><Box /></el-icon>
-              <span>耗材管理</span>
+              <span>{{ t('menu.consumable') }}</span>
             </el-menu-item>
             <el-menu-item index="/license-manage" @click="navigateTo('/license-manage')">
               <el-icon><Key /></el-icon>
-              <span>许可证管理</span>
+              <span>{{ t('menu.license') }}</span>
             </el-menu-item>
             <el-menu-item index="/contract-manage" @click="navigateTo('/contract-manage')">
               <el-icon><Document /></el-icon>
-              <span>合同管理</span>
+              <span>{{ t('menu.contract') }}</span>
             </el-menu-item>
           </el-sub-menu>
 
           <!-- 综合报表 -->
           <el-menu-item index="/reports" @click="navigateTo('/reports')">
             <el-icon><DataLine /></el-icon>
-            <span>综合报表</span>
+            <span>{{ t('menu.reports') }}</span>
           </el-menu-item>
 
           <!-- 公告信息 -->
           <el-menu-item index="/notice" @click="navigateTo('/notice')">
             <el-icon><Notification /></el-icon>
-            <span>公告信息</span>
+            <span>{{ t('menu.notice') }}</span>
           </el-menu-item>
 
           <!-- 系统管理（仅管理员） -->
           <el-sub-menu index="system" v-if="userRole === 2">
             <template #title>
               <el-icon><Setting /></el-icon>
-              <span>系统管理</span>
+              <span>{{ t('menu.system') }}</span>
             </template>
             <el-menu-item index="/workflow-settings" @click="navigateTo('/workflow-settings')">
               <el-icon><Setting /></el-icon>
-              <span>流程设置</span>
+              <span>{{ t('menu.workflow') }}</span>
             </el-menu-item>
             <el-menu-item index="/custom-field-manage" @click="navigateTo('/custom-field-manage')">
               <el-icon><Setting /></el-icon>
-              <span>自定义字段</span>
+              <span>{{ t('menu.customField') }}</span>
             </el-menu-item>
             <el-menu-item index="/integration" @click="navigateTo('/integration')">
               <el-icon><Document /></el-icon>
-              <span>集成配置</span>
+              <span>{{ t('menu.integration') }}</span>
             </el-menu-item>
             <el-menu-item index="/api-manage" @click="navigateTo('/api-manage')">
               <el-icon><DocumentAdd /></el-icon>
-              <span>接口管理</span>
+              <span>{{ t('menu.apiManage') }}</span>
             </el-menu-item>
             <el-menu-item index="/operation-log" @click="navigateTo('/operation-log')">
               <el-icon><List /></el-icon>
-              <span>操作日志</span>
+              <span>{{ t('menu.operationLog') }}</span>
             </el-menu-item>
             <el-menu-item index="/group-manage" @click="navigateTo('/group-manage')">
               <el-icon><UserFilled /></el-icon>
-              <span>用户组管理</span>
+              <span>{{ t('menu.group') }}</span>
             </el-menu-item>
             <el-menu-item index="/user-manage" @click="navigateTo('/user-manage')">
               <el-icon><User /></el-icon>
-              <span>用户管理</span>
+              <span>{{ t('menu.user') }}</span>
             </el-menu-item>
           </el-sub-menu>
         </el-menu>
@@ -190,16 +191,21 @@
         <el-header class="header">
           <div class="header-left">
             <el-breadcrumb separator="/">
-              <el-breadcrumb-item :to="{ path: '/home' }">系统首页</el-breadcrumb-item>
+              <el-breadcrumb-item :to="{ path: '/home' }">{{ t('menu.home') }}</el-breadcrumb-item>
               <el-breadcrumb-item v-if="currentTitle">{{ currentTitle }}</el-breadcrumb-item>
             </el-breadcrumb>
           </div>
           <div class="header-right">
-            <el-select v-if="userRole === 2" v-model="currentSite" @change="switchSite" style="width:120px;margin-right:16px">
-              <el-option label="苏州" value="苏州" />
-              <el-option label="Penang" value="Penang" />
+            <!-- 语言切换：中文 / English -->
+            <el-select v-model="currentLocale" @change="onLocaleChange" style="width:118px;margin-right:12px">
+              <el-option :label="t('app.zh')" value="zh-CN" />
+              <el-option :label="t('app.en')" value="en-US" />
             </el-select>
-            <el-tag v-else style="margin-right:16px" type="info" effect="plain">站点: {{ currentSite }}</el-tag>
+            <el-select v-if="userRole === 2" v-model="currentSite" @change="switchSite" style="width:120px;margin-right:16px">
+              <el-option :label="t('app.siteSuzhou')" value="苏州" />
+              <el-option :label="t('app.sitePenang')" value="Penang" />
+            </el-select>
+            <el-tag v-else style="margin-right:16px" type="info" effect="plain">{{ t('app.site') }}: {{ siteLabel }}</el-tag>
             <el-dropdown @command="handleCommand">
               <span class="user-dropdown">
                 <el-avatar :size="32" :icon="UserFilled" style="margin-right: 8px;" />
@@ -208,9 +214,9 @@
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="changePwd">修改密码</el-dropdown-item>
-                  <el-dropdown-item command="profile">个人信息</el-dropdown-item>
-                  <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                  <el-dropdown-item command="changePwd">{{ t('app.changePassword') }}</el-dropdown-item>
+                  <el-dropdown-item command="profile">{{ t('app.profile') }}</el-dropdown-item>
+                  <el-dropdown-item command="logout" divided>{{ t('app.logout') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -223,6 +229,7 @@
         </el-main>
       </el-container>
     </el-container>
+    </el-config-provider>
   </div>
 </template>
 
@@ -230,6 +237,10 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
+import { setLocale } from '@/i18n'
+import zhCnEp from 'element-plus/es/locale/lang/zh-cn'
+import enEp from 'element-plus/es/locale/lang/en'
 import request from '@/utils/request'
 import { 
   House, User, UserFilled, Document, List, 
@@ -241,6 +252,19 @@ import {
 
 const route = useRoute()
 const router = useRouter()
+
+// ---- 国际化 ----
+const { t, locale } = useI18n()
+const currentLocale = ref(locale.value)
+const epLocale = computed(() => (locale.value === 'en-US' ? enEp : zhCnEp))
+const onLocaleChange = (val) => {
+  setLocale(val)
+  currentLocale.value = val
+  updateTitle(route.path) // 面包屑标题跟随语言刷新
+}
+const siteLabel = computed(() =>
+  currentSite.value === '苏州' ? t('app.siteSuzhou') : t('app.sitePenang')
+)
 
 const username = ref(localStorage.getItem('username') || '用户')
 const realName = ref(localStorage.getItem('realName') || localStorage.getItem('username') || '用户')
@@ -343,7 +367,7 @@ const activeMenu = computed(() => {
 })
 
 const roleText = computed(() => {
-  return userRole.value === 2 ? '管理员' : '普通用户'
+  return userRole.value === 2 ? t('app.admin') : t('app.normalUser')
 })
 
 const navigateTo = (path) => {
@@ -353,36 +377,37 @@ const navigateTo = (path) => {
 
 const updateTitle = (path) => {
   const titleMap = {
-    '/home': '系统首页',
-    '/profile': '个人资产',
-    '/user-manage': '用户管理',
-    '/category-manage': '资产分类',
-    '/asset-manage': '固定资产',
-    '/asset-use': '资产领用',
-    '/asset-return': '资产归还',
-    '/asset-repair': '资产维修',
-    '/asset-inbound': '资产入库',
-    '/asset-inventory': '资产盘点',
-    '/reports': '综合报表',
-    '/asset-scrap': '资产报废',
-    '/notice': '公告信息',
-    '/department-info': '部门信息',
-    '/storage-location': '存放地点',
-    '/consumable-manage': '耗材管理',
-    '/license-manage': '许可证管理',
-    '/contract-manage': '合同管理',
-    '/asset-transfer': '资产调拨',
-    '/custom-field-manage': '自定义字段',
-    '/approval-center': '审批中心',
-    '/integration': '集成配置',
-    '/api-manage': '接口管理',
-    '/operation-log': '操作日志',
-    '/group-manage': '用户组管理',
-    '/mobile': '移动端',
-    '/mobile-scan': '扫码盘点',
-    '/mobile-query': '资产查询'
+    '/home': 'menu.home',
+    '/profile': 'menu.myAssets',
+    '/user-manage': 'menu.user',
+    '/category-manage': 'menu.category',
+    '/asset-manage': 'menu.assetManage',
+    '/asset-use': 'menu.assetUse',
+    '/asset-return': 'menu.assetReturn',
+    '/asset-repair': 'menu.assetRepair',
+    '/asset-inbound': 'menu.assetInbound',
+    '/asset-inventory': 'menu.assetInventory',
+    '/reports': 'menu.reports',
+    '/asset-scrap': 'menu.assetScrap',
+    '/notice': 'menu.notice',
+    '/department-info': 'menu.department',
+    '/storage-location': 'menu.storageLocation',
+    '/consumable-manage': 'menu.consumable',
+    '/license-manage': 'menu.license',
+    '/contract-manage': 'menu.contract',
+    '/asset-transfer': 'menu.assetTransfer',
+    '/custom-field-manage': 'menu.customField',
+    '/approval-center': 'menu.approvalCenter',
+    '/integration': 'menu.integration',
+    '/api-manage': 'menu.apiManage',
+    '/operation-log': 'menu.operationLog',
+    '/group-manage': 'menu.group',
+    '/mobile': 'menu.mobile',
+    '/mobile-scan': 'menu.mobileScan',
+    '/mobile-query': 'menu.mobileQuery'
   }
-  currentTitle.value = titleMap[path] || ''
+  const key = titleMap[path]
+  currentTitle.value = key ? t(key) : ''
 }
 
 const handleMenuSelect = (index) => {

@@ -1,24 +1,24 @@
 <template>
   <div class="page-container">
     <!-- 标题 -->
-    <div class="header-title"><span>资产维修</span></div>
+    <div class="header-title"><span>{{ t('ui.资产维修') }}</span></div>
     
     <!-- 搜索栏 -->
     <div class="search-section">
       <el-form :model="searchForm" inline>
-        <el-form-item label="资产名称">
-          <el-input v-model="searchForm.assetName" placeholder="请输入资产名称" clearable />
+        <el-form-item :label="t('ui.资产名称')">
+          <el-input v-model="searchForm.assetName" :placeholder="t('ui.请输入资产名称')" clearable />
         </el-form-item>
-        <el-form-item label="维修状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-            <el-option label="待维修" :value="0" />
-            <el-option label="维修中" :value="1" />
-            <el-option label="已完成" :value="2" />
+        <el-form-item :label="t('ui.维修状态')">
+          <el-select v-model="searchForm.status" :placeholder="t('ui.请选择状态')" clearable>
+            <el-option :label="t('ui.待维修')" :value="0" />
+            <el-option :label="t('ui.维修中')" :value="1" />
+            <el-option :label="t('ui.已完成')" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('ui.查询') }}</el-button>
+          <el-button @click="handleReset">{{ t('ui.重置') }}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -26,41 +26,41 @@
     <!-- 操作按钮 -->
     <div class="operation-section">
       <el-button type="primary" @click="showApplyDialog">
-        <el-icon><Plus /></el-icon> 报修申请
+        <el-icon><Plus /></el-icon> {{ t('ui.报修申请') }}
       </el-button>
     </div>
 
     <!-- 数据表格 -->
     <div class="table-section">
       <el-table :data="tableData" border stripe v-loading="loading">
-        <el-table-column prop="repairId" label="维修 ID" width="80" />
-        <el-table-column prop="assetName" label="资产名称" />
-        <el-table-column prop="repairReason" label="维修原因" show-overflow-tooltip />
-        <el-table-column prop="applyUserName" label="报修人" width="100" />
-        <el-table-column prop="applyDepartment" label="部门" width="120" />
-        <el-table-column prop="repairCost" label="维修费用" width="100">
+        <el-table-column prop="repairId" :label="t('ui.维修 ID')" width="80" />
+        <el-table-column prop="assetName" :label="t('ui.资产名称')" />
+        <el-table-column prop="repairReason" :label="t('ui.维修原因')" show-overflow-tooltip />
+        <el-table-column prop="applyUserName" :label="t('ui.报修人')" width="100" />
+        <el-table-column prop="applyDepartment" :label="t('ui.部门')" width="120" />
+        <el-table-column prop="repairCost" :label="t('ui.维修费用')" width="100">
           <template #default="{ row }">
             <span v-if="row.repairCost">¥{{ row.repairCost }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="repairStatus" label="状态" width="100">
+        <el-table-column prop="repairStatus" :label="t('ui.状态')" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.repairStatus)">
               {{ getStatusText(row.repairStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="报修时间" width="160" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column prop="createTime" :label="t('ui.报修时间')" width="160" />
+        <el-table-column :label="t('ui.操作')" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleView(row)">详情</el-button>
+            <el-button size="small" @click="handleView(row)">{{ t('ui.详情') }}</el-button>
             <el-button 
               v-if="row.repairStatus === 0" 
               size="small" 
               type="warning"
               @click="handleProcess(row)"
             >
-              处理
+              {{ t('ui.处理') }}
             </el-button>
             <el-button 
               v-if="row.repairStatus === 1" 
@@ -68,13 +68,13 @@
               type="success"
               @click="handleComplete(row)"
             >
-              完成
+              {{ t('ui.完成') }}
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && tableData.length === 0" description="暂无数据" />
+      <el-empty v-if="!loading && tableData.length === 0" :description="t('ui.暂无数据')" />
 
       <!-- 分页 -->
       <div class="pagination-container">
@@ -91,10 +91,10 @@
     </div>
 
     <!-- 报修申请对话框 -->
-    <el-dialog v-model="applyDialogVisible" title="报修申请" width="500px">
+    <el-dialog v-model="applyDialogVisible" :title="t('ui.报修申请')" width="500px">
       <el-form :model="applyForm" :rules="applyRules" ref="applyFormRef" label-width="80px">
-        <el-form-item label="选择资产" prop="assetId">
-          <el-select v-model="applyForm.assetId" placeholder="请选择要报修的资产" filterable style="width: 100%;">
+        <el-form-item :label="t('ui.选择资产')" prop="assetId">
+          <el-select v-model="applyForm.assetId" :placeholder="t('ui.请选择要报修的资产')" filterable style="width: 100%;">
             <el-option 
               v-for="asset in availableAssets" 
               :key="asset.assetId" 
@@ -103,73 +103,73 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="维修原因" prop="repairReason">
-          <el-input v-model="applyForm.repairReason" type="textarea" :rows="3" placeholder="请描述故障情况" />
+        <el-form-item :label="t('ui.维修原因')" prop="repairReason">
+          <el-input v-model="applyForm.repairReason" type="textarea" :rows="3" :placeholder="t('ui.请描述故障情况')" />
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="applyForm.remark" type="textarea" :rows="2" placeholder="可选备注" />
+        <el-form-item :label="t('ui.备注')">
+          <el-input v-model="applyForm.remark" type="textarea" :rows="2" :placeholder="t('ui.可选备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="applyDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitApply">提交申请</el-button>
+        <el-button @click="applyDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitApply">{{ t('ui.提交申请') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="dialogVisible" title="维修详情" width="600px">
+    <el-dialog v-model="dialogVisible" :title="t('ui.维修详情')" width="600px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="资产名称">{{ currentRow.assetName }}</el-descriptions-item>
-        <el-descriptions-item label="资产编号">{{ currentRow.assetCode }}</el-descriptions-item>
-        <el-descriptions-item label="维修原因">{{ currentRow.repairReason }}</el-descriptions-item>
-        <el-descriptions-item label="报修人">{{ currentRow.applyUserName }}</el-descriptions-item>
-        <el-descriptions-item label="报修部门">{{ currentRow.applyDepartment }}</el-descriptions-item>
-        <el-descriptions-item label="维修状态">
+        <el-descriptions-item :label="t('ui.资产名称')">{{ currentRow.assetName }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.资产编号')">{{ currentRow.assetCode }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.维修原因')">{{ currentRow.repairReason }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.报修人')">{{ currentRow.applyUserName }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.报修部门')">{{ currentRow.applyDepartment }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.维修状态')">
           <el-tag :type="getStatusType(currentRow.repairStatus)">
             {{ getStatusText(currentRow.repairStatus) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="维修费用" v-if="currentRow.repairCost">
+        <el-descriptions-item :label="t('ui.维修费用')" v-if="currentRow.repairCost">
           ¥{{ currentRow.repairCost }}
         </el-descriptions-item>
-        <el-descriptions-item label="备注">{{ currentRow.remark }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.备注')">{{ currentRow.remark }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button @click="dialogVisible = false">关闭</el-button>
+        <el-button @click="dialogVisible = false">{{ t('ui.关闭') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 处理对话框 -->
-    <el-dialog v-model="processDialogVisible" title="处理维修" width="500px">
+    <el-dialog v-model="processDialogVisible" :title="t('ui.处理维修')" width="500px">
       <el-form :model="processForm" label-width="80px">
-        <el-form-item label="维修人员">
-          <el-input v-model="processForm.repairMan" placeholder="请输入维修人员" />
+        <el-form-item :label="t('ui.维修人员')">
+          <el-input v-model="processForm.repairMan" :placeholder="t('ui.请输入维修人员')" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="processForm.status" placeholder="请选择状态">
-            <el-option label="维修中" :value="1" />
+        <el-form-item :label="t('ui.状态')">
+          <el-select v-model="processForm.status" :placeholder="t('ui.请选择状态')">
+            <el-option :label="t('ui.维修中')" :value="1" />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="processDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitProcess">确定</el-button>
+        <el-button @click="processDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitProcess">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 完成对话框 -->
-    <el-dialog v-model="completeDialogVisible" title="完成维修" width="500px">
+    <el-dialog v-model="completeDialogVisible" :title="t('ui.完成维修')" width="500px">
       <el-form :model="completeForm" label-width="80px">
-        <el-form-item label="维修费用">
+        <el-form-item :label="t('ui.维修费用')">
           <el-input-number v-model="completeForm.cost" :min="0" :precision="2" :step="0.01" />
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="completeForm.remark" type="textarea" :rows="3" placeholder="请输入维修备注" />
+        <el-form-item :label="t('ui.备注')">
+          <el-input v-model="completeForm.remark" type="textarea" :rows="3" :placeholder="t('ui.请输入维修备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="completeDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitComplete">确定</el-button>
+        <el-button @click="completeDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitComplete">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -180,6 +180,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const tableData = ref([])
@@ -212,8 +215,8 @@ const applyForm = reactive({
 })
 
 const applyRules = reactive({
-  assetId: [{ required: true, message: '请选择资产', trigger: 'change' }],
-  repairReason: [{ required: true, message: '请填写维修原因', trigger: 'blur' }]
+  assetId: [{ required: true, message: t('ui.请选择资产'), trigger: 'change' }],
+  repairReason: [{ required: true, message: t('ui.请填写维修原因'), trigger: 'blur' }]
 })
 
 const processForm = reactive({
@@ -236,8 +239,8 @@ const getStatusType = (status) => {
 
 // 获取状态文本
 const getStatusText = (status) => {
-  const texts = { 0: '待维修', 1: '维修中', 2: '已完成' }
-  return texts[status] || '未知'
+  const texts = { 0: t('ui.待维修'), 1: t('ui.维修中'), 2: t('ui.已完成') }
+  return texts[status] || t('ui.未知')
 }
 
 // 加载数据
@@ -256,7 +259,7 @@ const loadData = async () => {
       pagination.total = res.data.total || 0
     }
   } catch (error) {
-    ElMessage.error('加载数据失败')
+    ElMessage.error(t('ui.加载数据失败'))
   } finally {
     loading.value = false
   }
@@ -289,7 +292,7 @@ const showApplyDialog = async () => {
     })
     availableAssets.value = (res.data.records || []).filter(a => a.status !== 2 && a.status !== 3)
   } catch (e) {
-    ElMessage.error('加载资产列表失败')
+    ElMessage.error(t('ui.加载资产列表失败'))
     return
   }
   
@@ -310,12 +313,12 @@ const submitApply = async () => {
       remark: applyForm.remark
     })
     if (res.code === 200) {
-      ElMessage.success('报修申请提交成功')
+      ElMessage.success(t('ui.报修申请提交成功'))
       applyDialogVisible.value = false
       loadData()
     }
   } catch (error) {
-    ElMessage.error('提交失败')
+    ElMessage.error(t('ui.提交失败'))
   }
 }
 

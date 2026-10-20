@@ -6,6 +6,14 @@
       <span class="decor-wave"></span>
     </div>
 
+    <!-- 语言切换（登录前也能用） -->
+    <div class="login-lang">
+      <el-select v-model="lang" @change="onLangChange" size="small" style="width:112px">
+        <el-option :label="t('app.zh')" value="zh-CN" />
+        <el-option :label="t('app.en')" value="en-US" />
+      </el-select>
+    </div>
+
     <!-- ============ 左栏：品牌区 ============ -->
     <section class="brand-panel">
       <div class="brand-content">
@@ -14,36 +22,36 @@
           <img src="/nai-logo.png" alt="NAI - Reliable Connectivity Solutions" class="brand-logo" />
         </div>
 
-        <h1 class="brand-title">IT 固定资产管理系统</h1>
+        <h1 class="brand-title">{{ t('app.title') }}</h1>
         <p class="brand-subtitle">IT Fixed Asset Management System</p>
 
         <!-- 蓝色短横线 -->
         <span class="brand-accent-line"></span>
 
-        <p class="brand-slogan">专业 · 高效 · 安全 · 智能</p>
-        <p class="brand-desc">助力企业实现 IT 资产全生命周期管理</p>
+        <p class="brand-slogan">{{ t('login.slogan') }}</p>
+        <p class="brand-desc">{{ t('login.sloganSub') }}</p>
 
         <!-- 底部 4 个能力卡片 -->
         <div class="capability-row">
           <div class="cap-card">
             <span class="cap-icon"><el-icon><Box /></el-icon></span>
-            <span class="cap-title">资产全生命周期</span>
-            <span class="cap-sub">采购·使用·维护·报废</span>
+            <span class="cap-title">{{ t('login.cap1') }}</span>
+            <span class="cap-sub">{{ t('login.cap1Sub') }}</span>
           </div>
           <div class="cap-card">
             <span class="cap-icon"><el-icon><PieChart /></el-icon></span>
-            <span class="cap-title">数据可视化</span>
-            <span class="cap-sub">多维报表·洞察分析</span>
+            <span class="cap-title">{{ t('login.cap2') }}</span>
+            <span class="cap-sub">{{ t('login.cap2Sub') }}</span>
           </div>
           <div class="cap-card">
             <span class="cap-icon"><el-icon><Lock /></el-icon></span>
-            <span class="cap-title">安全合规</span>
-            <span class="cap-sub">权限管控·数据安全</span>
+            <span class="cap-title">{{ t('login.cap3') }}</span>
+            <span class="cap-sub">{{ t('login.cap3Sub') }}</span>
           </div>
           <div class="cap-card">
             <span class="cap-icon"><el-icon><Cloudy /></el-icon></span>
-            <span class="cap-title">高效协同</span>
-            <span class="cap-sub">流程驱动·提升效率</span>
+            <span class="cap-title">{{ t('login.cap4') }}</span>
+            <span class="cap-sub">{{ t('login.cap4Sub') }}</span>
           </div>
         </div>
       </div>
@@ -57,7 +65,7 @@
           <div class="brand-logo-chip brand-logo-chip--mini">
             <img src="/nai-logo.png" alt="NAI" class="brand-logo" />
           </div>
-          <h1 class="form-brand-mini-title">IT 固定资产管理系统</h1>
+          <h1 class="form-brand-mini-title">{{ t('app.title') }}</h1>
         </div>
 
         <div class="form-card">
@@ -65,8 +73,8 @@
           <div class="form-head">
             <span class="head-icon"><el-icon><UserFilled /></el-icon></span>
             <div class="head-text">
-              <h2 class="form-title">欢迎登录</h2>
-              <p class="form-subtitle">请输入您的账号信息以继续</p>
+              <h2 class="form-title">{{ t('login.welcome') }}</h2>
+              <p class="form-subtitle">{{ t('login.welcomeSub') }}</p>
             </div>
           </div>
 
@@ -81,7 +89,7 @@
             <el-form-item prop="username">
               <el-input
                 v-model="loginForm.username"
-                placeholder="请输入用户名"
+                :placeholder="t('login.username')"
                 size="large"
                 clearable
               >
@@ -95,7 +103,7 @@
               <el-input
                 v-model="loginForm.password"
                 type="password"
-                placeholder="请输入密码"
+                :placeholder="t('login.password')"
                 size="large"
                 show-password
                 clearable
@@ -115,7 +123,7 @@
                 :loading="loading"
                 size="large"
               >
-                {{ loading ? '登录中...' : '登 录' }}
+                {{ loading ? t('login.submitting') : t('login.submit') }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -124,28 +132,38 @@
           <div class="form-tips">
             <span class="tips-icon"><el-icon><Bell /></el-icon></span>
             <div class="tips-text">
-              <p class="tips-line">忘记密码请向管理员申请重置，</p>
-              <p class="tips-line">请妥善保管账号信息</p>
+              <p class="tips-line">{{ t('login.tips1') }}</p>
+              <p class="tips-line">{{ t('login.tips2') }}</p>
             </div>
           </div>
         </div>
 
-        <div class="form-copyright">© {{ currentYear }} NAI · IT Asset Management</div>
+        <div class="form-copyright">© {{ currentYear }} {{ t('login.copyright') }}</div>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { User, Lock, Box, PieChart, Cloudy, UserFilled, Bell } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { setLocale } from '@/i18n'
 import request from '@/utils/request'
 
 const router = useRouter()
 const loginFormRef = ref(null)
 const loading = ref(false)
+
+// ---- 国际化 ----
+const { t, locale } = useI18n()
+const lang = ref(locale.value)
+const onLangChange = (val) => {
+  setLocale(val)
+  lang.value = val
+}
 
 // 版权年份（纯展示）
 const currentYear = new Date().getFullYear()
@@ -155,17 +173,17 @@ const loginForm = reactive({
   password: ''
 })
 
-// 表单验证规则
-const loginRules = reactive({
+// 表单验证规则（computed：切换语言后校验提示同步变更）
+const loginRules = computed(() => ({
   username: [
-    { required: true, message: '用户名不能为空', trigger: 'blur' },
-    { min: 2, max: 20, message: '用户名长度在 2 到 20 个字符', trigger: 'blur' }
+    { required: true, message: t('login.userRequired'), trigger: 'blur' },
+    { min: 2, max: 20, message: t('login.userLength'), trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '密码不能为空', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于 6 个字符', trigger: 'blur' }
+    { required: true, message: t('login.pwdRequired'), trigger: 'blur' },
+    { min: 6, message: t('login.pwdLength'), trigger: 'blur' }
   ]
-})
+}))
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
@@ -187,13 +205,13 @@ const handleLogin = async () => {
     localStorage.setItem('role', res.data.role)
     if (res.data.site) localStorage.setItem('site', res.data.site)
 
-    ElMessage.success('登录成功！')
+    ElMessage.success(t('login.loginSuccess'))
 
     // 默认密码警告
     if (res.data.isDefaultPassword) {
       setTimeout(() => {
-        ElMessageBox.confirm('您的密码仍为系统默认密码，存在安全风险。\n\n建议立即修改密码，是否前往修改？', '安全提醒', {
-          confirmButtonText: '去修改', cancelButtonText: '暂不修改', type: 'warning'
+        ElMessageBox.confirm(t('login.defaultPwdMsg'), t('login.defaultPwdTitle'), {
+          confirmButtonText: t('login.goChange'), cancelButtonText: t('login.later'), type: 'warning'
         }).then(() => {
           router.push('/change-password')
         }).catch(() => {
@@ -643,5 +661,12 @@ const handleLogin = async () => {
   .brand-decor {
     display: none;
   }
+}
+/* 语言切换（登录页右上角，登录前也可切换） */
+.login-lang {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 10;
 }
 </style>

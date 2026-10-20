@@ -1,11 +1,11 @@
 <template>
   <div class="page-container">
-    <div class="header-title">接口管理</div>
+    <div class="header-title">{{ t('ui.接口管理') }}</div>
 
     <!-- API 概览卡片 -->
     <div class="search-section" style="padding:12px 16px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
-      <el-input v-model="searchKeyword" placeholder="搜索接口路径或说明" clearable style="width:300px" prefix-icon="Search" />
-      <el-select v-model="filterModule" placeholder="按模块筛选" clearable style="width:180px" @change="onFilter">
+      <el-input v-model="searchKeyword" :placeholder="t('ui.搜索接口路径或说明')" clearable style="width:300px" prefix-icon="Search" />
+      <el-select v-model="filterModule" :placeholder="t('ui.按模块筛选')" clearable style="width:180px" @change="onFilter">
         <el-option v-for="m in modules" :key="m" :label="m" :value="m" />
       </el-select>
       <span style="color:#909399;font-size:13px;margin-left:auto;">
@@ -15,25 +15,25 @@
 
     <div class="table-section">
       <el-table :data="filteredApis" border stripe row-key="path" style="width:100%">
-        <el-table-column label="方法" width="90" align="center">
+        <el-table-column :label="t('ui.方法')" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="methodColor(row.method)" size="small" effect="dark">{{ row.method }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="path" label="路径" min-width="260" show-overflow-tooltip>
+        <el-table-column prop="path" :label="t('ui.路径')" min-width="260" show-overflow-tooltip>
           <template #default="{ row }">
             <code style="font-size:13px;color:#409EFF;">{{ row.path }}</code>
           </template>
         </el-table-column>
-        <el-table-column prop="module" label="模块" width="160" align="center" />
-        <el-table-column prop="desc" label="说明" min-width="220" show-overflow-tooltip />
-        <el-table-column label="参数" min-width="180" show-overflow-tooltip>
+        <el-table-column prop="module" :label="t('ui.模块')" width="160" align="center" />
+        <el-table-column prop="desc" :label="t('ui.说明')" min-width="220" show-overflow-tooltip />
+        <el-table-column :label="t('ui.参数')" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <span v-if="row.params" style="font-size:12px;color:#909399;">{{ row.params }}</span>
             <span v-else style="color:#c0c4cc;">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="认证" width="80" align="center">
+        <el-table-column :label="t('ui.认证')" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="row.auth ? 'warning' : 'success'" size="small" effect="plain">
               {{ row.auth ? '需登录' : '公开' }}
@@ -47,6 +47,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const searchKeyword = ref('')
 const filterModule = ref('')

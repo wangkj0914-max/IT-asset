@@ -1,21 +1,21 @@
 <template>
   <div class="page-container">
     <!-- 标题 -->
-    <div class="header-title"><span>资产盘点</span></div>
+    <div class="header-title"><span>{{ t('ui.资产盘点') }}</span></div>
     
     <!-- 搜索栏 -->
     <div class="search-section">
       <el-form :model="searchForm" inline>
-        <el-form-item label="盘点状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-            <el-option label="待盘点" :value="0" />
-            <el-option label="盘点中" :value="1" />
-            <el-option label="已完成" :value="2" />
+        <el-form-item :label="t('ui.盘点状态')">
+          <el-select v-model="searchForm.status" :placeholder="t('ui.请选择状态')" clearable>
+            <el-option :label="t('ui.待盘点')" :value="0" />
+            <el-option :label="t('ui.盘点中')" :value="1" />
+            <el-option :label="t('ui.已完成')" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button v-if="userRole === 2" type="success" @click="handleCreate">新建盘点</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('ui.查询') }}</el-button>
+          <el-button v-if="userRole === 2" type="success" @click="handleCreate">{{ t('ui.新建盘点') }}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -24,23 +24,23 @@
     <div class="table-section">
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="inventoryId" label="ID" width="80" />
-        <el-table-column prop="inventoryNo" label="盘点单号" width="150" />
-        <el-table-column prop="inventoryName" label="盘点名称" />
-        <el-table-column prop="inventoryDate" label="盘点日期" width="160" />
-        <el-table-column prop="operatorName" label="盘点人" width="100" />
-        <el-table-column prop="surplusCount" label="盘盈" width="80" />
-        <el-table-column prop="lossCount" label="盘亏" width="80" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="inventoryNo" :label="t('ui.盘点单号')" width="150" />
+        <el-table-column prop="inventoryName" :label="t('ui.盘点名称')" />
+        <el-table-column prop="inventoryDate" :label="t('ui.盘点日期')" width="160" />
+        <el-table-column prop="operatorName" :label="t('ui.盘点人')" width="100" />
+        <el-table-column prop="surplusCount" :label="t('ui.盘盈')" width="80" />
+        <el-table-column prop="lossCount" :label="t('ui.盘亏')" width="80" />
+        <el-table-column prop="status" :label="t('ui.状态')" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusTag(row.status)">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="160" />
-        <el-table-column label="操作" width="250" fixed="right">
+        <el-table-column prop="createTime" :label="t('ui.创建时间')" width="160" />
+        <el-table-column :label="t('ui.操作')" width="250" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleView(row)">详情</el-button>
+            <el-button size="small" @click="handleView(row)">{{ t('ui.详情') }}</el-button>
             <el-button
               v-if="row.status === 0 && userRole === 2"
               size="small"
@@ -85,46 +85,46 @@
     </div>
 
     <!-- 新建盘点对话框 -->
-    <el-dialog v-model="createDialogVisible" title="新建盘点任务" width="500px">
+    <el-dialog v-model="createDialogVisible" :title="t('ui.新建盘点任务')" width="500px">
       <el-form :model="createForm" :rules="createRules" ref="createFormRef" label-width="100px">
-        <el-form-item label="盘点名称" prop="inventoryName">
-          <el-input v-model="createForm.inventoryName" placeholder="请输入盘点名称" />
+        <el-form-item :label="t('ui.盘点名称')" prop="inventoryName">
+          <el-input v-model="createForm.inventoryName" :placeholder="t('ui.请输入盘点名称')" />
         </el-form-item>
-        <el-form-item label="盘点范围" prop="inventoryRange">
-          <el-select v-model="createForm.inventoryRange" placeholder="请选择范围">
-            <el-option label="全部资产" :value="0" />
-            <el-option label="指定资产" :value="3" />
+        <el-form-item :label="t('ui.盘点范围')" prop="inventoryRange">
+          <el-select v-model="createForm.inventoryRange" :placeholder="t('ui.请选择范围')">
+            <el-option :label="t('ui.全部资产')" :value="0" />
+            <el-option :label="t('ui.指定资产')" :value="3" />
           </el-select>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item :label="t('ui.备注')">
           <el-input v-model="createForm.remark" type="textarea" :rows="3" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitCreate">确定</el-button>
+        <el-button @click="createDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitCreate">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="盘点详情" width="900px">
+    <el-dialog v-model="detailDialogVisible" :title="t('ui.盘点详情')" width="900px">
       <el-descriptions :column="2" border>
-        <el-descriptions-item label="盘点单号">{{ currentRow.inventoryNo }}</el-descriptions-item>
-        <el-descriptions-item label="盘点名称">{{ currentRow.inventoryName }}</el-descriptions-item>
-        <el-descriptions-item label="盘点日期">{{ currentRow.inventoryDate }}</el-descriptions-item>
-        <el-descriptions-item label="盘点人">{{ currentRow.operatorName }}</el-descriptions-item>
-        <el-descriptions-item label="盘盈数量">{{ currentRow.surplusCount || 0 }}</el-descriptions-item>
-        <el-descriptions-item label="盘亏数量">{{ currentRow.lossCount || 0 }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item :label="t('ui.盘点单号')">{{ currentRow.inventoryNo }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.盘点名称')">{{ currentRow.inventoryName }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.盘点日期')">{{ currentRow.inventoryDate }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.盘点人')">{{ currentRow.operatorName }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.盘盈数量')">{{ currentRow.surplusCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.盘亏数量')">{{ currentRow.lossCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.状态')">
           <el-tag :type="getStatusTag(currentRow.status)">
             {{ getStatusText(currentRow.status) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="备注">{{ currentRow.remark }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.备注')">{{ currentRow.remark }}</el-descriptions-item>
       </el-descriptions>
 
       <div class="detail-toolbar">
-        <span class="detail-title">盘点明细</span>
+        <span class="detail-title">{{ t('ui.盘点明细') }}</span>
         <div class="toolbar-actions" v-if="currentRow.status !== 2">
           <el-button type="success" size="small" @click="quickScanOpen = true">
             <el-icon><Camera /></el-icon> 扫码盘点
@@ -136,27 +136,27 @@
       </div>
       <el-table :data="detailList" border>
         <el-table-column type="index" label="#" width="50" />
-        <el-table-column prop="assetCode" label="资产编号" width="130" fixed="left" />
-        <el-table-column prop="assetName" label="资产名称" min-width="140" show-overflow-tooltip />
-        <el-table-column prop="department" label="使用部门" width="100" show-overflow-tooltip />
-        <el-table-column prop="userName" label="使用人" width="80" />
-        <el-table-column prop="actualLocation" label="实际位置" width="120" show-overflow-tooltip />
-        <el-table-column prop="differenceType" label="差异类型" width="100">
+        <el-table-column prop="assetCode" :label="t('ui.资产编号')" width="130" fixed="left" />
+        <el-table-column prop="assetName" :label="t('ui.资产名称')" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="department" :label="t('ui.使用部门')" width="100" show-overflow-tooltip />
+        <el-table-column prop="userName" :label="t('ui.使用人')" width="80" />
+        <el-table-column prop="actualLocation" :label="t('ui.实际位置')" width="120" show-overflow-tooltip />
+        <el-table-column prop="differenceType" :label="t('ui.差异类型')" width="100">
           <template #default="{ row }">
             <el-tag v-if="row.differenceType" :type="getDiffTypeTag(row.differenceType)" size="small">
               {{ getDiffTypeText(row.differenceType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="scannedAt" label="扫描时间" width="160" />
-        <el-table-column prop="status" label="盘点结果" width="100" fixed="right">
+        <el-table-column prop="scannedAt" :label="t('ui.扫描时间')" width="160" />
+        <el-table-column prop="status" :label="t('ui.盘点结果')" width="100" fixed="right">
           <template #default="{ row }">
             <el-tag :type="getResultTag(row.status)">
               {{ getResultText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="90" fixed="right">
+        <el-table-column :label="t('ui.操作')" width="90" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="currentRow.status !== 2"
@@ -171,59 +171,59 @@
       </el-table>
 
       <template #footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button @click="detailDialogVisible = false">{{ t('ui.关闭') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 盘点操作对话框 -->
-    <el-dialog v-model="checkDialogVisible" title="盘点操作" width="450px">
+    <el-dialog v-model="checkDialogVisible" :title="t('ui.盘点操作')" width="450px">
       <el-form :model="checkForm" label-width="90px">
-        <el-form-item label="资产编号">
+        <el-form-item :label="t('ui.资产编号')">
           <el-input :model-value="checkForm.assetCode" disabled />
         </el-form-item>
-        <el-form-item label="资产名称">
+        <el-form-item :label="t('ui.资产名称')">
           <el-input :model-value="checkForm.assetName" disabled />
         </el-form-item>
-        <el-form-item label="盘点结果" prop="status">
-          <el-select v-model="checkForm.status" placeholder="请选择">
-            <el-option label="正常" :value="1" />
-            <el-option label="盘盈" :value="2" />
-            <el-option label="盘亏" :value="3" />
+        <el-form-item :label="t('ui.盘点结果')" prop="status">
+          <el-select v-model="checkForm.status" :placeholder="t('ui.请选择')">
+            <el-option :label="t('ui.正常')" :value="1" />
+            <el-option :label="t('ui.盘盈')" :value="2" />
+            <el-option :label="t('ui.盘亏')" :value="3" />
           </el-select>
         </el-form-item>
-        <el-form-item label="实际位置">
-          <el-input v-model="checkForm.actualLocation" placeholder="请输入实际盘点位置" />
+        <el-form-item :label="t('ui.实际位置')">
+          <el-input v-model="checkForm.actualLocation" :placeholder="t('ui.请输入实际盘点位置')" />
         </el-form-item>
-        <el-form-item label="差异类型">
-          <el-select v-model="checkForm.differenceType" placeholder="请选择差异类型" clearable>
-            <el-option label="位置不符" value="LOCATION" />
-            <el-option label="状态不符" value="STATUS" />
-            <el-option label="缺失" value="MISSING" />
-            <el-option label="盘盈" value="EXTRA" />
+        <el-form-item :label="t('ui.差异类型')">
+          <el-select v-model="checkForm.differenceType" :placeholder="t('ui.请选择差异类型')" clearable>
+            <el-option :label="t('ui.位置不符')" value="LOCATION" />
+            <el-option :label="t('ui.状态不符')" value="STATUS" />
+            <el-option :label="t('ui.缺失')" value="MISSING" />
+            <el-option :label="t('ui.盘盈')" value="EXTRA" />
           </el-select>
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="checkForm.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+        <el-form-item :label="t('ui.备注')">
+          <el-input v-model="checkForm.remark" type="textarea" :rows="2" :placeholder="t('ui.请输入备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="checkDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitCheck">确定</el-button>
+        <el-button @click="checkDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitCheck">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 快速扫码盘点 -->
-    <el-dialog v-model="quickScanOpen" title="扫码盘点" width="480px" @closed="onQuickScanClose">
-      <p class="scan-tip">扫描或输入资产编号，自动定位并标记为正常</p>
+    <el-dialog v-model="quickScanOpen" :title="t('ui.扫码盘点')" width="480px" @closed="onQuickScanClose">
+      <p class="scan-tip">{{ t('ui.扫描或输入资产编号，自动定位并标记为正常') }}</p>
       <input ref="quickScanFile" type="file" accept="image/*" capture="environment" style="display:none" @change="handleQuickScanFile" />
       <div class="quick-scan-actions">
         <el-button type="primary" @click="$refs.quickScanFile.click()" :loading="scanLoading">
           <el-icon><Camera /></el-icon> 拍照扫码
         </el-button>
-        <span class="divider">或</span>
-        <el-input v-model="quickScanCode" placeholder="输入资产编号" @keyup.enter="doQuickScan" clearable style="flex:1">
+        <span class="divider">{{ t('ui.或') }}</span>
+        <el-input v-model="quickScanCode" :placeholder="t('ui.输入资产编号')" @keyup.enter="doQuickScan" clearable style="flex:1">
           <template #append>
-            <el-button @click="doQuickScan">确认</el-button>
+            <el-button @click="doQuickScan">{{ t('ui.确认') }}</el-button>
           </template>
         </el-input>
       </div>
@@ -234,39 +234,39 @@
           <span style="margin-left:8px">{{ item.assetCode }} {{ item.assetName }}</span>
           <span style="margin-left:auto;color:#94A3B8;font-size:12px">{{ item.msg }}</span>
         </div>
-        <el-button size="small" type="text" @click="quickScanLog = []">清空记录</el-button>
+        <el-button size="small" type="text" @click="quickScanLog = []">{{ t('ui.清空记录') }}</el-button>
       </div>
       <template #footer>
-        <el-button @click="quickScanOpen = false">关闭</el-button>
+        <el-button @click="quickScanOpen = false">{{ t('ui.关闭') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 盘点报告对话框 -->
-    <el-dialog v-model="reportDialogVisible" title="盘点差异报告" width="800px">
+    <el-dialog v-model="reportDialogVisible" :title="t('ui.盘点差异报告')" width="800px">
       <div class="report-summary">
         <el-row :gutter="12">
           <el-col :span="6">
             <el-card shadow="hover" class="summary-card summary-normal">
               <div class="summary-value">{{ reportData.normalCount || 0 }}</div>
-              <div class="summary-label">正常</div>
+              <div class="summary-label">{{ t('ui.正常') }}</div>
             </el-card>
           </el-col>
           <el-col :span="6">
             <el-card shadow="hover" class="summary-card summary-surplus">
               <div class="summary-value">{{ reportData.surplusCount || 0 }}</div>
-              <div class="summary-label">盘盈</div>
+              <div class="summary-label">{{ t('ui.盘盈') }}</div>
             </el-card>
           </el-col>
           <el-col :span="6">
             <el-card shadow="hover" class="summary-card summary-loss">
               <div class="summary-value">{{ reportData.lossCount || 0 }}</div>
-              <div class="summary-label">盘亏</div>
+              <div class="summary-label">{{ t('ui.盘亏') }}</div>
             </el-card>
           </el-col>
           <el-col :span="6">
             <el-card shadow="hover" class="summary-card summary-diff">
               <div class="summary-value">{{ (reportData.locationDiffCount || 0) + (reportData.statusDiffCount || 0) }}</div>
-              <div class="summary-label">位置/状态不符</div>
+              <div class="summary-label">{{ t('ui.位置/状态不符') }}</div>
             </el-card>
           </el-col>
         </el-row>
@@ -275,44 +275,44 @@
           <el-col :span="6">
             <el-card shadow="hover" class="summary-card summary-missing">
               <div class="summary-value">{{ reportData.missingCount || 0 }}</div>
-              <div class="summary-label">缺失</div>
+              <div class="summary-label">{{ t('ui.缺失') }}</div>
             </el-card>
           </el-col>
           <el-col :span="6">
             <el-card shadow="hover" class="summary-card summary-extra">
               <div class="summary-value">{{ reportData.extraCount || 0 }}</div>
-              <div class="summary-label">盘盈(额外)</div>
+              <div class="summary-label">{{ t('ui.盘盈(额外)') }}</div>
             </el-card>
           </el-col>
         </el-row>
       </div>
 
-      <el-divider>差异明细</el-divider>
+      <el-divider>{{ t('ui.差异明细') }}</el-divider>
       <el-table :data="reportData.details || []" border max-height="350">
-        <el-table-column prop="assetCode" label="资产编号" width="120" />
-        <el-table-column prop="assetName" label="资产名称" min-width="120" />
-        <el-table-column prop="storageLocation" label="原位置" width="120" />
-        <el-table-column prop="actualLocation" label="实际位置" width="120" />
-        <el-table-column prop="status" label="盘点结果" width="90">
+        <el-table-column prop="assetCode" :label="t('ui.资产编号')" width="120" />
+        <el-table-column prop="assetName" :label="t('ui.资产名称')" min-width="120" />
+        <el-table-column prop="storageLocation" :label="t('ui.原位置')" width="120" />
+        <el-table-column prop="actualLocation" :label="t('ui.实际位置')" width="120" />
+        <el-table-column prop="status" :label="t('ui.盘点结果')" width="90">
           <template #default="{ row }">
             <el-tag :type="getResultTag(row.status)" size="small">
               {{ getResultText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="differenceType" label="差异类型" width="100">
+        <el-table-column prop="differenceType" :label="t('ui.差异类型')" width="100">
           <template #default="{ row }">
             <el-tag v-if="row.differenceType" :type="getDiffTypeTag(row.differenceType)" size="small">
               {{ getDiffTypeText(row.differenceType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="resultRemark" label="说明" min-width="80" />
+        <el-table-column prop="resultRemark" :label="t('ui.说明')" min-width="80" />
       </el-table>
       <el-empty v-if="!reportData.details || reportData.details.length === 0" description="未发现差异项" />
 
       <template #footer>
-        <el-button @click="reportDialogVisible = false">关闭</el-button>
+        <el-button @click="reportDialogVisible = false">{{ t('ui.关闭') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -324,6 +324,9 @@ import { ElMessage } from 'element-plus'
 import { Camera, Position } from '@element-plus/icons-vue'
 import { Html5Qrcode } from 'html5-qrcode'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const tableData = ref([])

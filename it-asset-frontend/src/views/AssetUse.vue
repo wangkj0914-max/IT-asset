@@ -1,46 +1,46 @@
 <template>
   <div class="page-container">
     <!-- 顶部标题栏 -->
-    <div class="header-title">资产领用管理</div>
+    <div class="header-title">{{ t('ui.资产领用管理') }}</div>
 
     <!-- 搜索筛选区域 -->
     <div class="search-section">
       <el-form :inline="true" :model="searchForm" class="search-form">
-        <el-form-item label="资产名称">
+        <el-form-item :label="t('ui.资产名称')">
           <el-input
             v-model="searchForm.assetName"
-            placeholder="请输入资产名称"
+            :placeholder="t('ui.请输入资产名称')"
             clearable
             style="width: 160px;"
           />
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item :label="t('ui.状态')">
           <el-select
             v-model="searchForm.status"
-            placeholder="全部状态"
+            :placeholder="t('ui.全部状态')"
             clearable
             style="width: 120px;"
           >
-            <el-option label="待审批" :value="0" />
-            <el-option label="已通过" :value="1" />
-            <el-option label="已拒绝" :value="2" />
+            <el-option :label="t('ui.待审批')" :value="0" />
+            <el-option :label="t('ui.已通过')" :value="1" />
+            <el-option :label="t('ui.已拒绝')" :value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="逾期状态">
+        <el-form-item :label="t('ui.逾期状态')">
           <el-select
             v-model="searchForm.overdue"
-            placeholder="全部"
+            :placeholder="t('ui.全部')"
             clearable
             style="width: 120px;"
           >
-            <el-option label="正常" :value="0" />
-            <el-option label="已逾期" :value="1" />
-            <el-option label="已关闭" :value="2" />
+            <el-option :label="t('ui.正常')" :value="0" />
+            <el-option :label="t('ui.已逾期')" :value="1" />
+            <el-option :label="t('ui.已关闭')" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('ui.查询') }}</el-button>
+          <el-button @click="resetSearch">{{ t('ui.重置') }}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -51,7 +51,7 @@
         <el-icon><Plus /></el-icon> 新增
       </el-button>
       <el-button type="danger" @click="deleteSelected" :disabled="selectedIds.length === 0">
-        <el-icon><Delete /></el-icon> 删除 <el-badge :value="selectedIds.length" :hidden="selectedIds.length === 0" style="margin-left:4px" />
+        <el-icon><Delete /></el-icon>{{ t('ui.删除') }}<el-badge :value="selectedIds.length" :hidden="selectedIds.length === 0" style="margin-left:4px" />
       </el-button>
       <el-button type="warning" @click="loadPending" class="btn-pending" v-if="userRole === 2">
         <el-icon><Bell /></el-icon> 待审批
@@ -64,76 +64,76 @@
       <el-table
         :data="useRecordList"
         v-loading="loading"
-        element-loading-text="正在加载..."
+        :element-loading-text="t('ui.正在加载...')"
         border
         stripe
         style="width: 100%;"
         @selection-change="rows => selectedIds = rows.map(r => r.recordId)"
       >
         <el-table-column type="selection" width="42" />
-        <el-table-column prop="assetCode" label="资产编号" width="140" align="center" show-overflow-tooltip>
+        <el-table-column prop="assetCode" :label="t('ui.资产编号')" width="140" align="center" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="asset-code clickable" @click="goToAsset(row)" v-if="row.assetCode">{{ row.assetCode }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="assetName" label="资产名称" min-width="160" show-overflow-tooltip>
+        <el-table-column prop="assetName" :label="t('ui.资产名称')" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="clickable" @click="goToAsset(row)">{{ row.assetName }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="department" label="领用部门" width="110" align="center" />
-        <el-table-column prop="contactPerson" label="使用人" width="90" align="center" />
-        <el-table-column label="领用类型" width="90" align="center">
+        <el-table-column prop="department" :label="t('ui.领用部门')" width="110" align="center" />
+        <el-table-column prop="contactPerson" :label="t('ui.使用人')" width="90" align="center" />
+        <el-table-column :label="t('ui.领用类型')" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="row.useType === 1 ? '' : 'warning'" size="small">
               {{ getUseTypeText(row.useType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="领用时间" width="110" align="center">
+        <el-table-column :label="t('ui.领用时间')" width="110" align="center">
           <template #default="{ row }">{{ row.useDate ? formatDate(row.useDate) : '-' }}</template>
         </el-table-column>
-        <el-table-column label="预期归还" width="110" align="center">
+        <el-table-column :label="t('ui.预期归还')" width="110" align="center">
           <template #default="{ row }">{{ row.expectedReturnDate ? formatDate(row.expectedReturnDate) : '-' }}</template>
         </el-table-column>
-        <el-table-column label="实际归还" width="110" align="center">
+        <el-table-column :label="t('ui.实际归还')" width="110" align="center">
           <template #default="{ row }">{{ row.actualReturnDate ? formatDate(row.actualReturnDate) : '-' }}</template>
         </el-table-column>
-        <el-table-column label="逾期状态" width="90" align="center">
+        <el-table-column :label="t('ui.逾期状态')" width="90" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.overdueStatus === 1" type="danger" size="small">已逾期</el-tag>
-            <el-tag v-else-if="row.overdueStatus === 2" type="success" size="small">已关闭</el-tag>
+            <el-tag v-if="row.overdueStatus === 1" type="danger" size="small">{{ t('ui.已逾期') }}</el-tag>
+            <el-tag v-else-if="row.overdueStatus === 2" type="success" size="small">{{ t('ui.已关闭') }}</el-tag>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="审批状态" width="90" align="center">
+        <el-table-column :label="t('ui.审批状态')" width="90" align="center">
           <template #default="{ row }">
             <span :class="['status-tag', getStatusClass(row.approveStatus)]">
               {{ getStatusText(row.approveStatus) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="审批人" width="90" align="center">
+        <el-table-column :label="t('ui.审批人')" width="90" align="center">
           <template #default="{ row }">{{ row.approveUser || '-' }}</template>
         </el-table-column>
-        <el-table-column label="备注" min-width="120" show-overflow-tooltip>
+        <el-table-column :label="t('ui.备注')" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">{{ row.remark || '-' }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column :label="t('ui.操作')" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <!-- 待审批状态，管理员显示通过/拒绝 -->
             <template v-if="row.approveStatus === 0 && userRole === 2">
-              <el-button type="success" size="small" @click="handleApprove(row, true)">通过</el-button>
-              <el-button type="danger" size="small" @click="handleApprove(row, false)">拒绝</el-button>
+              <el-button type="success" size="small" @click="handleApprove(row, true)">{{ t('ui.通过') }}</el-button>
+              <el-button type="danger" size="small" @click="handleApprove(row, false)">{{ t('ui.拒绝') }}</el-button>
             </template>
             <!-- 已通过状态且是领用类型，显示归还 -->
             <template v-else-if="row.approveStatus === 1 && (row.useType === 1 || row.useType === null)">
-              <el-button type="warning" size="small" @click="handleReturn(row)">归还</el-button>
+              <el-button type="warning" size="small" @click="handleReturn(row)">{{ t('ui.归还') }}</el-button>
             </template>
             <!-- 其他状态显示详情 -->
             <template v-else>
-              <el-button type="info" size="small" @click="showDetail(row)">详情</el-button>
+              <el-button type="info" size="small" @click="showDetail(row)">{{ t('ui.详情') }}</el-button>
             </template>
           </template>
         </el-table-column>
@@ -156,12 +156,12 @@
     </div>
 
     <!-- 领用申请对话框 -->
-    <el-dialog v-model="applyDialogVisible" title="领用申请" width="600px" @close="resetApplyForm">
+    <el-dialog v-model="applyDialogVisible" :title="t('ui.领用申请')" width="600px" @close="resetApplyForm">
       <el-form :model="applyForm" :rules="applyRules" ref="applyFormRef" label-width="90px">
-        <el-form-item label="选择资产" prop="assetId">
+        <el-form-item :label="t('ui.选择资产')" prop="assetId">
           <el-select
             v-model="applyForm.assetId"
-            placeholder="请选择资产（仅显示未领用）"
+            :placeholder="t('ui.请选择资产（仅显示未领用）')"
             style="width: 100%;"
             filterable
             @change="onAssetChange"
@@ -174,8 +174,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="领用部门" prop="department">
-          <el-select v-model="applyForm.department" placeholder="请选择部门" style="width: 100%;" filterable>
+        <el-form-item :label="t('ui.领用部门')" prop="department">
+          <el-select v-model="applyForm.department" :placeholder="t('ui.请选择部门')" style="width: 100%;" filterable>
             <el-option
               v-for="dept in departmentList"
               :key="dept.deptId"
@@ -186,64 +186,64 @@
         </el-form-item>
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="使用人" prop="contactPerson">
-              <el-input v-model="applyForm.contactPerson" placeholder="请输入使用人" />
+            <el-form-item :label="t('ui.使用人')" prop="contactPerson">
+              <el-input v-model="applyForm.contactPerson" :placeholder="t('ui.请输入使用人')" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="预期归还日期">
+        <el-form-item :label="t('ui.预期归还日期')">
           <el-date-picker
             v-model="applyForm.expectedReturnDate"
             type="datetime"
-            placeholder="请选择预期归还日期"
+            :placeholder="t('ui.请选择预期归还日期')"
             value-format="YYYY-MM-DD HH:mm:ss"
             style="width: 100%;"
           />
         </el-form-item>
         <!-- 选中资产后显示资产信息 -->
-        <el-form-item v-if="selectedAsset" label="资产信息">
+        <el-form-item v-if="selectedAsset" :label="t('ui.资产信息')">
           <div class="asset-info-card">
-            <div class="info-row"><span class="info-label">资产名称：</span>{{ selectedAsset.assetName }}</div>
-            <div class="info-row" v-if="selectedAsset.model"><span class="info-label">型号：</span>{{ selectedAsset.model }}</div>
-            <div class="info-row" v-if="selectedAsset.storageLocation"><span class="info-label">存放位置：</span>{{ selectedAsset.storageLocation }}</div>
-            <div class="info-row" v-if="selectedAsset.purchasePrice"><span class="info-label">原值：</span>¥{{ Number(selectedAsset.purchasePrice).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}</div>
+            <div class="info-row"><span class="info-label">{{ t('ui.资产名称：') }}</span>{{ selectedAsset.assetName }}</div>
+            <div class="info-row" v-if="selectedAsset.model"><span class="info-label">{{ t('ui.型号：') }}</span>{{ selectedAsset.model }}</div>
+            <div class="info-row" v-if="selectedAsset.storageLocation"><span class="info-label">{{ t('ui.存放位置：') }}</span>{{ selectedAsset.storageLocation }}</div>
+            <div class="info-row" v-if="selectedAsset.purchasePrice"><span class="info-label">{{ t('ui.原值：') }}</span>¥{{ Number(selectedAsset.purchasePrice).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}</div>
           </div>
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="applyForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+        <el-form-item :label="t('ui.备注')">
+          <el-input v-model="applyForm.remark" type="textarea" :rows="3" :placeholder="t('ui.请输入备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="applyDialogVisible = false">返回</el-button>
-        <el-button type="danger" @click="submitApply">保存</el-button>
+        <el-button @click="applyDialogVisible = false">{{ t('ui.返回') }}</el-button>
+        <el-button type="danger" @click="submitApply">{{ t('ui.保存') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="领用详情" width="580px">
+    <el-dialog v-model="detailDialogVisible" :title="t('ui.领用详情')" width="580px">
       <el-descriptions :column="2" border v-if="currentRecord">
-        <el-descriptions-item label="资产编号">{{ currentRecord.assetCode || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="资产名称">{{ currentRecord.assetName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="领用部门">{{ currentRecord.department || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="领用类型">{{ getUseTypeText(currentRecord.useType) }}</el-descriptions-item>
-        <el-descriptions-item label="使用人">{{ currentRecord.contactPerson || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="领用时间">{{ currentRecord.useDate ? formatDate(currentRecord.useDate) : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="预期归还">{{ currentRecord.expectedReturnDate ? formatDate(currentRecord.expectedReturnDate) : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="实际归还">{{ currentRecord.actualReturnDate ? formatDate(currentRecord.actualReturnDate) : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="归还时间">{{ currentRecord.returnDate ? formatDate(currentRecord.returnDate) : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="逾期状态">
-          <el-tag v-if="currentRecord.overdueStatus === 1" type="danger" size="small">已逾期</el-tag>
-          <el-tag v-else-if="currentRecord.overdueStatus === 2" type="success" size="small">已关闭</el-tag>
+        <el-descriptions-item :label="t('ui.资产编号')">{{ currentRecord.assetCode || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.资产名称')">{{ currentRecord.assetName || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.领用部门')">{{ currentRecord.department || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.领用类型')">{{ getUseTypeText(currentRecord.useType) }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.使用人')">{{ currentRecord.contactPerson || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.领用时间')">{{ currentRecord.useDate ? formatDate(currentRecord.useDate) : '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.预期归还')">{{ currentRecord.expectedReturnDate ? formatDate(currentRecord.expectedReturnDate) : '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.实际归还')">{{ currentRecord.actualReturnDate ? formatDate(currentRecord.actualReturnDate) : '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.归还时间')">{{ currentRecord.returnDate ? formatDate(currentRecord.returnDate) : '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.逾期状态')">
+          <el-tag v-if="currentRecord.overdueStatus === 1" type="danger" size="small">{{ t('ui.已逾期') }}</el-tag>
+          <el-tag v-else-if="currentRecord.overdueStatus === 2" type="success" size="small">{{ t('ui.已关闭') }}</el-tag>
           <span v-else>-</span>
         </el-descriptions-item>
-        <el-descriptions-item label="审批状态">
+        <el-descriptions-item :label="t('ui.审批状态')">
           <span :class="['status-tag', getStatusClass(currentRecord.approveStatus)]">
             {{ getStatusText(currentRecord.approveStatus) }}
           </span>
         </el-descriptions-item>
-        <el-descriptions-item label="审批人">{{ currentRecord.approveUser || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="审批时间">{{ currentRecord.approveTime ? formatDateTime(currentRecord.approveTime) : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">{{ currentRecord.remark || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.审批人')">{{ currentRecord.approveUser || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.审批时间')">{{ currentRecord.approveTime ? formatDateTime(currentRecord.approveTime) : '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('ui.备注')" :span="2">{{ currentRecord.remark || '-' }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -255,8 +255,10 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Bell } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const loading = ref(false)
 const useRecordList = ref([])

@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <!-- 顶部标题栏 -->
-    <div class="header-title">IT 固定资产管理</div>
+    <div class="header-title">{{ t('ui.IT 固定资产管理') }}</div>
 
     <!-- 搜索和筛选区域 -->
     <div class="search-section">
@@ -9,7 +9,7 @@
         <el-form-item>
           <el-input
             v-model="searchForm.keyword"
-            placeholder="请输入资产名称或编号"
+            :placeholder="t('ui.请输入资产名称或编号')"
             clearable
             style="width: 200px;"
           />
@@ -17,7 +17,7 @@
         <el-form-item>
           <el-select
             v-model="searchForm.categoryId"
-            placeholder="请选择资产分类"
+            :placeholder="t('ui.请选择资产分类')"
             clearable
             style="width: 160px;"
           >
@@ -32,7 +32,7 @@
         <el-form-item>
           <el-input
             v-model="searchForm.tagNo"
-            placeholder="请输入资产标签号"
+            :placeholder="t('ui.请输入资产标签号')"
             clearable
             style="width: 180px;"
           />
@@ -40,35 +40,35 @@
         <el-form-item>
           <el-input
             v-model="searchForm.deviceNo"
-            placeholder="请输入设备编号"
+            :placeholder="t('ui.请输入设备编号')"
             clearable
             style="width: 180px;"
           />
         </el-form-item>
         <el-form-item>
-          <el-select v-model="searchForm.status" placeholder="状态" clearable style="width:140px">
-            <el-option label="未领用" :value="0" />
-            <el-option label="已领用" :value="1" />
-            <el-option label="维修中" :value="2" />
-            <el-option label="已报废" :value="3" />
+          <el-select v-model="searchForm.status" :placeholder="t('ui.状态')" clearable style="width:140px">
+            <el-option :label="t('ui.未领用')" :value="0" />
+            <el-option :label="t('ui.已领用')" :value="1" />
+            <el-option :label="t('ui.维修中')" :value="2" />
+            <el-option :label="t('ui.已报废')" :value="3" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="searchForm.department" placeholder="使用部门" clearable filterable style="width:160px">
+          <el-select v-model="searchForm.department" :placeholder="t('ui.使用部门')" clearable filterable style="width:160px">
             <el-option v-for="d in departmentList" :key="d.deptId" :label="d.deptName" :value="d.deptName" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="searchForm.storageLocation" placeholder="存放地点" clearable filterable style="width:160px">
+          <el-select v-model="searchForm.storageLocation" :placeholder="t('ui.存放地点')" clearable filterable style="width:160px">
             <el-option v-for="s in storageLocationList" :key="s.locationId" :label="s.locationName" :value="s.locationName" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-input v-model="searchForm.responsiblePerson" placeholder="使用人" clearable style="width:160px" />
+          <el-input v-model="searchForm.responsiblePerson" :placeholder="t('ui.使用人')" clearable style="width:160px" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('ui.查询') }}</el-button>
+          <el-button @click="resetSearch">{{ t('ui.重置') }}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -102,7 +102,7 @@
         :data="assetList"
         style="width: 100%;"
         v-loading="loading"
-        element-loading-text="正在加载..."
+        :element-loading-text="t('ui.正在加载...')"
         border
         stripe
         @selection-change="onSelectionChange"
@@ -110,13 +110,13 @@
       >
         <el-table-column type="selection" width="40" />
         <!-- 序号 -->
-        <el-table-column type="index" label="序号" width="55" align="center" />
+        <el-table-column type="index" :label="t('ui.序号')" width="55" align="center" />
 
         <!-- 资产名称 -->
-        <el-table-column prop="assetName" label="资产名称" min-width="120" show-overflow-tooltip sortable="custom" />
+        <el-table-column prop="assetName" :label="t('ui.资产名称')" min-width="120" show-overflow-tooltip sortable="custom" />
 
         <!-- 资产分类 -->
-        <el-table-column label="资产分类" width="100" align="center">
+        <el-table-column :label="t('ui.资产分类')" width="100" align="center">
           <template #default="{ row }">
             <el-tag type="info" size="small" v-if="getCategoryName(row.categoryId)">
               {{ getCategoryName(row.categoryId) }}
@@ -126,42 +126,42 @@
         </el-table-column>
 
         <!-- 资产编号 -->
-        <el-table-column prop="assetCode" label="资产编号" width="130" align="center" show-overflow-tooltip sortable="custom">
+        <el-table-column prop="assetCode" :label="t('ui.资产编号')" width="130" align="center" show-overflow-tooltip sortable="custom">
           <template #default="{ row }">
             <span class="asset-code">{{ row.assetCode || '-' }}</span>
           </template>
         </el-table-column>
 
         <!-- 设备编号 -->
-        <el-table-column prop="deviceNo" label="设备编号" width="130" align="center" show-overflow-tooltip sortable="custom">
+        <el-table-column prop="deviceNo" :label="t('ui.设备编号')" width="130" align="center" show-overflow-tooltip sortable="custom">
           <template #default="{ row }">
             {{ row.deviceNo || '-' }}
           </template>
         </el-table-column>
 
         <!-- 资产品牌 -->
-        <el-table-column prop="brand" label="资产品牌" width="120" align="center" show-overflow-tooltip>
+        <el-table-column prop="brand" :label="t('ui.资产品牌')" width="120" align="center" show-overflow-tooltip>
           <template #default="{ row }">
             {{ row.brand || '-' }}
           </template>
         </el-table-column>
 
         <!-- 资产数量 -->
-        <el-table-column prop="quantity" label="资产数量" width="80" align="center">
+        <el-table-column prop="quantity" :label="t('ui.资产数量')" width="80" align="center">
           <template #default="{ row }">
             {{ row.quantity || 1 }}
           </template>
         </el-table-column>
 
         <!-- 购置日期 -->
-        <el-table-column label="购置日期" width="110" align="center">
+        <el-table-column :label="t('ui.购置日期')" width="110" align="center">
           <template #default="{ row }">
             {{ row.purchaseDate || '-' }}
           </template>
         </el-table-column>
 
         <!-- 采购成本（原「原始价值」列,显示 purchaseCost 优先,兜底 purchasePrice; 2026-09-09 改美元符号） -->
-        <el-table-column label="采购成本(USD)" width="110" align="right">
+        <el-table-column :label="t('ui.采购成本(USD)')" width="110" align="right">
           <template #default="{ row }">
             <span v-if="row.purchaseCost != null || row.purchasePrice" class="price-text">
               ${{ Number(row.purchaseCost != null ? row.purchaseCost : row.purchasePrice).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
@@ -171,28 +171,28 @@
         </el-table-column>
 
         <!-- 使用部门 -->
-        <el-table-column label="使用部门" width="110" align="center" show-overflow-tooltip>
+        <el-table-column :label="t('ui.使用部门')" width="110" align="center" show-overflow-tooltip>
           <template #default="{ row }">
             {{ row.department || parseDepartment(row.remark) || '-' }}
           </template>
         </el-table-column>
 
         <!-- 使用人 -->
-        <el-table-column prop="userName" label="使用人" width="90" align="center">
+        <el-table-column prop="userName" :label="t('ui.使用人')" width="90" align="center">
           <template #default="{ row }">
             {{ row.userName || row.responsiblePerson || (row.userId ? getUserName(row.userId) : '-') }}
           </template>
         </el-table-column>
 
         <!-- 存放地点 -->
-        <el-table-column prop="storageLocation" label="存放地点" width="100" align="center" show-overflow-tooltip>
+        <el-table-column prop="storageLocation" :label="t('ui.存放地点')" width="100" align="center" show-overflow-tooltip>
           <template #default="{ row }">
             {{ row.storageLocation || '-' }}
           </template>
         </el-table-column>
 
         <!-- 状态 -->
-        <el-table-column label="状态" width="80" align="center">
+        <el-table-column :label="t('ui.状态')" width="80" align="center">
           <template #default="{ row }">
             <span :class="['status-tag', getStatusClass(row.status)]">
               {{ getStatusText(row.status) }}
@@ -201,7 +201,7 @@
         </el-table-column>
 
         <!-- P0: 当前价值 -->
-        <el-table-column label="当前价值" width="110" align="right" sortable="custom" prop="currentValue">
+        <el-table-column :label="t('ui.当前价值')" width="110" align="right" sortable="custom" prop="currentValue">
           <template #default="{ row }">
             <span v-if="row.currentValue != null" :class="['price-text', { 'text-danger': row.currentValue <= 0 }]">
               ¥{{ Number(row.currentValue).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
@@ -211,7 +211,7 @@
         </el-table-column>
 
         <!-- P0: EOL日期 -->
-        <el-table-column label="EOL日期" width="110" align="center" sortable="custom" prop="eolDate">
+        <el-table-column :label="t('ui.EOL日期')" width="110" align="center" sortable="custom" prop="eolDate">
           <template #default="{ row }">
             <span v-if="row.eolDate" :style="{ color: isEolNear(row.eolDate) ? '#F56C6C' : '' }">
               {{ row.eolDate }}
@@ -221,7 +221,7 @@
         </el-table-column>
 
         <!-- 保修到期 -->
-        <el-table-column label="保修到期" width="110" align="center">
+        <el-table-column :label="t('ui.保修到期')" width="110" align="center">
           <template #default="{ row }">
             <span v-if="row.warrantyExpireDate" :style="{ color: isExpireNear(row.warrantyExpireDate) ? '#F56C6C' : '' }">
               {{ row.warrantyExpireDate }}
@@ -230,7 +230,7 @@
           </template>
         </el-table-column>
         <!-- 下次维护 -->
-        <el-table-column label="下次维护" width="110" align="center">
+        <el-table-column :label="t('ui.下次维护')" width="110" align="center">
           <template #default="{ row }">
             <span v-if="row.nextMaintenanceDate" :style="{ color: isExpireNear(row.nextMaintenanceDate) ? '#E6A23C' : '' }">
               {{ row.nextMaintenanceDate }}
@@ -240,25 +240,25 @@
         </el-table-column>
 
         <!-- 折旧方法 -->
-        <el-table-column label="折旧方法" width="90" align="center">
+        <el-table-column :label="t('ui.折旧方法')" width="90" align="center">
           <template #default="{ row }">
             {{ getDepText(row.depreciationMethod) }}
           </template>
         </el-table-column>
 
         <!-- 备注 -->
-        <el-table-column prop="remark" label="备注" min-width="120" show-overflow-tooltip>
+        <el-table-column prop="remark" :label="t('ui.备注')" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">
             {{ (row.remark || '').replace(/部门[:：][^,，\s]*[，,]?\s*/g, '').trim() || '-' }}
           </template>
         </el-table-column>
 
         <!-- 操作 -->
-        <el-table-column label="操作" width="210" align="center" fixed="right">
+        <el-table-column :label="t('ui.操作')" width="210" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="printSingleLabel(row)" style="color:#67C23A;border-color:#67C23A">标签</el-button>
-            <el-button type="primary" size="small" @click="showEditDialog(row)" v-if="userRole === 2">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)" v-if="userRole === 2">删除</el-button>
+            <el-button size="small" @click="printSingleLabel(row)" style="color:#67C23A;border-color:#67C23A">{{ t('ui.标签') }}</el-button>
+            <el-button type="primary" size="small" @click="showEditDialog(row)" v-if="userRole === 2">{{ t('ui.编辑') }}</el-button>
+            <el-button type="danger" size="small" @click="handleDelete(row)" v-if="userRole === 2">{{ t('ui.删除') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -282,7 +282,7 @@
     <!-- 新增/编辑资产对话框 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="isEditMode ? '编辑资产' : '新增资产'"
+      :title="isEditMode ? t('ui.编辑资产') : t('ui.新增资产')"
       width="700px"
       @close="resetForm"
     >
@@ -294,13 +294,13 @@
       >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="资产名称" prop="assetName">
-              <el-input v-model="assetForm.assetName" placeholder="请输入资产名称" clearable />
+            <el-form-item :label="t('ui.资产名称')" prop="assetName">
+              <el-input v-model="assetForm.assetName" :placeholder="t('ui.请输入资产名称')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="资产分类" prop="categoryId">
-              <el-select v-model="assetForm.categoryId" placeholder="请选择分类" style="width: 100%;">
+            <el-form-item :label="t('ui.资产分类')" prop="categoryId">
+              <el-select v-model="assetForm.categoryId" :placeholder="t('ui.请选择分类')" style="width: 100%;">
                 <el-option v-for="cat in categoryList" :key="cat.categoryId" :label="cat.categoryName" :value="cat.categoryId" />
               </el-select>
             </el-form-item>
@@ -309,34 +309,34 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="资产编号">
-              <el-input v-model="assetForm.assetCode" placeholder="留空自动生成" clearable />
+            <el-form-item :label="t('ui.资产编号')">
+              <el-input v-model="assetForm.assetCode" :placeholder="t('ui.留空自动生成')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="设备编号">
-              <el-input v-model="assetForm.deviceNo" placeholder="请输入设备编号" clearable />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="品牌" prop="brand">
-              <el-input v-model="assetForm.brand" placeholder="请输入品牌" clearable />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="型号" prop="model">
-              <el-input v-model="assetForm.model" placeholder="请输入型号" clearable />
+            <el-form-item :label="t('ui.设备编号')">
+              <el-input v-model="assetForm.deviceNo" :placeholder="t('ui.请输入设备编号')" clearable />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="资产模型">
-              <el-select v-model="assetForm.modelId" placeholder="选择模型(自动继承折旧)" clearable filterable style="width:100%" @change="onModelChange">
+            <el-form-item :label="t('ui.品牌')" prop="brand">
+              <el-input v-model="assetForm.brand" :placeholder="t('ui.请输入品牌')" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item :label="t('ui.型号')" prop="model">
+              <el-input v-model="assetForm.model" :placeholder="t('ui.请输入型号')" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item :label="t('ui.资产模型')">
+              <el-select v-model="assetForm.modelId" :placeholder="t('ui.选择模型(自动继承折旧)')" clearable filterable style="width:100%" @change="onModelChange">
                 <el-option v-for="m in modelList" :key="m.modelId" :label="m.modelName" :value="m.modelId" />
               </el-select>
             </el-form-item>
@@ -345,32 +345,32 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="序列号" prop="serialNumber">
-              <el-input v-model="assetForm.serialNumber" placeholder="请输入序列号" clearable />
+            <el-form-item :label="t('ui.序列号')" prop="serialNumber">
+              <el-input v-model="assetForm.serialNumber" :placeholder="t('ui.请输入序列号')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="采购价格" prop="purchasePrice">
-              <el-input v-model="assetForm.purchasePrice" placeholder="请输入采购价格" type="number" step="0.01" clearable />
+            <el-form-item :label="t('ui.采购价格')" prop="purchasePrice">
+              <el-input v-model="assetForm.purchasePrice" :placeholder="t('ui.请输入采购价格')" type="number" step="0.01" clearable />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="存放位置" prop="storageLocation">
-              <el-select v-model="assetForm.storageLocation" filterable placeholder="请选择存放位置" style="width:100%">
+            <el-form-item :label="t('ui.存放位置')" prop="storageLocation">
+              <el-select v-model="assetForm.storageLocation" filterable :placeholder="t('ui.请选择存放位置')" style="width:100%">
                 <el-option v-for="s in storageLocationList" :key="s.locationId" :label="s.locationName" :value="s.locationName" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="资产状态" prop="status">
-              <el-select v-model="assetForm.status" placeholder="请选择状态" style="width: 100%;">
-                <el-option label="未领用" :value="0" />
-                <el-option label="已领用" :value="1" />
-                <el-option label="维修中" :value="2" />
-                <el-option label="已报废" :value="3" />
+            <el-form-item :label="t('ui.资产状态')" prop="status">
+              <el-select v-model="assetForm.status" :placeholder="t('ui.请选择状态')" style="width: 100%;">
+                <el-option :label="t('ui.未领用')" :value="0" />
+                <el-option :label="t('ui.已领用')" :value="1" />
+                <el-option :label="t('ui.维修中')" :value="2" />
+                <el-option :label="t('ui.已报废')" :value="3" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -378,32 +378,32 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="采购日期">
+            <el-form-item :label="t('ui.采购日期')">
               <el-date-picker
                 v-model="assetForm.purchaseDate"
                 type="date"
-                placeholder="选择日期"
+                :placeholder="t('ui.选择日期')"
                 value-format="YYYY-MM-DD"
                 style="width: 100%;"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="供应商">
-              <el-input v-model="assetForm.supplier" placeholder="请输入供应商" clearable />
+            <el-form-item :label="t('ui.供应商')">
+              <el-input v-model="assetForm.supplier" :placeholder="t('ui.请输入供应商')" clearable />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="维保信息">
-              <el-input v-model="assetForm.warrantyInfo" placeholder="如: 3年质保, 到期2027-06" clearable />
+            <el-form-item :label="t('ui.维保信息')">
+              <el-input v-model="assetForm.warrantyInfo" :placeholder="t('ui.如: 3年质保, 到期2027-06')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="部门">
-              <el-select v-model="assetForm.department" placeholder="请选择部门" style="width: 100%;" clearable filterable>
+            <el-form-item :label="t('ui.部门')">
+              <el-select v-model="assetForm.department" :placeholder="t('ui.请选择部门')" style="width: 100%;" clearable filterable>
                 <el-option
                   v-for="dept in departmentList"
                   :key="dept.deptId"
@@ -416,102 +416,102 @@
         </el-row>
 
         <!-- 维护信息 -->
-        <el-divider content-position="left">维护信息</el-divider>
+        <el-divider content-position="left">{{ t('ui.维护信息') }}</el-divider>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="保修到期日">
-              <el-date-picker v-model="assetForm.warrantyExpireDate" type="date" placeholder="保修到期"
+            <el-form-item :label="t('ui.保修到期日')">
+              <el-date-picker v-model="assetForm.warrantyExpireDate" type="date" :placeholder="t('ui.保修到期')"
                 value-format="YYYY-MM-DD" style="width:100%" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="维护周期(天)">
+            <el-form-item :label="t('ui.维护周期(天)')">
               <el-input-number v-model="assetForm.maintenanceCycleDays" :min="1" :max="3650" style="width:100%" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="下次维护日期">
-              <el-date-picker v-model="assetForm.nextMaintenanceDate" type="date" placeholder="自动推算或手动设"
+            <el-form-item :label="t('ui.下次维护日期')">
+              <el-date-picker v-model="assetForm.nextMaintenanceDate" type="date" :placeholder="t('ui.自动推算或手动设')"
                 value-format="YYYY-MM-DD" style="width:100%" />
             </el-form-item>
           </el-col>
         </el-row>
 
         <!-- P0: 财务与折旧 -->
-        <el-divider content-position="left">财务与折旧</el-divider>
+        <el-divider content-position="left">{{ t('ui.财务与折旧') }}</el-divider>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="采购成本(USD)">
-              <el-input v-model="assetForm.purchaseCost" placeholder="采购成本(USD)" type="number" step="0.01" clearable />
+            <el-form-item :label="t('ui.采购成本(USD)')">
+              <el-input v-model="assetForm.purchaseCost" :placeholder="t('ui.采购成本(USD)')" type="number" step="0.01" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="折旧年限">
+            <el-form-item :label="t('ui.折旧年限')">
               <el-input-number v-model="assetForm.depreciationYears" :min="1" :max="20" style="width:100%" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="折旧方法">
+            <el-form-item :label="t('ui.折旧方法')">
               <el-select v-model="assetForm.depreciationMethod" style="width:100%">
-                <el-option label="直线折旧" value="straight_line" />
-                <el-option label="余额递减" value="declining_balance" />
+                <el-option :label="t('ui.直线折旧')" value="straight_line" />
+                <el-option :label="t('ui.余额递减')" value="declining_balance" />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="EOL日期">
+            <el-form-item :label="t('ui.EOL日期')">
               <el-date-picker
                 v-model="assetForm.eolDate"
                 type="date"
-                placeholder="EOL日期"
+                :placeholder="t('ui.EOL日期')"
                 value-format="YYYY-MM-DD"
                 style="width: 100%;"
               />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="当前价值">
+            <el-form-item :label="t('ui.当前价值')">
               <span v-if="assetForm.currentValue != null" class="price-text">
                 ¥{{ Number(assetForm.currentValue).toLocaleString('zh-CN', { minimumFractionDigits: 2 }) }}
               </span>
-              <span v-else style="color:#999">保存后自动计算</span>
+              <span v-else style="color:#999">{{ t('ui.保存后自动计算') }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="折旧率">
+            <el-form-item :label="t('ui.折旧率')">
               <span v-if="assetForm.depreciationRate != null">{{ Number(assetForm.depreciationRate).toFixed(2) }}% / 年</span>
-              <span v-else style="color:#999">保存后自动计算</span>
+              <span v-else style="color:#999">{{ t('ui.保存后自动计算') }}</span>
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="使用人">
-              <el-input v-model="assetForm.userName" placeholder="请输入使用人" style="width: 100%;" clearable />
+            <el-form-item :label="t('ui.使用人')">
+              <el-input v-model="assetForm.userName" :placeholder="t('ui.请输入使用人')" style="width: 100%;" clearable />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="备注">
-              <el-input v-model="assetForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+            <el-form-item :label="t('ui.备注')">
+              <el-input v-model="assetForm.remark" type="textarea" :rows="3" :placeholder="t('ui.请输入备注')" />
             </el-form-item>
           </el-col>
         </el-row>
 
         <!-- 自定义字段 -->
         <template v-if="customFieldDefs.length > 0">
-          <el-divider content-position="left">自定义字段</el-divider>
+          <el-divider content-position="left">{{ t('ui.自定义字段') }}</el-divider>
           <el-row :gutter="20">
             <el-col :span="12" v-for="def in customFieldDefs" :key="def.fieldId">
               <el-form-item :label="def.fieldName" :required="def.isRequired === 1">
                 <!-- 文本 -->
                 <el-input v-if="def.fieldType === 'text'" v-model="customFieldValues[def.fieldId]"
-                  :placeholder="'请输入' + def.fieldName" clearable />
+                  :placeholder="t('ui.请输入') + def.fieldName" clearable />
                 <!-- 数字 -->
                 <el-input-number v-if="def.fieldType === 'number'" v-model="customFieldValues[def.fieldId]"
                   :precision="2" style="width:100%" />
@@ -520,25 +520,25 @@
                   type="date" value-format="YYYY-MM-DD" style="width:100%" />
                 <!-- 下拉选择 -->
                 <el-select v-if="def.fieldType === 'select'" v-model="customFieldValues[def.fieldId]"
-                  :placeholder="'请选择' + def.fieldName" clearable style="width:100%">
+                  :placeholder="t('ui.请选择') + def.fieldName" clearable style="width:100%">
                   <el-option v-for="opt in parseOptions(def.fieldOptions)" :key="opt" :label="opt" :value="opt" />
                 </el-select>
                 <!-- 多行文本 -->
                 <el-input v-if="def.fieldType === 'textarea'" v-model="customFieldValues[def.fieldId]"
-                  type="textarea" :rows="2" :placeholder="'请输入' + def.fieldName" />
+                  type="textarea" :rows="2" :placeholder="t('ui.请输入') + def.fieldName" />
               </el-form-item>
             </el-col>
           </el-row>
         </template>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleSubmit">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 领用申请对话框 -->
-    <el-dialog v-model="applyDialogVisible" title="申请领用" width="500px" @close="resetApplyForm">
+    <el-dialog v-model="applyDialogVisible" :title="t('ui.申请领用')" width="500px" @close="resetApplyForm">
       <div class="apply-asset-info" v-if="applyAsset">
         <div class="apply-asset-title">领用资产：{{ applyAsset.assetName }}</div>
         <div class="apply-asset-detail">
@@ -548,8 +548,8 @@
         </div>
       </div>
       <el-form :model="applyForm" :rules="applyRules" ref="applyFormRef" label-width="90px">
-        <el-form-item label="领用部门" prop="department">
-          <el-select v-model="applyForm.department" placeholder="请选择部门" style="width: 100%;" filterable>
+        <el-form-item :label="t('ui.领用部门')" prop="department">
+          <el-select v-model="applyForm.department" :placeholder="t('ui.请选择部门')" style="width: 100%;" filterable>
             <el-option
               v-for="dept in departmentList"
               :key="dept.deptId"
@@ -558,21 +558,21 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="使用人" prop="contactPerson">
-          <el-input v-model="applyForm.contactPerson" placeholder="请输入使用人" />
+        <el-form-item :label="t('ui.使用人')" prop="contactPerson">
+          <el-input v-model="applyForm.contactPerson" :placeholder="t('ui.请输入使用人')" />
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="applyForm.remark" type="textarea" :rows="2" placeholder="请输入备注（可选）" />
+        <el-form-item :label="t('ui.备注')">
+          <el-input v-model="applyForm.remark" type="textarea" :rows="2" :placeholder="t('ui.请输入备注（可选）')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="applyDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitApply">提交申请</el-button>
+        <el-button @click="applyDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitApply">{{ t('ui.提交申请') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 领用记录对话框 -->
-    <el-dialog v-model="useRecordDialogVisible" title="领用记录" width="750px">
+    <el-dialog v-model="useRecordDialogVisible" :title="t('ui.领用记录')" width="750px">
       <div class="use-record-header" v-if="useRecordAsset">
         <strong>{{ useRecordAsset.assetName }}</strong>
         <span class="use-record-code">（{{ useRecordAsset.assetCode || '-' }}）</span>
@@ -581,95 +581,95 @@
         </el-button>
       </div>
       <el-table :data="useRecordList" v-loading="useRecordLoading" border stripe style="width: 100%;" max-height="400">
-        <el-table-column label="类型" width="70" align="center">
+        <el-table-column :label="t('ui.类型')" width="70" align="center">
           <template #default="{ row }">
             <el-tag :type="row.useType === 1 ? '' : 'warning'" size="small">{{ getUseTypeText(row.useType) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="使用人" width="80" align="center">
+        <el-table-column :label="t('ui.使用人')" width="80" align="center">
           <template #default="{ row }">{{ row.contactPerson || '-' }}</template>
         </el-table-column>
-        <el-table-column label="部门" width="100" align="center" prop="department" />
-        <el-table-column label="联系电话" width="120" align="center" prop="contactPhone" />
-        <el-table-column label="领用时间" width="110" align="center">
+        <el-table-column :label="t('ui.部门')" width="100" align="center" prop="department" />
+        <el-table-column :label="t('ui.联系电话')" width="120" align="center" prop="contactPhone" />
+        <el-table-column :label="t('ui.领用时间')" width="110" align="center">
           <template #default="{ row }">{{ row.useDate ? formatDateTime(row.useDate) : '-' }}</template>
         </el-table-column>
-        <el-table-column label="归还时间" width="110" align="center">
+        <el-table-column :label="t('ui.归还时间')" width="110" align="center">
           <template #default="{ row }">{{ row.returnDate ? formatDateTime(row.returnDate) : '-' }}</template>
         </el-table-column>
-        <el-table-column label="审批状态" width="90" align="center">
+        <el-table-column :label="t('ui.审批状态')" width="90" align="center">
           <template #default="{ row }">
             <span :class="['status-tag', getApproveStatusClass(row.approveStatus)]">
               {{ getApproveStatusText(row.approveStatus) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="审批人" width="90" align="center">
+        <el-table-column :label="t('ui.审批人')" width="90" align="center">
           <template #default="{ row }">{{ row.approveUser || '-' }}</template>
         </el-table-column>
-        <el-table-column label="备注" min-width="120" show-overflow-tooltip>
+        <el-table-column :label="t('ui.备注')" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">{{ row.remark || '-' }}</template>
         </el-table-column>
       </el-table>
     </el-dialog>
 
     <!-- 批量修改对话框 -->
-    <el-dialog v-model="batchEditVisible" title="批量修改资产" width="500px">
+    <el-dialog v-model="batchEditVisible" :title="t('ui.批量修改资产')" width="500px">
       <el-alert type="info" :closable="false" style="margin-bottom:16px">
         已选择 <b>{{ selectedRows.length }}</b> 条资产，以下字段将覆盖到所选资产。
       </el-alert>
       <el-form :model="batchForm" label-width="100px">
-        <el-form-item label="所属部门">
-          <el-select v-model="batchForm.department" clearable filterable placeholder="留空表示不修改" style="width:100%">
+        <el-form-item :label="t('ui.所属部门')">
+          <el-select v-model="batchForm.department" clearable filterable :placeholder="t('ui.留空表示不修改')" style="width:100%">
             <el-option v-for="d in departmentList" :key="d.deptId" :label="d.deptName" :value="d.deptName" />
           </el-select>
         </el-form-item>
-        <el-form-item label="存放位置">
-          <el-select v-model="batchForm.storageLocation" clearable filterable placeholder="留空表示不修改" style="width:100%">
+        <el-form-item :label="t('ui.存放位置')">
+          <el-select v-model="batchForm.storageLocation" clearable filterable :placeholder="t('ui.留空表示不修改')" style="width:100%">
             <el-option v-for="s in storageLocationList" :key="s.locationId" :label="s.locationName" :value="s.locationName" />
           </el-select>
         </el-form-item>
-        <el-form-item label="使用人">
-          <el-input v-model="batchForm.userName" placeholder="留空表示不修改" clearable />
+        <el-form-item :label="t('ui.使用人')">
+          <el-input v-model="batchForm.userName" :placeholder="t('ui.留空表示不修改')" clearable />
         </el-form-item>
-        <el-form-item label="负责人">
-          <el-input v-model="batchForm.responsiblePerson" placeholder="留空表示不修改" clearable />
+        <el-form-item :label="t('ui.负责人')">
+          <el-input v-model="batchForm.responsiblePerson" :placeholder="t('ui.留空表示不修改')" clearable />
         </el-form-item>
-        <el-form-item label="资产分类">
-          <el-select v-model="batchForm.categoryId" clearable placeholder="留空表示不修改" style="width:100%">
+        <el-form-item :label="t('ui.资产分类')">
+          <el-select v-model="batchForm.categoryId" clearable :placeholder="t('ui.留空表示不修改')" style="width:100%">
             <el-option v-for="c in categoryList" :key="c.categoryId" :label="c.categoryName" :value="c.categoryId" />
           </el-select>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="batchForm.status" clearable placeholder="留空表示不修改" style="width:100%">
-            <el-option label="未领用" :value="0" />
-            <el-option label="已领用" :value="1" />
+        <el-form-item :label="t('ui.状态')">
+          <el-select v-model="batchForm.status" clearable :placeholder="t('ui.留空表示不修改')" style="width:100%">
+            <el-option :label="t('ui.未领用')" :value="0" />
+            <el-option :label="t('ui.已领用')" :value="1" />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="batchEditVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitBatchEdit" :loading="batchSubmitting">确定修改</el-button>
+        <el-button @click="batchEditVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="submitBatchEdit" :loading="batchSubmitting">{{ t('ui.确定修改') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 批量导入对话框 -->
-    <el-dialog v-model="importDialogVisible" title="批量导入资产" width="780px" @close="resetImport">
+    <el-dialog v-model="importDialogVisible" :title="t('ui.批量导入资产')" width="780px" @close="resetImport">
       <div class="import-steps">
         <!-- 步骤一：下载模板 -->
         <div class="import-step">
-          <div class="step-header"><span class="step-num">1</span> 下载导入模板</div>
+          <div class="step-header"><span class="step-num">1</span>{{ t('ui.下载导入模板') }}</div>
           <div class="step-body">
             <el-button type="primary" plain size="small" @click="downloadTemplate">
               <el-icon><Download /></el-icon> 下载Excel模板
             </el-button>
-            <span class="step-tip">模板包含必填字段说明，请严格按照模板格式填写</span>
+            <span class="step-tip">{{ t('ui.模板包含必填字段说明，请严格按照模板格式填写') }}</span>
           </div>
         </div>
 
         <!-- 步骤二：上传文件 -->
         <div class="import-step">
-          <div class="step-header"><span class="step-num">2</span> 上传文件（支持 .xlsx / .xls / .csv）</div>
+          <div class="step-header"><span class="step-num">2</span>{{ t('ui.上传文件（支持 .xlsx / .xls / .csv）') }}</div>
           <div class="step-body">
             <input
               ref="fileInputRef"
@@ -682,7 +682,7 @@
               <el-icon><Upload /></el-icon> 选择文件
             </el-button>
             <span class="step-tip" v-if="importFileName">已选：{{ importFileName }}</span>
-            <span class="step-tip" v-else>未选择文件</span>
+            <span class="step-tip" v-else>{{ t('ui.未选择文件') }}</span>
           </div>
         </div>
 
@@ -694,24 +694,24 @@
           </div>
           <div class="step-body">
             <el-table :data="importPreviewData.slice(0, 5)" border size="small" style="width:100%;">
-              <el-table-column prop="assetName" label="资产名称" width="120" show-overflow-tooltip />
-              <el-table-column prop="categoryName" label="资产分类" width="90" />
-              <el-table-column prop="brand" label="品牌" width="90" />
-              <el-table-column prop="model" label="型号" width="100" show-overflow-tooltip />
-              <el-table-column prop="quantity" label="数量" width="60" />
-              <el-table-column prop="purchasePrice" label="原始价值" width="90" />
-              <el-table-column prop="purchaseDate" label="购置日期" width="100" />
-              <el-table-column label="折旧方法" width="80">
+              <el-table-column prop="assetName" :label="t('ui.资产名称')" width="120" show-overflow-tooltip />
+              <el-table-column prop="categoryName" :label="t('ui.资产分类')" width="90" />
+              <el-table-column prop="brand" :label="t('ui.品牌')" width="90" />
+              <el-table-column prop="model" :label="t('ui.型号')" width="100" show-overflow-tooltip />
+              <el-table-column prop="quantity" :label="t('ui.数量')" width="60" />
+              <el-table-column prop="purchasePrice" :label="t('ui.原始价值')" width="90" />
+              <el-table-column prop="purchaseDate" :label="t('ui.购置日期')" width="100" />
+              <el-table-column :label="t('ui.折旧方法')" width="80">
                 <template #default="{ row }">{{ getDepText(row.depreciationMethod) }}</template>
               </el-table-column>
-              <el-table-column prop="department" label="使用部门" width="90" show-overflow-tooltip />
-              <el-table-column prop="responsiblePerson" label="责任人" width="80" />
-              <el-table-column prop="storageLocation" label="存放地点" width="90" show-overflow-tooltip />
-              <el-table-column prop="remark" label="备注" min-width="80" show-overflow-tooltip />
+              <el-table-column prop="department" :label="t('ui.使用部门')" width="90" show-overflow-tooltip />
+              <el-table-column prop="responsiblePerson" :label="t('ui.责任人')" width="80" />
+              <el-table-column prop="storageLocation" :label="t('ui.存放地点')" width="90" show-overflow-tooltip />
+              <el-table-column prop="remark" :label="t('ui.备注')" min-width="80" show-overflow-tooltip />
             </el-table>
             <!-- 错误提示 -->
             <div v-if="importErrors.length > 0" class="import-errors">
-              <div class="error-title">⚠️ 以下行存在问题（将跳过）：</div>
+              <div class="error-title">{{ t('ui.⚠️ 以下行存在问题（将跳过）：') }}</div>
               <div v-for="err in importErrors" :key="err.row" class="error-item">第 {{ err.row }} 行：{{ err.msg }}</div>
             </div>
           </div>
@@ -719,7 +719,7 @@
       </div>
 
       <template #footer>
-        <el-button @click="importDialogVisible = false">取消</el-button>
+        <el-button @click="importDialogVisible = false">{{ t('ui.取消') }}</el-button>
         <el-button
           type="primary"
           :disabled="importPreviewData.length === 0"
@@ -737,6 +737,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { Plus, Download, RefreshRight, Printer, Upload, Edit } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import axios from 'axios'
@@ -744,6 +745,7 @@ import QRCode from 'qrcode'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
 // 表单引用
 const assetFormRef = ref(null)

@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <div class="header-title">个人信息</div>
+    <div class="header-title">{{ t('ui.个人信息') }}</div>
     
     <el-row :gutter="20">
       <!-- 基本信息 -->
@@ -8,16 +8,16 @@
         <el-card class="profile-card">
           <template #header>
             <div class="card-header">
-              <span>📋 基本信息</span>
-              <el-button type="primary" size="small" @click="showEditInfoDialog">修改信息</el-button>
+              <span>{{ t('ui.📋 基本信息') }}</span>
+              <el-button type="primary" size="small" @click="showEditInfoDialog">{{ t('ui.修改信息') }}</el-button>
             </div>
           </template>
           <el-descriptions :column="1" border>
-            <el-descriptions-item label="用户名">{{ userInfo.username }}</el-descriptions-item>
-            <el-descriptions-item label="姓名">{{ userInfo.realName }}</el-descriptions-item>
-            <el-descriptions-item label="角色">
+            <el-descriptions-item :label="t('ui.用户名')">{{ userInfo.username }}</el-descriptions-item>
+            <el-descriptions-item :label="t('ui.姓名')">{{ userInfo.realName }}</el-descriptions-item>
+            <el-descriptions-item :label="t('ui.角色')">
               <el-tag :type="userInfo.role === 2 ? 'danger' : 'info'" size="large">
-                {{ userInfo.role === 2 ? '管理员' : '普通用户' }}
+                {{ userInfo.role === 2 ? t('ui.管理员') : t('ui.普通用户') }}
               </el-tag>
             </el-descriptions-item>
           </el-descriptions>
@@ -29,19 +29,19 @@
         <el-card class="role-card">
           <template #header>
             <div class="card-header">
-              <span>🔐 权限设置</span>
+              <span>{{ t('ui.🔐 权限设置') }}</span>
             </div>
           </template>
           <el-form label-width="100px">
-            <el-form-item label="当前角色">
+            <el-form-item :label="t('ui.当前角色')">
               <el-tag :type="userInfo.role === 2 ? 'danger' : 'info'">
-                {{ userInfo.role === 2 ? '管理员' : '普通用户' }}
+                {{ userInfo.role === 2 ? t('ui.管理员') : t('ui.普通用户') }}
               </el-tag>
             </el-form-item>
-            <el-form-item label="设置角色" v-if="userInfo.role === 2">
-              <el-select v-model="targetRole" placeholder="请选择角色" style="width: 200px;">
-                <el-option label="管理员" :value="2" />
-                <el-option label="普通用户" :value="1" />
+            <el-form-item :label="t('ui.设置角色')" v-if="userInfo.role === 2">
+              <el-select v-model="targetRole" :placeholder="t('ui.请选择角色')" style="width: 200px;">
+                <el-option :label="t('ui.管理员')" :value="2" />
+                <el-option :label="t('ui.普通用户')" :value="1" />
               </el-select>
               <el-button type="primary" @click="handleChangeRole" style="margin-left: 10px;">
                 修改
@@ -49,7 +49,7 @@
             </el-form-item>
             <el-alert
               v-else
-              title="仅管理员可以修改用户角色"
+              :title="t('ui.仅管理员可以修改用户角色')"
               type="warning"
               :closable="false"
               show-icon
@@ -63,24 +63,24 @@
     <el-card class="user-list-card" v-if="userInfo.role === 2">
       <template #header>
         <div class="card-header">
-          <span>👥 用户管理</span>
+          <span>{{ t('ui.👥 用户管理') }}</span>
           <el-button type="primary" size="small" @click="showAddUserDialog">
-            <el-icon><Plus /></el-icon> 新增用户
+            <el-icon><Plus /></el-icon> {{ t('ui.新增用户') }}
           </el-button>
         </div>
       </template>
       <el-table :data="userList" v-loading="loading" stripe>
         <el-table-column prop="userId" label="ID" width="80" align="center" />
-        <el-table-column prop="username" label="用户名" width="150" align="center" />
-        <el-table-column prop="realName" label="姓名" width="120" align="center" />
-        <el-table-column label="角色" width="150" align="center">
+        <el-table-column prop="username" :label="t('ui.用户名')" width="150" align="center" />
+        <el-table-column prop="realName" :label="t('ui.姓名')" width="120" align="center" />
+        <el-table-column :label="t('ui.角色')" width="150" align="center">
           <template #default="{ row }">
             <el-tag :type="row.role === 2 ? 'danger' : 'info'" size="small">
-              {{ row.role === 2 ? '管理员' : '普通用户' }}
+              {{ row.role === 2 ? t('ui.管理员') : t('ui.普通用户') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column :label="t('ui.操作')" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <el-button 
               type="primary" 
@@ -98,90 +98,90 @@
             >
               删除
             </el-button>
-            <span v-else style="color: #909399; font-size: 13px;">当前用户</span>
+            <span v-else style="color: #909399; font-size: 13px;">{{ t('ui.当前用户') }}</span>
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-if="!loading && userList.length === 0" description="暂无用户数据" />
+      <el-empty v-if="!loading && userList.length === 0" :description="t('ui.暂无用户数据')" />
     </el-card>
     
     <!-- 编辑个人信息对话框 -->
-    <el-dialog v-model="editInfoDialogVisible" title="修改个人信息" width="450px">
+    <el-dialog v-model="editInfoDialogVisible" :title="t('ui.修改个人信息')" width="450px">
       <el-form :model="editForm" label-width="80px">
-        <el-form-item label="用户名">
+        <el-form-item :label="t('ui.用户名')">
           <span>{{ userInfo.username }}</span>
         </el-form-item>
-        <el-form-item label="姓名" required>
-          <el-input v-model="editForm.realName" placeholder="请输入姓名" />
+        <el-form-item :label="t('ui.姓名')" required>
+          <el-input v-model="editForm.realName" :placeholder="t('ui.请输入姓名')" />
         </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="editForm.email" placeholder="请输入邮箱" />
+        <el-form-item :label="t('ui.邮箱')">
+          <el-input v-model="editForm.email" :placeholder="t('ui.请输入邮箱')" />
         </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="editForm.phone" placeholder="请输入电话" />
+        <el-form-item :label="t('ui.电话')">
+          <el-input v-model="editForm.phone" :placeholder="t('ui.请输入电话')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editInfoDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleUpdateInfo">确定</el-button>
+        <el-button @click="editInfoDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleUpdateInfo">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
     
     <!-- 修改角色对话框 -->
-    <el-dialog v-model="editRoleDialogVisible" title="修改用户角色" width="400px">
+    <el-dialog v-model="editRoleDialogVisible" :title="t('ui.修改用户角色')" width="400px">
       <el-form label-width="80px">
-        <el-form-item label="用户名">
+        <el-form-item :label="t('ui.用户名')">
           <span>{{ currentUser.username }}</span>
         </el-form-item>
-        <el-form-item label="当前角色">
+        <el-form-item :label="t('ui.当前角色')">
           <el-tag :type="currentUser.role === 2 ? 'danger' : 'info'">
-            {{ currentUser.role === 2 ? '管理员' : '普通用户' }}
+            {{ currentUser.role === 2 ? t('ui.管理员') : t('ui.普通用户') }}
           </el-tag>
         </el-form-item>
-        <el-form-item label="新角色">
-          <el-select v-model="targetRole" placeholder="请选择角色" style="width: 100%;">
-            <el-option label="管理员" :value="2" />
-            <el-option label="普通用户" :value="1" />
+        <el-form-item :label="t('ui.新角色')">
+          <el-select v-model="targetRole" :placeholder="t('ui.请选择角色')" style="width: 100%;">
+            <el-option :label="t('ui.管理员')" :value="2" />
+            <el-option :label="t('ui.普通用户')" :value="1" />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editRoleDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmEditRole">确定</el-button>
+        <el-button @click="editRoleDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="confirmEditRole">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
     
     <!-- 新增用户对话框 -->
-    <el-dialog v-model="addDialogVisible" title="新增用户" width="500px">
+    <el-dialog v-model="addDialogVisible" :title="t('ui.新增用户')" width="500px">
       <el-form :model="newUser" label-width="80px">
-        <el-form-item label="用户名" required>
-          <el-input v-model="newUser.username" placeholder="请输入用户名" />
+        <el-form-item :label="t('ui.用户名')" required>
+          <el-input v-model="newUser.username" :placeholder="t('ui.请输入用户名')" />
         </el-form-item>
-        <el-form-item label="姓名" required>
-          <el-input v-model="newUser.realName" placeholder="请输入姓名" />
+        <el-form-item :label="t('ui.姓名')" required>
+          <el-input v-model="newUser.realName" :placeholder="t('ui.请输入姓名')" />
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="newUser.password" type="password" placeholder="请输入密码（默认 123456）" />
+        <el-form-item :label="t('ui.密码')">
+          <el-input v-model="newUser.password" type="password" :placeholder="t('ui.请输入密码（默认 123456）')" />
         </el-form-item>
-        <el-form-item label="角色">
+        <el-form-item :label="t('ui.角色')">
           <el-select v-model="newUser.role" style="width: 100%;">
-            <el-option label="普通用户" :value="1" />
-            <el-option label="管理员" :value="2" />
+            <el-option :label="t('ui.普通用户')" :value="1" />
+            <el-option :label="t('ui.管理员')" :value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="部门">
-          <el-input v-model="newUser.department" placeholder="请输入部门" />
+        <el-form-item :label="t('ui.部门')">
+          <el-input v-model="newUser.department" :placeholder="t('ui.请输入部门')" />
         </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="newUser.email" placeholder="请输入邮箱" />
+        <el-form-item :label="t('ui.邮箱')">
+          <el-input v-model="newUser.email" :placeholder="t('ui.请输入邮箱')" />
         </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="newUser.phone" placeholder="请输入电话" />
+        <el-form-item :label="t('ui.电话')">
+          <el-input v-model="newUser.phone" :placeholder="t('ui.请输入电话')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="addDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateUser">确定</el-button>
+        <el-button @click="addDialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleCreateUser">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -193,8 +193,10 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const userInfo = reactive({
   userId: null,
@@ -246,7 +248,7 @@ const loadUsers = async () => {
     })
     userList.value = res.data.records || []
   } catch (error) {
-    ElMessage.error('加载用户列表失败：' + (error.response?.data?.msg || error.message))
+    ElMessage.error(t('ui.加载用户列表失败') + ': ' + (error.response?.data?.msg || error.message))
   } finally {
     loading.value = false
   }
@@ -254,16 +256,16 @@ const loadUsers = async () => {
 
 const handleChangeRole = () => {
   if (targetRole.value === userInfo.role) {
-    ElMessage.warning('请选择不同的角色')
+    ElMessage.warning(t('ui.请选择不同的角色'))
     return
   }
   
   ElMessageBox.confirm(
-    `确认要将自己的角色修改为${targetRole.value === 2 ? '管理员' : '普通用户'}吗？`,
-    '提示',
+    t('ui.确认要将自己的角色修改为{role}吗？', { role: targetRole.value === 2 ? t('ui.管理员') : t('ui.普通用户') }),
+    t('ui.提示'),
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+      confirmButtonText: t('ui.确定'),
+      cancelButtonText: t('ui.取消'),
       type: 'warning'
     }
   ).then(async () => {
@@ -294,7 +296,7 @@ const showEditRoleDialog = (row) => {
 
 const confirmEditRole = async () => {
   if (targetRole.value === currentUser.role) {
-    ElMessage.warning('请选择不同的角色')
+    ElMessage.warning(t('ui.请选择不同的角色'))
     return
   }
   
@@ -349,8 +351,8 @@ const handleDeleteUser = (row) => {
     `确认要删除用户"${row.username}"吗？`,
     '警告',
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+      confirmButtonText: t('ui.确定'),
+      cancelButtonText: t('ui.取消'),
       type: 'warning'
     }
   ).then(async () => {

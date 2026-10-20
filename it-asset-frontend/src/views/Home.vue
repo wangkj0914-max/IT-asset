@@ -22,13 +22,13 @@
     <el-row :gutter="16" style="margin-top:16px">
       <el-col :span="12">
         <el-card shadow="hover">
-          <template #header><span>资产分类分布</span></template>
+          <template #header><span>{{ t('home.categoryDist') }}</span></template>
           <div ref="categoryChartRef" style="height:300px;padding:10px 20px"></div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card shadow="hover">
-          <template #header><span>部门资产分布 (Top 10)</span></template>
+          <template #header><span>{{ t('home.deptDist') }}</span></template>
           <div ref="deptChartRef" style="height:300px;padding:10px 20px"></div>
         </el-card>
       </el-col>
@@ -38,7 +38,7 @@
     <el-row :gutter="16" style="margin-top:16px">
       <el-col :span="24">
         <el-card shadow="hover">
-          <template #header><span>耗材消耗趋势（近6个月）</span></template>
+          <template #header><span>{{ t('home.consumptionTrend') }}</span></template>
           <div ref="trendChartRef" style="height:300px;padding:10px 20px"></div>
         </el-card>
       </el-col>
@@ -46,27 +46,27 @@
 
     <!-- 低库存提醒 -->
     <el-card shadow="hover" style="margin-top:16px" v-if="lowStockItems && lowStockItems.length > 0">
-      <template #header><span style="color:#E6A23C">⚠ 低库存耗材预警</span></template>
+      <template #header><span style="color:#E6A23C">⚠ {{ t('home.lowStockAlert') }}</span></template>
       <el-table :data="lowStockItems" size="small" stripe>
-        <el-table-column prop="consumableName" label="名称" />
-        <el-table-column label="当前库存" width="120"><template #default="{row}"><b style="color:#F56C6C">{{row.currentStock}} {{row.unit}}</b></template></el-table-column>
-        <el-table-column prop="minStock" label="最低库存" width="100"/>
-        <el-table-column label="建议补充量" width="110">
+        <el-table-column prop="consumableName" :label="t('home.name')" />
+        <el-table-column :label="t('home.currentStock')" width="120"><template #default="{row}"><b style="color:#F56C6C">{{row.currentStock}} {{row.unit}}</b></template></el-table-column>
+        <el-table-column prop="minStock" :label="t('home.minStock')" width="100"/>
+        <el-table-column :label="t('home.suggestedReplenishment')" width="110">
           <template #default="{row}"><el-tag type="warning">{{row.suggestedReplenishment || (row.minStock - row.currentStock)}} {{row.unit}}</el-tag></template>
         </el-table-column>
-        <el-table-column prop="category" label="分类" width="100"/>
+        <el-table-column prop="category" :label="t('home.category')" width="100"/>
       </el-table>
     </el-card>
 
     <el-row :gutter="16" style="margin-top:16px" v-if="maintenanceItems && maintenanceItems.length > 0">
       <el-col :span="24">
         <el-card shadow="hover">
-          <template #header><span style="color:#E6A23C">🔧 30天内维护到期</span></template>
+          <template #header><span style="color:#E6A23C">🔧 {{ t('home.maintenanceDue') }}</span></template>
           <el-table :data="maintenanceItems" size="small" stripe>
-            <el-table-column prop="assetCode" label="资产编号" width="140"/>
-            <el-table-column prop="assetName" label="名称" />
-            <el-table-column prop="department" label="部门" width="120"/>
-            <el-table-column label="下次维护" width="110"><template #default="{row}">{{row.nextMaintenanceDate}}</template></el-table-column>
+            <el-table-column prop="assetCode" :label="t('home.assetCode')" width="140"/>
+            <el-table-column prop="assetName" :label="t('home.name')" />
+            <el-table-column prop="department" :label="t('home.department')" width="120"/>
+            <el-table-column :label="t('home.nextMaintenance')" width="110"><template #default="{row}">{{row.nextMaintenanceDate}}</template></el-table-column>
           </el-table>
         </el-card>
       </el-col>
@@ -75,13 +75,13 @@
     <el-row :gutter="16" style="margin-top:16px" v-if="licenseExpiring && licenseExpiring.length > 0">
       <el-col :span="24">
         <el-card shadow="hover">
-          <template #header><span style="color:#F56C6C">📋 许可证即将到期</span></template>
+          <template #header><span style="color:#F56C6C">📋 {{ t('home.licenseExpiring') }}</span></template>
           <el-table :data="licenseExpiring" size="small" stripe>
-            <el-table-column prop="softwareName" label="软件名称" />
-            <el-table-column prop="vendor" label="厂商" width="100"/>
-            <el-table-column prop="usedCount" label="已用" width="60"/>
-            <el-table-column prop="totalCount" label="总数" width="60"/>
-            <el-table-column label="到期" width="110"><template #default="{row}"><b style="color:#F56C6C">{{row.expireDate}}</b></template></el-table-column>
+            <el-table-column prop="softwareName" :label="t('home.softwareName')" />
+            <el-table-column prop="vendor" :label="t('home.vendor')" width="100"/>
+            <el-table-column prop="usedCount" :label="t('home.usedQty')" width="60"/>
+            <el-table-column prop="totalCount" :label="t('home.totalQty')" width="60"/>
+            <el-table-column :label="t('home.expire')" width="110"><template #default="{row}"><b style="color:#F56C6C">{{row.expireDate}}</b></template></el-table-column>
           </el-table>
         </el-card>
       </el-col>
@@ -89,36 +89,44 @@
   </div>
 
   <!-- 空状态引导 -->
-  <el-card shadow="hover" v-if="statCards[0].value === 0" style="margin:16px 20px;text-align:center;padding:40px">
-    <el-empty description="当前站点暂无资产数据">
-      <el-button type="primary" @click="router.push('/asset-manage')">开始录入资产</el-button>
+  <el-card shadow="hover" v-if="counts.total === 0" style="margin:16px 20px;text-align:center;padding:40px">
+    <el-empty :description="t('home.emptyTip')">
+      <el-button type="primary" @click="router.push('/asset-manage')">{{ t('home.startEnter') }}</el-button>
     </el-empty>
   </el-card>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { Monitor, Box, DataLine, Timer, Bell, Coin, Money, Warning } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import request from '@/utils/request'
 
+const { t } = useI18n()
 const router = useRouter()
 const categoryChartRef = ref(null), deptChartRef = ref(null), trendChartRef = ref(null)
 const lowStockItems = ref([])
 const maintenanceItems = ref([])
 const licenseExpiring = ref([])
 
-const statCards = reactive([
-  { label:'资产总数', value:0, icon:Monitor, color:'#409EFF' },
-  { label:'未领用', value:0, icon:Box, color:'#67C23A' },
-  { label:'已领用', value:0, icon:DataLine, color:'#E6A23C' },
-  { label:'待审批', value:0, icon:Bell, color:'#9C27B0' },
-  { label:'低库存耗材', value:0, icon:Timer, color:'#F56C6C' },
-  { label:'资产总值', value:'¥0', icon:Coin, color:'#FF9800' },
-  { label:'折旧概览', value:'加载中', icon:Money, color:'#67C23A' },
-  { label:'逾期资产', value:0, icon:Warning, color:'#F56C6C' },
+// 原始计数（与语言无关），statCards 由它 + t() 派生，切换语言可即时更新
+const counts = reactive({
+  total: 0, unused: 0, used: 0, pending: 0, lowStock: 0,
+  totalValue: '¥0', depValue: '', depRate: 0, overdue: 0
+})
+
+const statCards = computed(() => [
+  { label: t('home.totalAssets'), value: counts.total, icon: Monitor, color: '#409EFF' },
+  { label: t('home.unused'), value: counts.unused, icon: Box, color: '#67C23A' },
+  { label: t('home.used'), value: counts.used, icon: DataLine, color: '#E6A23C' },
+  { label: t('home.pending'), value: counts.pending, icon: Bell, color: '#9C27B0' },
+  { label: t('home.lowStock'), value: counts.lowStock, icon: Timer, color: '#F56C6C' },
+  { label: t('home.totalValue'), value: counts.totalValue, icon: Coin, color: '#FF9800' },
+  { label: t('home.depRate') + ' ' + counts.depRate + '%', value: counts.depValue, icon: Money, color: '#67C23A' },
+  { label: t('home.overdue'), value: counts.overdue, icon: Warning, color: '#F56C6C' }
 ])
 
 const loadData = async () => {
@@ -126,20 +134,20 @@ const loadData = async () => {
     const r = await request.get('/home/dashboard')
     if (r.code !== 200) return
     const d = r.data
-    statCards[0].value = d.totalAssets || 0
-    statCards[1].value = d.unusedAssets || 0
-    statCards[2].value = d.usedAssets || 0
-    statCards[3].value = d.pendingApprovalCount || 0
-    statCards[4].value = d.lowStockCount || 0
-    statCards[5].value = '¥' + ((d.totalAssetValue ? Number(d.totalAssetValue).toLocaleString('zh-CN') : 0))
+    counts.total = d.totalAssets || 0
+    counts.unused = d.unusedAssets || 0
+    counts.used = d.usedAssets || 0
+    counts.pending = d.pendingApprovalCount || 0
+    counts.lowStock = d.lowStockCount || 0
+    counts.totalValue = '¥' + ((d.totalAssetValue ? Number(d.totalAssetValue).toLocaleString('zh-CN') : 0))
     // 折旧概览卡
     if (d.depreciationSummary) {
       const ds = d.depreciationSummary
-      statCards[6].value = '¥' + (ds.totalCurrentValue ? Number(ds.totalCurrentValue).toLocaleString('zh-CN') : 0) + ' / ¥' + (ds.totalOriginalValue ? Number(ds.totalOriginalValue).toLocaleString('zh-CN') : 0)
-      statCards[6].label = '折旧率 ' + (ds.depreciationRate || 0) + '%'
+      counts.depValue = '¥' + (ds.totalCurrentValue ? Number(ds.totalCurrentValue).toLocaleString('zh-CN') : 0) + ' / ¥' + (ds.totalOriginalValue ? Number(ds.totalOriginalValue).toLocaleString('zh-CN') : 0)
+      counts.depRate = ds.depreciationRate || 0
     }
     // 逾期资产卡
-    statCards[7].value = d.overdueAssetCount || 0
+    counts.overdue = d.overdueAssetCount || 0
 
     lowStockItems.value = d.lowStockItems || []
     maintenanceItems.value = d.maintenanceItems || []
@@ -148,7 +156,7 @@ const loadData = async () => {
     await nextTick()
     renderCharts(d.categoryDistribution || [], d.departmentDistribution || [], d.monthlyConsumption || [])
   } catch (e) {
-    ElMessage.error('加载首页数据失败')
+    ElMessage.error(t('home.loadFailed'))
   }
 }
 
@@ -158,7 +166,7 @@ const loadAlerts = async () => {
     const r = await request.get('/consumable/alerts')
     if (r.code === 200 && r.data) {
       lowStockItems.value = r.data
-      statCards[4].value = r.data.length
+      counts.lowStock = r.data.length
     }
   } catch (e) { /* ignore */ }
 }
@@ -185,7 +193,7 @@ const renderCharts = (catDist, deptDist, monthlyConsumption) => {
     c.setOption({
       tooltip:{trigger:'axis'},
       xAxis:{type:'category',data:monthlyConsumption.map(d=>d.month)},
-      yAxis:{type:'value',name:'出库数量'},
+      yAxis:{type:'value',name:t('home.outboundQty')},
       series:[{type:'line',data:monthlyConsumption.map(d=>d.totalQuantity),smooth:true,itemStyle:{color:'#67C23A'},areaStyle:{color:'rgba(103,194,58,0.15)'}}]
     })
   }
