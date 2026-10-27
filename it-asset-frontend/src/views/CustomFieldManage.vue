@@ -1,67 +1,67 @@
 <template>
   <div class="page-container">
     <div class="header-title">
-      <span>自定义字段管理</span>
+      <span>{{ t('ui.自定义字段管理') }}</span>
       <el-button type="primary" size="small" @click="showAddDialog">
-        <el-icon><Plus /></el-icon> 新增字段
+        <el-icon><Plus /></el-icon> {{ t('ui.新增字段') }}
       </el-button>
     </div>
 
     <div class="table-section">
       <el-table :data="fieldList" v-loading="loading" border stripe>
-        <el-table-column prop="fieldName" label="字段名称" min-width="160" />
-        <el-table-column label="类型" width="120" align="center">
+        <el-table-column prop="fieldName" :label="t('ui.字段名称')" min-width="160" />
+        <el-table-column :label="t('ui.类型')" width="120" align="center">
           <template #default="{ row }">
             <el-tag size="small">{{ getTypeLabel(row.fieldType) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="必填" width="80" align="center">
+        <el-table-column :label="t('ui.必填')" width="80" align="center">
           <template #default="{ row }">
             <span :style="{ color: row.isRequired === 1 ? '#F56C6C' : '#909399' }">
-              {{ row.isRequired === 1 ? '是' : '否' }}
+              {{ row.isRequired === 1 ? t('ui.是') : t('ui.否') }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="sortOrder" label="排序" width="80" align="center" />
-        <el-table-column label="操作" width="160" align="center" fixed="right">
+        <el-table-column prop="sortOrder" :label="t('ui.排序')" width="80" align="center" />
+        <el-table-column :label="t('ui.操作')" width="160" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="showEditDialog(row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" size="small" @click="showEditDialog(row)">{{ t('ui.编辑') }}</el-button>
+            <el-button type="danger" size="small" @click="handleDelete(row)">{{ t('ui.删除') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-if="!loading && fieldList.length === 0" description="暂无自定义字段" />
+      <el-empty v-if="!loading && fieldList.length === 0" :description="t('ui.暂无自定义字段')" />
     </div>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="isEditMode ? '编辑字段' : '新增字段'" width="500px" @close="resetForm">
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? t('ui.编辑字段') : t('ui.新增字段')" width="500px" @close="resetForm">
       <el-form :model="fieldForm" :rules="formRules" ref="fieldFormRef" label-width="100px">
-        <el-form-item label="字段名称" prop="fieldName">
-          <el-input v-model="fieldForm.fieldName" placeholder="如：MAC地址、操作系统" clearable />
+        <el-form-item :label="t('ui.字段名称')" prop="fieldName">
+          <el-input v-model="fieldForm.fieldName" :placeholder="t('ui.如：MAC地址、操作系统')" clearable />
         </el-form-item>
-        <el-form-item label="字段类型" prop="fieldType">
-          <el-select v-model="fieldForm.fieldType" placeholder="请选择类型" style="width:100%" @change="onTypeChange">
-            <el-option label="文本" value="text" />
-            <el-option label="数字" value="number" />
-            <el-option label="日期" value="date" />
-            <el-option label="下拉选择" value="select" />
-            <el-option label="多行文本" value="textarea" />
+        <el-form-item :label="t('ui.字段类型')" prop="fieldType">
+          <el-select v-model="fieldForm.fieldType" :placeholder="t('ui.请选择类型')" style="width:100%" @change="onTypeChange">
+            <el-option :label="t('ui.文本')" value="text" />
+            <el-option :label="t('ui.数字')" value="number" />
+            <el-option :label="t('ui.日期')" value="date" />
+            <el-option :label="t('ui.下拉选择')" value="select" />
+            <el-option :label="t('ui.多行文本')" value="textarea" />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="fieldForm.fieldType === 'select'" label="下拉选项">
-          <el-input v-model="optionsInput" placeholder="选项1,选项2,选项3" clearable />
-          <div style="color: #909399; font-size: 12px; margin-top: 4px;">多个选项用英文逗号分隔</div>
+        <el-form-item v-if="fieldForm.fieldType === 'select'" :label="t('ui.下拉选项')">
+          <el-input v-model="optionsInput" :placeholder="t('ui.选项1,选项2,选项3')" clearable />
+          <div style="color: #909399; font-size: 12px; margin-top: 4px;">{{ t('ui.多个选项用英文逗号分隔') }}</div>
         </el-form-item>
-        <el-form-item label="是否必填">
+        <el-form-item :label="t('ui.是否必填')">
           <el-switch v-model="fieldForm.isRequired" :active-value="1" :inactive-value="0" />
         </el-form-item>
-        <el-form-item label="排序">
+        <el-form-item :label="t('ui.排序')">
           <el-input-number v-model="fieldForm.sortOrder" :min="0" :max="999" style="width:100%" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleSubmit">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -72,6 +72,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const fieldList = ref([])
@@ -89,16 +92,16 @@ const fieldForm = reactive({
 })
 
 const formRules = reactive({
-  fieldName: [{ required: true, message: '请输入字段名称', trigger: 'blur' }],
-  fieldType: [{ required: true, message: '请选择字段类型', trigger: 'change' }]
+  fieldName: [{ required: true, message: t('ui.请输入字段名称'), trigger: 'blur' }],
+  fieldType: [{ required: true, message: t('ui.请选择字段类型'), trigger: 'change' }]
 })
 
 const typeLabelMap = {
-  text: '文本',
-  number: '数字',
-  date: '日期',
-  select: '下拉选择',
-  textarea: '多行文本'
+  text: t('ui.文本'),
+  number: t('ui.数字'),
+  date: t('ui.日期'),
+  select: t('ui.下拉选择'),
+  textarea: t('ui.多行文本')
 }
 
 const getTypeLabel = (type) => typeLabelMap[type] || type
@@ -181,28 +184,28 @@ const handleSubmit = async () => {
     }
 
     await request.post('/custom-field/def-save', data)
-    ElMessage.success(isEditMode.value ? '更新成功' : '新增成功')
+    ElMessage.success(isEditMode.value ? t('ui.更新成功') : t('ui.新增成功'))
     dialogVisible.value = false
     loadList()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(isEditMode.value ? '更新失败' : '新增失败')
+      ElMessage.error(isEditMode.value ? t('ui.更新失败') : t('ui.新增失败'))
     }
   }
 }
 
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确认要删除字段"${row.fieldName}"吗？删除后该字段的所有数据也将被清除。`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(t('ui.确认要删除字段"{name}"吗？删除后该字段的所有数据也将被清除。', { name: row.fieldName }), '提示', {
+    confirmButtonText: t('ui.确定'),
+    cancelButtonText: t('ui.取消'),
     type: 'warning'
   }).then(async () => {
     try {
       await request.post('/custom-field/def-delete', null, { params: { fieldId: row.fieldId } })
-      ElMessage.success('删除成功')
+      ElMessage.success(t('ui.删除成功'))
       loadList()
     } catch {
-      ElMessage.error('删除失败')
+      ElMessage.error(t('ui.删除失败'))
     }
   }).catch(() => {})
 }

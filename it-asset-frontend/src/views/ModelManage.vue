@@ -1,37 +1,37 @@
 <template>
   <div class="page-container">
-    <div class="header-title">资产模型管理</div>
+    <div class="header-title">{{ t('ui.资产模型管理') }}</div>
 
     <div class="operation-section">
       <el-button v-if="userRole === 2" type="primary" @click="showAddDialog">
-        <el-icon><Plus /></el-icon> 新增模型
+        <el-icon><Plus /></el-icon> {{ t('ui.新增模型') }}
       </el-button>
     </div>
 
     <div class="table-section">
       <el-table :data="modelList" v-loading="loading" border stripe style="width:100%">
-        <el-table-column type="index" label="序号" width="55" align="center" />
-        <el-table-column prop="modelName" label="模型名称" min-width="140" show-overflow-tooltip />
-        <el-table-column prop="modelNumber" label="模型编号" width="120" align="center" />
-        <el-table-column label="所属分类" width="120" align="center">
+        <el-table-column type="index" :label="t('ui.序号')" width="55" align="center" />
+        <el-table-column prop="modelName" :label="t('ui.模型名称')" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="modelNumber" :label="t('ui.模型编号')" width="120" align="center" />
+        <el-table-column :label="t('ui.所属分类')" width="120" align="center">
           <template #default="{ row }">
             {{ getCategoryName(row.categoryId) || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="manufacturer" label="制造商" width="120" align="center" show-overflow-tooltip />
-        <el-table-column prop="specs" label="规格说明" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="eolMonths" label="EOL周期(月)" width="100" align="center" />
-        <el-table-column prop="depreciationYears" label="折旧年限" width="90" align="center" />
-        <el-table-column label="折旧方法" width="110" align="center">
+        <el-table-column prop="manufacturer" :label="t('ui.制造商')" width="120" align="center" show-overflow-tooltip />
+        <el-table-column prop="specs" :label="t('ui.规格说明')" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="eolMonths" :label="t('ui.EOL周期(月)')" width="100" align="center" />
+        <el-table-column prop="depreciationYears" :label="t('ui.折旧年限')" width="90" align="center" />
+        <el-table-column :label="t('ui.折旧方法')" width="110" align="center">
           <template #default="{ row }">
             {{ getDepMethodText(row.depreciationMethod) }}
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" min-width="120" show-overflow-tooltip />
-        <el-table-column label="操作" width="150" align="center" fixed="right">
+        <el-table-column prop="remark" :label="t('ui.备注')" min-width="120" show-overflow-tooltip />
+        <el-table-column :label="t('ui.操作')" width="150" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="userRole === 2" type="primary" size="small" @click="showEditDialog(row)">编辑</el-button>
-            <el-button v-if="userRole === 2" type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="userRole === 2" type="primary" size="small" @click="showEditDialog(row)">{{ t('ui.编辑') }}</el-button>
+            <el-button v-if="userRole === 2" type="danger" size="small" @click="handleDelete(row)">{{ t('ui.删除') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -50,66 +50,66 @@
     </div>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑模型' : '新增模型'" width="600px" @close="resetForm">
+    <el-dialog v-model="dialogVisible" :title="isEdit ? t('ui.编辑模型') : t('ui.新增模型')" width="600px" @close="resetForm">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="模型名称" prop="modelName">
-              <el-input v-model="form.modelName" placeholder="如: Dell OptiPlex 7090" clearable />
+            <el-form-item :label="t('ui.模型名称')" prop="modelName">
+              <el-input v-model="form.modelName" :placeholder="t('ui.如: Dell OptiPlex 7090')" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="模型编号">
-              <el-input v-model="form.modelNumber" placeholder="如: DELL-OP-7090" clearable />
+            <el-form-item :label="t('ui.模型编号')">
+              <el-input v-model="form.modelNumber" :placeholder="t('ui.如: DELL-OP-7090')" clearable />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="所属分类">
-              <el-select v-model="form.categoryId" placeholder="选择分类" clearable style="width:100%">
+            <el-form-item :label="t('ui.所属分类')">
+              <el-select v-model="form.categoryId" :placeholder="t('ui.选择分类')" clearable style="width:100%">
                 <el-option v-for="c in categoryList" :key="c.categoryId" :label="c.categoryName" :value="c.categoryId" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="制造商">
-              <el-input v-model="form.manufacturer" placeholder="如: Dell" clearable />
+            <el-form-item :label="t('ui.制造商')">
+              <el-input v-model="form.manufacturer" :placeholder="t('ui.如: Dell')" clearable />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="规格说明">
-          <el-input v-model="form.specs" type="textarea" :rows="2" placeholder="如: CPU: i7-11700, RAM: 16GB, SSD: 512GB" />
+        <el-form-item :label="t('ui.规格说明')">
+          <el-input v-model="form.specs" type="textarea" :rows="2" :placeholder="t('ui.如: CPU: i7-11700, RAM: 16GB, SSD: 512GB')" />
         </el-form-item>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="EOL周期">
+            <el-form-item :label="t('ui.EOL周期')">
               <el-input-number v-model="form.eolMonths" :min="1" :max="120" style="width:100%" />
-              <div style="font-size:12px;color:#999">单位：月</div>
+              <div style="font-size:12px;color:#999">{{ t('ui.单位：月') }}</div>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="折旧年限">
+            <el-form-item :label="t('ui.折旧年限')">
               <el-input-number v-model="form.depreciationYears" :min="1" :max="20" style="width:100%" />
-              <div style="font-size:12px;color:#999">单位：年</div>
+              <div style="font-size:12px;color:#999">{{ t('ui.单位：年') }}</div>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="折旧方法">
+            <el-form-item :label="t('ui.折旧方法')">
               <el-select v-model="form.depreciationMethod" style="width:100%">
-                <el-option label="直线折旧" value="straight_line" />
-                <el-option label="余额递减" value="declining_balance" />
+                <el-option :label="t('ui.直线折旧')" value="straight_line" />
+                <el-option :label="t('ui.余额递减')" value="declining_balance" />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="备注">
-          <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="可选" />
+        <el-form-item :label="t('ui.备注')">
+          <el-input v-model="form.remark" type="textarea" :rows="2" :placeholder="t('ui.可选')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleSubmit">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -120,6 +120,9 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 const loading = ref(false)
@@ -145,7 +148,7 @@ const form = reactive({
 })
 
 const rules = reactive({
-  modelName: [{ required: true, message: '请输入模型名称', trigger: 'blur' }]
+  modelName: [{ required: true, message: t('ui.请输入模型名称'), trigger: 'blur' }]
 })
 
 onMounted(() => {
@@ -166,8 +169,8 @@ const getCategoryName = (id) => {
 }
 
 const getDepMethodText = (m) => {
-  if (m === 'straight_line') return '直线折旧'
-  if (m === 'declining_balance') return '余额递减'
+  if (m === 'straight_line') return t('ui.直线折旧')
+  if (m === 'declining_balance') return t('ui.余额递减')
   return m || '-'
 }
 
@@ -180,7 +183,7 @@ const getList = async () => {
     modelList.value = res.data.records || []
     pagination.total = res.data.total || 0
   } catch (e) {
-    ElMessage.error('查询失败')
+    ElMessage.error(t('ui.查询失败'))
   } finally {
     loading.value = false
   }
@@ -208,27 +211,27 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     if (isEdit.value) {
       await request.post('/assetModel/update', form)
-      ElMessage.success('更新成功')
+      ElMessage.success(t('ui.更新成功'))
     } else {
       await request.post('/assetModel/save', form)
-      ElMessage.success('新增成功')
+      ElMessage.success(t('ui.新增成功'))
     }
     dialogVisible.value = false
     getList()
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error('操作失败')
+    if (e !== 'cancel') ElMessage.error(t('ui.操作失败'))
   }
 }
 
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确认删除模型"${row.modelName}"？`, '提示', {
+  ElMessageBox.confirm(t('ui.确认删除模型"{name}"？', { name: row.modelName }), t('ui.提示'), {
     type: 'warning'
   }).then(async () => {
     try {
       await request.post('/assetModel/delete', null, { params: { modelId: row.modelId } })
-      ElMessage.success('删除成功')
+      ElMessage.success(t('ui.删除成功'))
       getList()
-    } catch (e) { ElMessage.error('删除失败') }
+    } catch (e) { ElMessage.error(t('ui.删除失败')) }
   }).catch(() => {})
 }
 
