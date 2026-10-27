@@ -1,21 +1,21 @@
 <template>
   <div class="mobile-home">
     <div class="home-header">
-      <h1>IT资产管理系统</h1>
-      <p>{{ currentSite }} 站点</p>
-      <p class="user-info">{{ realName }} · {{ isAdmin ? '管理员' : '普通用户' }}</p>
+      <h1>{{ t('ui.IT资产管理系统') }}</h1>
+      <p>{{ currentSite }} {{ t('ui.站点') }}</p>
+      <p class="user-info">{{ realName }} · {{ isAdmin ? t('ui.管理员') : t('ui.普通用户') }}</p>
     </div>
     
     <div class="menu-grid">
       <div class="menu-card scan" @click="$router.push('/mobile-scan')">
         <div class="menu-icon">📷</div>
-        <div class="menu-title">扫码盘点</div>
-        <div class="menu-desc">扫描资产二维码，快速盘点</div>
+        <div class="menu-title">{{ t('ui.扫码盘点') }}</div>
+        <div class="menu-desc">{{ t('ui.扫描资产二维码，快速盘点') }}</div>
       </div>
       <div class="menu-card query" @click="$router.push('/mobile-query')">
         <div class="menu-icon">🔍</div>
-        <div class="menu-title">资产查询</div>
-        <div class="menu-desc">按编号或名称搜索资产信息</div>
+        <div class="menu-title">{{ t('ui.资产查询') }}</div>
+        <div class="menu-desc">{{ t('ui.按编号或名称搜索资产信息') }}</div>
       </div>
     </div>
   </div>
@@ -23,6 +23,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const currentSite = localStorage.getItem('site') || ''
 const realName = localStorage.getItem('realName') || localStorage.getItem('username') || ''

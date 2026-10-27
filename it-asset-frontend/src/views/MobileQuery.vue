@@ -1,25 +1,25 @@
 <template>
   <div class="mobile-page">
     <div class="mobile-header">
-      <span>资产查询</span>
+      <span>{{ t('ui.资产查询') }}</span>
       <span class="site-tag">{{ currentSite }}</span>
     </div>
 
     <div class="search-bar">
-      <el-input v-model="keyword" placeholder="输入资产编号或名称" clearable @keyup.enter="search" @clear="search">
+      <el-input v-model="keyword" :placeholder="t('ui.输入资产编号或名称')" clearable @keyup.enter="search" @clear="search">
         <template #prefix><el-icon><Search /></el-icon></template>
         <template #append>
-          <el-button @click="search" :loading="loading">搜索</el-button>
+          <el-button @click="search" :loading="loading">{{ t('ui.搜索') }}</el-button>
         </template>
       </el-input>
     </div>
 
     <div v-if="loading" class="loading-box">
-      <el-icon class="is-loading"><Loading /></el-icon> 查询中...
+      <el-icon class="is-loading"><Loading /></el-icon> {{ t('ui.查询中...') }}
     </div>
 
     <div v-if="!loading && searched && results.length === 0" class="empty-box">
-      <el-empty description="未找到匹配资产" />
+      <el-empty :description="t('ui.未找到匹配资产')" />
     </div>
 
     <div v-if="results.length > 0" class="result-list">
@@ -36,7 +36,7 @@
           <span>{{ item.storageLocation || '-' }}</span>
         </div>
         <div class="card-user" v-if="item.userName">
-          使用人: {{ item.userName }}
+          {{ t('ui.使用人: ') }}{{ item.userName }}
         </div>
       </div>
       <div class="pagination-row">
@@ -44,18 +44,18 @@
       </div>
     </div>
 
-    <el-dialog v-model="detailVisible" title="资产详情" width="92%">
+    <el-dialog v-model="detailVisible" :title="t('ui.资产详情')" width="92%">
       <template v-if="detail">
-        <div class="detail-item"><label>编号</label><span>{{ detail.assetCode }}</span></div>
-        <div class="detail-item"><label>名称</label><span>{{ detail.assetName }}</span></div>
-        <div class="detail-item"><label>品牌型号</label><span>{{ detail.brand }} {{ detail.model }}</span></div>
-        <div class="detail-item"><label>状态</label><span><el-tag size="small">{{ statusText(detail.status) }}</el-tag></span></div>
-        <div class="detail-item"><label>存放位置</label><span>{{ detail.storageLocation || '-' }}</span></div>
-        <div class="detail-item"><label>使用人</label><span>{{ detail.userName || '-' }}</span></div>
-        <div class="detail-item"><label>部门</label><span>{{ detail.department || '-' }}</span></div>
-        <div class="detail-item"><label>序列号</label><span>{{ detail.serialNumber || '-' }}</span></div>
-        <div class="detail-item" v-if="detail.purchaseCost"><label>采购金额</label><span>¥{{ detail.purchaseCost }}</span></div>
-        <div class="detail-item" v-if="detail.currentValue"><label>当前价值</label><span>¥{{ detail.currentValue }}</span></div>
+        <div class="detail-item"><label>{{ t('ui.编号') }}</label><span>{{ detail.assetCode }}</span></div>
+        <div class="detail-item"><label>{{ t('ui.名称') }}</label><span>{{ detail.assetName }}</span></div>
+        <div class="detail-item"><label>{{ t('ui.品牌型号') }}</label><span>{{ detail.brand }} {{ detail.model }}</span></div>
+        <div class="detail-item"><label>{{ t('ui.状态') }}</label><span><el-tag size="small">{{ statusText(detail.status) }}</el-tag></span></div>
+        <div class="detail-item"><label>{{ t('ui.存放位置') }}</label><span>{{ detail.storageLocation || '-' }}</span></div>
+        <div class="detail-item"><label>{{ t('ui.使用人') }}</label><span>{{ detail.userName || '-' }}</span></div>
+        <div class="detail-item"><label>{{ t('ui.部门') }}</label><span>{{ detail.department || '-' }}</span></div>
+        <div class="detail-item"><label>{{ t('ui.序列号') }}</label><span>{{ detail.serialNumber || '-' }}</span></div>
+        <div class="detail-item" v-if="detail.purchaseCost"><label>{{ t('ui.采购金额') }}</label><span>¥{{ detail.purchaseCost }}</span></div>
+        <div class="detail-item" v-if="detail.currentValue"><label>{{ t('ui.当前价值') }}</label><span>¥{{ detail.currentValue }}</span></div>
       </template>
     </el-dialog>
   </div>
@@ -65,6 +65,9 @@
 import { ref, onMounted } from 'vue'
 import { Search, Loading } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const keyword = ref('')
 const loading = ref(false)
@@ -79,8 +82,8 @@ const detailVisible = ref(false)
 const detail = ref(null)
 
 const statusText = (s) => {
-  const map = { 0: '在库', 1: '已领用', 2: '维修中', 3: '已报废', 4: '可部署' }
-  return map[s] || '未知'
+  const map = { 0: t('ui.在库'), 1: t('ui.已领用'), 2: t('ui.维修中'), 3: t('ui.已报废'), 4: t('ui.可部署') }
+  return map[s] || t('ui.未知')
 }
 
 const search = async () => {

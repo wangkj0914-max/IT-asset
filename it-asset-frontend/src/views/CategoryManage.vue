@@ -1,16 +1,16 @@
 <template>
   <div class="page-container">
     <div class="header-title">
-      <span>资产分类管理</span>
+      <span>{{ t('ui.资产分类管理') }}</span>
       <el-button v-if="userRole === 2" type="primary" size="small" @click="showAddDialog(null)">
-        <el-icon><Plus /></el-icon> 新增父级分类
+        <el-icon><Plus /></el-icon> {{ t('ui.新增父级分类') }}
       </el-button>
     </div>
 
     <div class="table-section">
       <el-table :data="treeData" v-loading="loading" border stripe row-key="categoryId"
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
-        <el-table-column prop="categoryName" label="分类名称" min-width="220">
+        <el-table-column prop="categoryName" :label="t('ui.分类名称')" min-width="220">
           <template #default="{ row }">
             <span v-if="row.parentId === 0" style="font-weight:bold;color:#303133">
               <el-icon style="margin-right:4px"><FolderOpened /></el-icon>{{ row.categoryName }}
@@ -18,57 +18,57 @@
             <span v-else style="padding-left:8px;color:#606266">{{ row.categoryName }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="层级" width="80" align="center">
+        <el-table-column :label="t('ui.层级')" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="row.parentId === 0 ? 'primary' : 'info'" size="small">
-              {{ row.parentId === 0 ? '父级' : '子级' }}
+              {{ row.parentId === 0 ? t('ui.父级') : t('ui.子级') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="sortOrder" label="排序" width="80" align="center" />
-        <el-table-column label="操作" width="240" align="center" fixed="right">
+        <el-table-column prop="sortOrder" :label="t('ui.排序')" width="80" align="center" />
+        <el-table-column :label="t('ui.操作')" width="240" align="center" fixed="right">
           <template #default="{ row }">
             <el-button v-if="row.parentId === 0 && userRole === 2" type="success" size="small" @click="showAddDialog(row)">
-              <el-icon><Plus /></el-icon> 子分类
+              <el-icon><Plus /></el-icon> {{ t('ui.子分类') }}
             </el-button>
-            <el-button v-if="userRole === 2" type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button v-if="userRole === 2" type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="userRole === 2" type="primary" size="small" @click="handleEdit(row)">{{ t('ui.编辑') }}</el-button>
+            <el-button v-if="userRole === 2" type="danger" size="small" @click="handleDelete(row)">{{ t('ui.删除') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-if="!loading && categoryList.length === 0" description="暂无分类" />
+      <el-empty v-if="!loading && categoryList.length === 0" :description="t('ui.暂无分类')" />
     </div>
 
     <!-- 新增/编辑对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="450px">
       <el-form :model="categoryForm" :rules="formRules" ref="categoryFormRef" label-width="100px">
         <template v-if="categoryForm.parentId > 0">
-          <el-form-item label="父级分类">
+          <el-form-item :label="t('ui.父级分类')">
             <el-input :value="selectedParentName" disabled />
           </el-form-item>
-          <el-form-item label="分类名称" prop="categoryName">
-            <el-input v-model="categoryForm.categoryName" placeholder="如：服务器" />
+          <el-form-item :label="t('ui.分类名称')" prop="categoryName">
+            <el-input v-model="categoryForm.categoryName" :placeholder="t('ui.如：服务器')" />
           </el-form-item>
         </template>
         <template v-else>
-          <el-form-item label="分类名称" prop="categoryName">
-            <el-input v-model="categoryForm.categoryName" placeholder="如：固定资产" />
+          <el-form-item :label="t('ui.分类名称')" prop="categoryName">
+            <el-input v-model="categoryForm.categoryName" :placeholder="t('ui.如：固定资产')" />
           </el-form-item>
-          <el-form-item label="父级分类" prop="parentId">
-            <el-select v-model="categoryForm.parentId" placeholder="请选择" style="width:100%">
-              <el-option label="顶级（父级分类）" :value="0" />
+          <el-form-item :label="t('ui.父级分类')" prop="parentId">
+            <el-select v-model="categoryForm.parentId" :placeholder="t('ui.请选择')" style="width:100%">
+              <el-option :label="t('ui.顶级（父级分类）')" :value="0" />
               <el-option v-for="p in parentOptions" :key="p.categoryId" :label="p.categoryName" :value="p.categoryId"
                 :disabled="isEditMode && p.categoryId === categoryForm.categoryId" />
             </el-select>
           </el-form-item>
         </template>
-        <el-form-item label="排序">
+        <el-form-item :label="t('ui.排序')">
           <el-input-number v-model="categoryForm.sortOrder" :min="0" :max="999" style="width:100%" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">{{ t('ui.取消') }}</el-button>
+        <el-button type="primary" @click="handleSubmit">{{ t('ui.确定') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -79,13 +79,16 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, FolderOpened } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const userRole = computed(() => parseInt(localStorage.getItem('role') || '1'))
 const loading = ref(false), dialogVisible = ref(false), isEditMode = ref(false)
 const categoryList = ref([]), categoryFormRef = ref(null)
 
 const categoryForm = reactive({ categoryId: null, categoryName: '', parentId: 0, sortOrder: 1 })
-const formRules = reactive({ categoryName: [{ required: true, message: '请输入分类名称', trigger: 'blur' }] })
+const formRules = reactive({ categoryName: [{ required: true, message: t('ui.请输入分类名称'), trigger: 'blur' }] })
 
 const parentOptions = computed(() => categoryList.value.filter(c => c.parentId === 0))
 
@@ -96,8 +99,8 @@ const selectedParentName = computed(() => {
 })
 
 const dialogTitle = computed(() => {
-  if (isEditMode.value) return '编辑分类'
-  return categoryForm.parentId > 0 ? '新增子分类' : '新增父级分类'
+  if (isEditMode.value) return t('ui.编辑分类')
+  return categoryForm.parentId > 0 ? t('ui.新增子分类') : t('ui.新增父级分类')
 })
 
 const treeData = computed(() => {
@@ -114,7 +117,7 @@ const loadCategories = async () => {
   try {
     const res = await request.get('/category/list')
     categoryList.value = res.data || []
-  } catch { ElMessage.error('加载分类失败') } finally { loading.value = false }
+  } catch { ElMessage.error(t('ui.加载分类失败')) } finally { loading.value = false }
 }
 
 const showAddDialog = (parentRow) => {
@@ -144,21 +147,21 @@ const handleSubmit = async () => {
     await categoryFormRef.value.validate()
     const url = isEditMode.value ? '/category/update' : '/category/save'
     await request.post(url, categoryForm)
-    ElMessage.success(isEditMode.value ? '更新成功' : '新增成功')
+    ElMessage.success(isEditMode.value ? t('ui.更新成功') : t('ui.新增成功'))
     dialogVisible.value = false
     loadCategories()
-  } catch (e) { if (e !== 'cancel') ElMessage.error('操作失败') }
+  } catch (e) { if (e !== 'cancel') ElMessage.error(t('ui.操作失败')) }
 }
 
 const handleDelete = (row) => {
   const hasChildren = categoryList.value.some(c => c.parentId === row.categoryId)
-  const msg = hasChildren ? `「${row.categoryName}」下有子分类，删除后子分类将变为顶级分类，确认删除？` : `确认删除「${row.categoryName}」？`
-  ElMessageBox.confirm(msg, '确认', { type: 'warning' }).then(async () => {
+  const msg = hasChildren ? t('ui.「{name}」下有子分类，删除后子分类将变为顶级分类，确认删除？', { name: row.categoryName }) : t('ui.确认删除「{name}」？', { name: row.categoryName })
+  ElMessageBox.confirm(msg, t('ui.确认'), { type: 'warning' }).then(async () => {
     try {
       await request.post('/category/delete', null, { params: { categoryId: row.categoryId } })
-      ElMessage.success('删除成功')
+      ElMessage.success(t('ui.删除成功'))
       loadCategories()
-    } catch { ElMessage.error('删除失败') }
+    } catch { ElMessage.error(t('ui.删除失败')) }
   }).catch(() => {})
 }
 

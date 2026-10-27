@@ -1,6 +1,6 @@
 <template>
   <div class="placeholder-container">
-    <el-empty description="功能开发中" />
+    <el-empty :description="t('ui.功能开发中')" />
   </div>
 </template>
 
@@ -10,3 +10,9 @@
   text-align: center;
 }
 </style>
+
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+</script>

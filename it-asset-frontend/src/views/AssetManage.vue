@@ -76,22 +76,22 @@
     <!-- 操作按钮区域 -->
     <div class="operation-section">
       <el-button type="primary" @click="showAddDialog" class="btn-add">
-        <el-icon><Plus /></el-icon> 新增
+        <el-icon><Plus /></el-icon> {{ t('ui.新增') }}
       </el-button>
       <el-button type="warning" @click="handleRegenCode">
-        <el-icon><RefreshRight /></el-icon> 重新制码
+        <el-icon><RefreshRight /></el-icon> {{ t('ui.重新制码') }}
       </el-button>
       <el-button type="success" @click="exportLabels">
-        <el-icon><Printer /></el-icon> 标签导出
+        <el-icon><Printer /></el-icon> {{ t('ui.标签导出') }}
       </el-button>
       <el-button type="info" @click="handleBatchImport">
-        <el-icon><Upload /></el-icon> 批量导入
+        <el-icon><Upload /></el-icon> {{ t('ui.批量导入') }}
       </el-button>
       <el-button type="primary" plain @click="exportExcel" :loading="exporting">
-        <el-icon><Download /></el-icon> 导出 Excel
+        <el-icon><Download /></el-icon> {{ t('ui.导出 Excel') }}
       </el-button>
       <el-button type="warning" @click="showBatchEditDialog" :disabled="selectedRows.length === 0">
-        <el-icon><Edit /></el-icon> 批量修改 ({{ selectedRows.length }})
+        <el-icon><Edit /></el-icon> {{ t('ui.批量修改') }} ({{ selectedRows.length }})
       </el-button>
     </div>
 
@@ -263,7 +263,7 @@
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && assetList.length === 0" description="暂无资产数据" />
+      <el-empty v-if="!loading && assetList.length === 0" :description="t('ui.暂无资产数据')" />
 
       <!-- 分页 -->
       <div class="pagination-container">
@@ -481,7 +481,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item :label="t('ui.折旧率')">
-              <span v-if="assetForm.depreciationRate != null">{{ Number(assetForm.depreciationRate).toFixed(2) }}% / 年</span>
+              <span v-if="assetForm.depreciationRate != null">{{ Number(assetForm.depreciationRate).toFixed(2) }}% {{ t('ui./ 年') }}</span>
               <span v-else style="color:#999">{{ t('ui.保存后自动计算') }}</span>
             </el-form-item>
           </el-col>
@@ -540,11 +540,11 @@
     <!-- 领用申请对话框 -->
     <el-dialog v-model="applyDialogVisible" :title="t('ui.申请领用')" width="500px" @close="resetApplyForm">
       <div class="apply-asset-info" v-if="applyAsset">
-        <div class="apply-asset-title">领用资产：{{ applyAsset.assetName }}</div>
+        <div class="apply-asset-title">{{ t('ui.领用资产：') }}{{ applyAsset.assetName }}</div>
         <div class="apply-asset-detail">
-          <span>编号：{{ applyAsset.assetCode || '-' }}</span>
-          <span>型号：{{ applyAsset.model || '-' }}</span>
-          <span>位置：{{ applyAsset.storageLocation || '-' }}</span>
+          <span>{{ t('ui.编号：') }}{{ applyAsset.assetCode || '-' }}</span>
+          <span>{{ t('ui.型号：') }}{{ applyAsset.model || '-' }}</span>
+          <span>{{ t('ui.位置：') }}{{ applyAsset.storageLocation || '-' }}</span>
         </div>
       </div>
       <el-form :model="applyForm" :rules="applyRules" ref="applyFormRef" label-width="90px">
@@ -577,7 +577,7 @@
         <strong>{{ useRecordAsset.assetName }}</strong>
         <span class="use-record-code">（{{ useRecordAsset.assetCode || '-' }}）</span>
         <el-button type="primary" size="small" style="float: right;" @click="goToAssetUse" v-if="useRecordAsset.status === 0">
-          前往申请领用
+          {{ t('ui.前往申请领用') }}
         </el-button>
       </div>
       <el-table :data="useRecordList" v-loading="useRecordLoading" border stripe style="width: 100%;" max-height="400">
@@ -616,7 +616,7 @@
     <!-- 批量修改对话框 -->
     <el-dialog v-model="batchEditVisible" :title="t('ui.批量修改资产')" width="500px">
       <el-alert type="info" :closable="false" style="margin-bottom:16px">
-        已选择 <b>{{ selectedRows.length }}</b> 条资产，以下字段将覆盖到所选资产。
+        {{ t('ui.已选择') }} <b>{{ selectedRows.length }}</b> {{ t('ui.条资产，以下字段将覆盖到所选资产。') }}
       </el-alert>
       <el-form :model="batchForm" label-width="100px">
         <el-form-item :label="t('ui.所属部门')">
@@ -661,7 +661,7 @@
           <div class="step-header"><span class="step-num">1</span>{{ t('ui.下载导入模板') }}</div>
           <div class="step-body">
             <el-button type="primary" plain size="small" @click="downloadTemplate">
-              <el-icon><Download /></el-icon> 下载Excel模板
+              <el-icon><Download /></el-icon> {{ t('ui.下载Excel模板') }}
             </el-button>
             <span class="step-tip">{{ t('ui.模板包含必填字段说明，请严格按照模板格式填写') }}</span>
           </div>
@@ -679,9 +679,9 @@
               @change="handleFileChange"
             />
             <el-button type="success" plain size="small" @click="() => fileInputRef.click()">
-              <el-icon><Upload /></el-icon> 选择文件
+              <el-icon><Upload /></el-icon> {{ t('ui.选择文件') }}
             </el-button>
-            <span class="step-tip" v-if="importFileName">已选：{{ importFileName }}</span>
+            <span class="step-tip" v-if="importFileName">{{ t('ui.已选：') }}{{ importFileName }}</span>
             <span class="step-tip" v-else>{{ t('ui.未选择文件') }}</span>
           </div>
         </div>
@@ -689,8 +689,8 @@
         <!-- 步骤三：预览数据 -->
         <div class="import-step" v-if="importPreviewData.length > 0">
           <div class="step-header">
-            <span class="step-num">3</span> 数据预览
-            <span style="margin-left:10px;font-size:13px;color:#666;">共 {{ importPreviewData.length }} 条，前 5 条预览</span>
+            <span class="step-num">3</span> {{ t('ui.数据预览') }}
+            <span style="margin-left:10px;font-size:13px;color:#666;">{{ t('ui.共') }} {{ importPreviewData.length }} {{ t('ui.条，前 5 条预览') }}</span>
           </div>
           <div class="step-body">
             <el-table :data="importPreviewData.slice(0, 5)" border size="small" style="width:100%;">
@@ -712,7 +712,7 @@
             <!-- 错误提示 -->
             <div v-if="importErrors.length > 0" class="import-errors">
               <div class="error-title">{{ t('ui.⚠️ 以下行存在问题（将跳过）：') }}</div>
-              <div v-for="err in importErrors" :key="err.row" class="error-item">第 {{ err.row }} 行：{{ err.msg }}</div>
+              <div v-for="err in importErrors" :key="err.row" class="error-item">{{ t('ui.第') }} {{ err.row }} {{ t('ui.行：') }}{{ err.msg }}</div>
             </div>
           </div>
         </div>
@@ -726,7 +726,7 @@
           :loading="importLoading"
           @click="submitImport"
         >
-          确认导入（{{ importPreviewData.length }} 条）
+          {{ t('ui.确认导入（') }}{{ importPreviewData.length }} {{ t('ui.条）') }}
         </el-button>
       </template>
     </el-dialog>

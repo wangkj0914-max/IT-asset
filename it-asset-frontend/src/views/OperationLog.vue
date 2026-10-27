@@ -2,34 +2,34 @@
   <div class="log-container">
     <el-card class="search-card">
       <el-form inline>
-        <el-form-item label="模块">
-          <el-select v-model="searchModule" placeholder="全部" clearable @change="loadData">
-            <el-option label="资产管理" value="资产管理" />
-            <el-option label="资产维修" value="资产维修" />
-            <el-option label="资产报废" value="资产报废" />
-            <el-option label="资产盘点" value="资产盘点" />
-            <el-option label="资产领用" value="资产领用" />
-            <el-option label="资产归还" value="资产归还" />
-            <el-option label="资产调拨" value="资产调拨" />
-            <el-option label="资产入库" value="资产入库" />
-            <el-option label="资产分类" value="资产分类" />
-            <el-option label="部门管理" value="部门管理" />
-            <el-option label="用户管理" value="用户管理" />
-            <el-option label="系统管理" value="系统管理" />
+        <el-form-item :label="t('ui.模块')">
+          <el-select v-model="searchModule" :placeholder="t('ui.全部')" clearable @change="loadData">
+            <el-option :label="t('ui.资产管理')" value="资产管理" />
+            <el-option :label="t('ui.资产维修')" value="资产维修" />
+            <el-option :label="t('ui.资产报废')" value="资产报废" />
+            <el-option :label="t('ui.资产盘点')" value="资产盘点" />
+            <el-option :label="t('ui.资产领用')" value="资产领用" />
+            <el-option :label="t('ui.资产归还')" value="资产归还" />
+            <el-option :label="t('ui.资产调拨')" value="资产调拨" />
+            <el-option :label="t('ui.资产入库')" value="资产入库" />
+            <el-option :label="t('ui.资产分类')" value="资产分类" />
+            <el-option :label="t('ui.部门管理')" value="部门管理" />
+            <el-option :label="t('ui.用户管理')" value="用户管理" />
+            <el-option :label="t('ui.系统管理')" value="系统管理" />
           </el-select>
         </el-form-item>
-        <el-form-item label="操作人">
-          <el-input v-model="searchUser" placeholder="用户名" clearable @keyup.enter="loadData" />
+        <el-form-item :label="t('ui.操作人')">
+          <el-input v-model="searchUser" :placeholder="t('ui.用户名')" clearable @keyup.enter="loadData" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="searchStatus" placeholder="全部" clearable @change="loadData">
-            <el-option label="成功" :value="1" />
-            <el-option label="失败" :value="0" />
+        <el-form-item :label="t('ui.状态')">
+          <el-select v-model="searchStatus" :placeholder="t('ui.全部')" clearable @change="loadData">
+            <el-option :label="t('ui.成功')" :value="1" />
+            <el-option :label="t('ui.失败')" :value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadData">查询</el-button>
-          <el-button type="success" @click="exportLog" :loading="exporting">导出CSV</el-button>
+          <el-button type="primary" @click="loadData">{{ t('ui.查询') }}</el-button>
+          <el-button type="success" @click="exportLog" :loading="exporting">{{ t('ui.导出CSV') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -37,32 +37,32 @@
     <el-card class="table-card">
       <el-table :data="tableData" border stripe v-loading="loading" size="small">
         <el-table-column prop="logId" label="ID" width="70" />
-        <el-table-column prop="userName" label="操作人" width="100" />
-        <el-table-column prop="module" label="模块" width="100" />
-        <el-table-column prop="operation" label="操作" width="80">
+        <el-table-column prop="userName" :label="t('ui.操作人')" width="100" />
+        <el-table-column prop="module" :label="t('ui.模块')" width="100" />
+        <el-table-column prop="operation" :label="t('ui.操作')" width="80">
           <template #default="{ row }">
             <el-tag :type="opColor(row.operation)" size="small">{{ row.operation }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="requestUri" label="请求路径" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="requestParams" label="请求参数" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="requestUri" :label="t('ui.请求路径')" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="requestParams" :label="t('ui.请求参数')" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">{{ row.requestParams || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="70">
+        <el-table-column prop="status" :label="t('ui.状态')" width="70">
           <template #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">{{ row.status === 1 ? '成功' : '失败' }}</el-tag>
+            <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">{{ row.status === 1 ? t('ui.成功') : t('ui.失败') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="errorMsg" label="错误" min-width="140" show-overflow-tooltip>
+        <el-table-column prop="errorMsg" :label="t('ui.错误')" min-width="140" show-overflow-tooltip>
           <template #default="{ row }">{{ row.errorMsg || '-' }}</template>
         </el-table-column>
         <el-table-column prop="ip" label="IP" width="130" />
-        <el-table-column prop="costTime" label="耗时" width="70">
+        <el-table-column prop="costTime" :label="t('ui.耗时')" width="70">
           <template #default="{ row }">{{ row.costTime }}ms</template>
         </el-table-column>
-        <el-table-column prop="createTime" label="时间" width="160" />
+        <el-table-column prop="createTime" :label="t('ui.时间')" width="160" />
       </el-table>
-      <el-empty v-if="!loading && tableData.length === 0" description="暂无操作记录" />
+      <el-empty v-if="!loading && tableData.length === 0" :description="t('ui.暂无操作记录')" />
       <el-pagination
         v-if="total > 0"
         v-model:current-page="pageNum" v-model:page-size="pageSize"
@@ -80,6 +80,9 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
 import axios from 'axios'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const loading = ref(false), tableData = ref([]), pageNum = ref(1), pageSize = ref(20), total = ref(0)
 const searchModule = ref(null), searchUser = ref(''), searchStatus = ref(null)
@@ -94,7 +97,7 @@ const loadData = async () => {
       params: { pageNum: pageNum.value, pageSize: pageSize.value, module: searchModule.value, userName: searchUser.value, status: searchStatus.value }
     })
     if (res.code === 200) { tableData.value = res.data.records || []; total.value = res.data.total || 0 }
-  } catch { ElMessage.error('加载失败') } finally { loading.value = false }
+  } catch { ElMessage.error(t('ui.加载失败')) } finally { loading.value = false }
 }
 
 const exportLog = async () => {
@@ -109,13 +112,13 @@ const exportLog = async () => {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = '操作日志_' + new Date().toISOString().slice(0, 10) + '.csv'
+    a.download = t('ui.操作日志') + '_' + new Date().toISOString().slice(0, 10) + '.csv'
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
-    ElMessage.success('导出成功')
-  } catch { ElMessage.error('导出失败') } finally { exporting.value = false }
+    ElMessage.success(t('ui.导出成功'))
+  } catch { ElMessage.error(t('ui.导出失败')) } finally { exporting.value = false }
 }
 
 onMounted(loadData)

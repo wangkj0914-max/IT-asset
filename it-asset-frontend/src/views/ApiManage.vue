@@ -9,7 +9,7 @@
         <el-option v-for="m in modules" :key="m" :label="m" :value="m" />
       </el-select>
       <span style="color:#909399;font-size:13px;margin-left:auto;">
-        共 <b>{{ filteredApis.length }}</b> 个接口 / {{ apis.length }} 总计
+        {{ t('ui.共') }} <b>{{ filteredApis.length }}</b> {{ t('ui.个接口') }} / {{ apis.length }} {{ t('ui.总计') }}
       </span>
     </div>
 
@@ -36,7 +36,7 @@
         <el-table-column :label="t('ui.认证')" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="row.auth ? 'warning' : 'success'" size="small" effect="plain">
-              {{ row.auth ? '需登录' : '公开' }}
+              {{ row.auth ? t('ui.需登录') : t('ui.公开') }}
             </el-tag>
           </template>
         </el-table-column>

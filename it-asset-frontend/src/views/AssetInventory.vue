@@ -47,7 +47,7 @@
               type="warning"
               @click="handleStart(row)"
             >
-              开始盘点
+              {{ t('ui.开始盘点') }}
             </el-button>
             <el-button
               v-if="row.status === 1 && userRole === 2"
@@ -55,7 +55,7 @@
               type="success"
               @click="handleFinish(row)"
             >
-              完成盘点
+              {{ t('ui.完成盘点') }}
             </el-button>
             <el-button
               v-if="row.status === 2"
@@ -63,13 +63,13 @@
               type="info"
               @click="handleReport(row)"
             >
-              查看报告
+              {{ t('ui.查看报告') }}
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && tableData.length === 0" description="暂无数据" />
+      <el-empty v-if="!loading && tableData.length === 0" :description="t('ui.暂无数据')" />
 
       <!-- 分页 -->
       <el-pagination
@@ -127,10 +127,10 @@
         <span class="detail-title">{{ t('ui.盘点明细') }}</span>
         <div class="toolbar-actions" v-if="currentRow.status !== 2">
           <el-button type="success" size="small" @click="quickScanOpen = true">
-            <el-icon><Camera /></el-icon> 扫码盘点
+            <el-icon><Camera /></el-icon> {{ t('ui.扫码盘点') }}
           </el-button>
           <el-button size="small" @click="scanAllPending">
-            <el-icon><Position /></el-icon> 一键全盘
+            <el-icon><Position /></el-icon> {{ t('ui.一键全盘') }}
           </el-button>
         </div>
       </div>
@@ -164,7 +164,7 @@
               type="primary"
               @click="openCheckDialog(row)"
             >
-              盘点
+              {{ t('ui.盘点') }}
             </el-button>
           </template>
         </el-table-column>
@@ -218,7 +218,7 @@
       <input ref="quickScanFile" type="file" accept="image/*" capture="environment" style="display:none" @change="handleQuickScanFile" />
       <div class="quick-scan-actions">
         <el-button type="primary" @click="$refs.quickScanFile.click()" :loading="scanLoading">
-          <el-icon><Camera /></el-icon> 拍照扫码
+          <el-icon><Camera /></el-icon> {{ t('ui.拍照扫码') }}
         </el-button>
         <span class="divider">{{ t('ui.或') }}</span>
         <el-input v-model="quickScanCode" :placeholder="t('ui.输入资产编号')" @keyup.enter="doQuickScan" clearable style="flex:1">
@@ -228,7 +228,7 @@
         </el-input>
       </div>
       <div v-if="quickScanLog.length > 0" class="scan-log">
-        <el-divider>本次已盘点 ({{ quickScanLog.length }})</el-divider>
+        <el-divider>{{ t('ui.本次已盘点') }} ({{ quickScanLog.length }})</el-divider>
         <div v-for="item in quickScanLog" :key="item.assetCode" class="log-item">
           <el-tag size="small" :type="item.success ? 'success' : 'danger'">{{ item.success ? '✓' : '✗' }}</el-tag>
           <span style="margin-left:8px">{{ item.assetCode }} {{ item.assetName }}</span>
@@ -309,7 +309,7 @@
         </el-table-column>
         <el-table-column prop="resultRemark" :label="t('ui.说明')" min-width="80" />
       </el-table>
-      <el-empty v-if="!reportData.details || reportData.details.length === 0" description="未发现差异项" />
+      <el-empty v-if="!reportData.details || reportData.details.length === 0" :description="t('ui.未发现差异项')" />
 
       <template #footer>
         <el-button @click="reportDialogVisible = false">{{ t('ui.关闭') }}</el-button>
@@ -496,7 +496,7 @@ const handleStart = async (row) => {
       params: { inventoryId: row.inventoryId, status: 1 }
     })
     if (res.code === 200) {
-      ElMessage.success('已开始盘点')
+      ElMessage.success(t('ui.已开始盘点'))
       loadData()
     }
   } catch (error) {

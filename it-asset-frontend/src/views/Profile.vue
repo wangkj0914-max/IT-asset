@@ -44,7 +44,7 @@
                 <el-option :label="t('ui.普通用户')" :value="1" />
               </el-select>
               <el-button type="primary" @click="handleChangeRole" style="margin-left: 10px;">
-                修改
+                {{ t('ui.修改') }}
               </el-button>
             </el-form-item>
             <el-alert
@@ -88,7 +88,7 @@
               @click="showEditRoleDialog(row)"
               v-if="row.userId !== userInfo.userId"
             >
-              修改角色
+              {{ t('ui.修改角色') }}
             </el-button>
             <el-button 
               type="danger" 
@@ -96,7 +96,7 @@
               @click="handleDeleteUser(row)"
               v-if="row.userId !== userInfo.userId"
             >
-              删除
+              {{ t('ui.删除') }}
             </el-button>
             <span v-else style="color: #909399; font-size: 13px;">{{ t('ui.当前用户') }}</span>
           </template>

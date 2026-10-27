@@ -48,13 +48,13 @@
     <!-- 操作按钮区域 -->
     <div class="operation-section">
       <el-button type="primary" @click="showApplyDialog" class="btn-apply">
-        <el-icon><Plus /></el-icon> 新增
+        <el-icon><Plus /></el-icon> {{ t('ui.新增') }}
       </el-button>
       <el-button type="danger" @click="deleteSelected" :disabled="selectedIds.length === 0">
         <el-icon><Delete /></el-icon>{{ t('ui.删除') }}<el-badge :value="selectedIds.length" :hidden="selectedIds.length === 0" style="margin-left:4px" />
       </el-button>
       <el-button type="warning" @click="loadPending" class="btn-pending" v-if="userRole === 2">
-        <el-icon><Bell /></el-icon> 待审批
+        <el-icon><Bell /></el-icon> {{ t('ui.待审批') }}
         <el-badge :value="pendingCount" :hidden="pendingCount === 0" style="margin-left: 8px;" />
       </el-button>
     </div>
@@ -139,7 +139,7 @@
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && useRecordList.length === 0" description="暂无数据" />
+      <el-empty v-if="!loading && useRecordList.length === 0" :description="t('ui.暂无数据')" />
 
       <!-- 分页 -->
       <div class="pagination-container">

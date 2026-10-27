@@ -1,71 +1,71 @@
 <template>
   <div class="approval-center">
     <div class="page-header">
-      <h2>审批中心</h2>
+      <h2>{{ t('ui.审批中心') }}</h2>
     </div>
 
     <el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
       <el-tab-pane name="all">
         <template #label>
-          <span>全部待审批 <el-badge :value="totalPending" :hidden="totalPending === 0" /></span>
+          <span>{{ t('ui.全部待审批') }}<el-badge :value="totalPending" :hidden="totalPending === 0" /></span>
         </template>
       </el-tab-pane>
       <el-tab-pane name="inbound">
         <template #label>
-          <span>入库审批 <el-badge :value="pendingCounts.inbound" :hidden="pendingCounts.inbound === 0" /></span>
+          <span>{{ t('ui.入库审批') }}<el-badge :value="pendingCounts.inbound" :hidden="pendingCounts.inbound === 0" /></span>
         </template>
       </el-tab-pane>
       <el-tab-pane name="use">
         <template #label>
-          <span>领用审批 <el-badge :value="pendingCounts.use" :hidden="pendingCounts.use === 0" /></span>
+          <span>{{ t('ui.领用审批') }}<el-badge :value="pendingCounts.use" :hidden="pendingCounts.use === 0" /></span>
         </template>
       </el-tab-pane>
       <el-tab-pane name="scrap">
         <template #label>
-          <span>报废审批 <el-badge :value="pendingCounts.scrap" :hidden="pendingCounts.scrap === 0" /></span>
+          <span>{{ t('ui.报废审批') }}<el-badge :value="pendingCounts.scrap" :hidden="pendingCounts.scrap === 0" /></span>
         </template>
       </el-tab-pane>
       <el-tab-pane name="transfer">
         <template #label>
-          <span>调拨审批 <el-badge :value="pendingCounts.transfer" :hidden="pendingCounts.transfer === 0" /></span>
+          <span>{{ t('ui.调拨审批') }}<el-badge :value="pendingCounts.transfer" :hidden="pendingCounts.transfer === 0" /></span>
         </template>
       </el-tab-pane>
       <el-tab-pane name="return">
         <template #label>
-          <span>归还审批 <el-badge :value="pendingCounts.return" :hidden="pendingCounts.return === 0" /></span>
+          <span>{{ t('ui.归还审批') }}<el-badge :value="pendingCounts.return" :hidden="pendingCounts.return === 0" /></span>
         </template>
       </el-tab-pane>
       <el-tab-pane name="consumableUse">
         <template #label>
-          <span>耗材领用 <el-badge :value="pendingCounts.consumableUse" :hidden="pendingCounts.consumableUse === 0" /></span>
+          <span>{{ t('ui.耗材领用') }}<el-badge :value="pendingCounts.consumableUse" :hidden="pendingCounts.consumableUse === 0" /></span>
         </template>
       </el-tab-pane>
     </el-tabs>
 
-    <el-alert v-if="totalPending === 0 && !loading" title="暂无待审批事项" type="success" :closable="false" show-icon style="margin-top:20px" />
+    <el-alert v-if="totalPending === 0 && !loading" :title="t('ui.暂无待审批事项')" type="success" :closable="false" show-icon style="margin-top:20px" />
 
     <div v-loading="loading" style="margin-top:16px">
       <el-table :data="tableData" stripe v-if="tableData.length > 0">
-        <el-table-column label="类型" width="90" align="center">
+        <el-table-column :label="t('ui.类型')" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="tagType(row.type)" size="small">{{ row.type }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="title" label="标题/名称" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="applicant" label="申请人" width="120" />
-        <el-table-column prop="department" label="部门" width="120" v-if="showDept" />
-        <el-table-column label="申请时间" width="170" align="center">
+        <el-table-column prop="title" :label="t('ui.标题/名称')" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="applicant" :label="t('ui.申请人')" width="120" />
+        <el-table-column prop="department" :label="t('ui.部门')" width="120" v-if="showDept" />
+        <el-table-column :label="t('ui.申请时间')" width="170" align="center">
           <template #default="{ row }">{{ row.time ? row.time.substring(0, 16).replace('T', ' ') : '-' }}</template>
         </el-table-column>
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column :label="t('ui.状态')" width="100" align="center">
           <template #default="{ row }">
-            <el-tag type="warning" size="small">{{ row.statusLabel || '待审批' }}</el-tag>
+            <el-tag type="warning" size="small">{{ row.statusLabel || t('ui.待审批') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column :label="t('ui.操作')" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="success" size="small" @click="approve(row, 1)">通过</el-button>
-            <el-button type="danger" size="small" @click="approve(row, 2)">拒绝</el-button>
+            <el-button type="success" size="small" @click="approve(row, 1)">{{ t('ui.通过') }}</el-button>
+            <el-button type="danger" size="small" @click="approve(row, 2)">{{ t('ui.拒绝') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -77,6 +77,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const activeTab = ref('all')
 const loading = ref(false)
@@ -119,7 +122,7 @@ const loadPending = async () => {
       totalPending.value = res.data.totalPending?.count || 0
     }
   } catch (e) {
-    ElMessage.error('加载失败')
+    ElMessage.error(t('ui.加载失败'))
   }
   loading.value = false
 }
@@ -134,9 +137,9 @@ const getApproveUrl = (type) => {
 }
 
 const approve = async (row, approveStatus) => {
-  const action = approveStatus === 1 ? '通过' : '拒绝'
+  const action = approveStatus === 1 ? t('ui.通过') : t('ui.拒绝')
   try {
-    await ElMessageBox.confirm(`确认${action}该项申请？`, '审批确认', { type: 'warning' })
+    await ElMessageBox.confirm(t('ui.确认{action}该项申请？', { action }), t('ui.审批确认'), { type: 'warning' })
     const configs = {
       '入库': { url: '/inbound/audit', idField: 'inboundId', valField: 'approved', val: approveStatus === 1 },
       '领用': { url: '/use/approve',   idField: 'recordId',  valField: 'approved', val: approveStatus === 1 },
@@ -146,13 +149,13 @@ const approve = async (row, approveStatus) => {
       '耗材领用': { url: '/consumable-use/approve', idField: 'recordId', valField: 'approved', val: approveStatus === 1 }
     }
     const c = configs[row.type]
-    if (!c) return ElMessage.error('未知类型')
+    if (!c) return ElMessage.error(t('ui.未知类型'))
     const res = await request.post(c.url, null, { params: { [c.idField]: row.id, [c.valField]: c.val } })
     if (res.code === 200) {
-      ElMessage.success(`已${action}`)
+      ElMessage.success(t('ui.已{action}', { action }))
       loadPending()
     } else {
-      ElMessage.error(res.msg || '操作失败')
+      ElMessage.error(res.msg || t('ui.操作失败'))
     }
   } catch (e) { /* cancelled */ }
 }
